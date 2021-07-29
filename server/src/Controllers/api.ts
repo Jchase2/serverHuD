@@ -1,6 +1,7 @@
 import { User } from "../Models/user.model";
 import bcrypt from "bcrypt";
 import Joi from "joi";
+import jwt from 'jsonwebtoken';
 
 const userSchema = Joi.object({
   email: Joi.string().email().required(),
@@ -39,10 +40,12 @@ export const loginUser = async(ctx: any) => {
       return ctx.status = 403;
     }
     const validatedPass = await bcrypt.compare(ctx.request.body.password, user.password);
-    if (!validatedPass) throw new Error();
-    ctx.body = "Logged in!"
+    if (!validatedPass) throw new Error("Incorrect username or password!");
+    const accessToken = jwt.sign({ _id: user.id }, process.env.SECRET_KEY || 'insecureuY47Qf2xo3M9kKjF67hq');
+    ctx.body = {accessToken}
     ctx.status = 200;
   } catch (e) {
     ctx.body = `${e}`
+    ctx.status = 401;
   }
 }
