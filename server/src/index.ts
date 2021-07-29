@@ -1,10 +1,11 @@
 import Koa from 'koa';
 import {sequelize} from './Models/index';
 import router from './Router/routes';
+import koaBody from 'koa-body';
 
 const app = new Koa();
 
-
+app.use(koaBody());
 app.use(router.routes());
 
 (async () => {

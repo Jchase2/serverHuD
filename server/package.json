@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc --build server/tsconfig.json && nodemon server"
+    "start": "tsc-watch -p ./ --onSuccess \"nodemon ./dist/\""
   },
   "repository": {
     "type": "git",
@@ -22,12 +22,17 @@
     "@types/koa": "^2.13.4",
     "@types/node": "^16.4.7",
     "@types/validator": "^13.6.3",
+    "tsc-watch": "^4.4.0",
     "typescript": "^4.3.5"
   },
   "dependencies": {
     "@koa/router": "^10.1.0",
+    "@types/bcrypt": "^5.0.0",
     "@types/koa__router": "^8.0.7",
+    "bcrypt": "^5.0.1",
+    "joi": "^17.4.1",
     "koa": "^2.13.1",
+    "koa-body": "^4.2.0",
     "pg": "^8.7.1",
     "sequelize": "^6.6.5",
     "sequelize-typescript": "^2.1.0"

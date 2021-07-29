@@ -2,21 +2,12 @@ import Router from '@koa/router';
 
 const router = new Router();
 
+import {registerUser} from '../Controllers/api';
+
 router
-  .get('/', (ctx, next) => {
-    ctx.body = 'Hello World!';
+  .get('/', (ctx) => {
+    ctx.body = "Test"
   })
-  .post('/users', (ctx, next) => {
-    // ...
-  })
-  .put('/users/:id', (ctx, next) => {
-    // ...
-  })
-  .del('/users/:id', (ctx, next) => {
-    // ...
-  })
-  .all('/users/:id', (ctx, next) => {
-    // ...
-  });
+  .post('/register', registerUser)
 
   export default router;
