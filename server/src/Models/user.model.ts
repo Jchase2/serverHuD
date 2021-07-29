@@ -1,7 +1,7 @@
 import { Table, Column, Model, CreatedAt, UpdatedAt, DataType } from 'sequelize-typescript'
 
 @Table
-export class User extends Model<User> {
+export class User extends Model {
 
   @Column
   email!: string;
@@ -10,14 +10,5 @@ export class User extends Model<User> {
   password!: string;
 
   @Column(DataType.JSONB)
-  servers!: object;
-
-  @CreatedAt
-  @Column
-  createdAt!: Date;
-
-  @UpdatedAt
-  @Column
-  updatedAt!: Date;
-
+  servers!: object | null;
 }
