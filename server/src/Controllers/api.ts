@@ -27,6 +27,7 @@ export const registerUser = async (ctx: any) => {
     ctx.body = "User Created!";
     ctx.status = 201;
   } catch (e) {
+    ctx.status = 400;
     ctx.body = `${e}`;
   }
 };
