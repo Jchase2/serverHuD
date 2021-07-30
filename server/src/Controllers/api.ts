@@ -49,3 +49,9 @@ export const loginUser = async(ctx: any) => {
     ctx.status = 401;
   }
 }
+
+
+
+export const getUserServers = async (ctx: any) => {
+  ctx.body = "Well that worked!"
+}
