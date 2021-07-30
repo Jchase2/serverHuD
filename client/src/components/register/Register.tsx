@@ -5,7 +5,6 @@ import { useState } from "react";
 import { loginFunc } from "../../services/api";
 
 const Register = () => {
-
   const [loginState, setLoginState] = useState({
     email: "",
     password: "",
@@ -22,17 +21,11 @@ const Register = () => {
   const handleSubmit = (e: any) => {
     e.preventDefault();
 
-    // Call service to log in with un and pw.
-    console.log("e: ", e)
-    console.log('e.target.email: ', e.target.email.value)
-    console.log('e.target.password: ', e.target.password.value)
-
     loginFunc({
-      'email': e.target.email.value,
-      'password': e.target.password.value
-    })
+      email: e.target.email.value,
+      password: e.target.password.value,
+    });
 
-    // clear form
     setLoginState({
       email: "",
       password: "",
@@ -42,13 +35,30 @@ const Register = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <TextField id="standard-basic" name="email" label="Email" variant="standard" value={loginState.email} onChange={handleChange}/>
-      <TextField id="standard-basic" name="password" label="Password" variant="standard" value={loginState.password} onChange={handleChange}/>
       <TextField
         id="standard-basic"
+        name="email"
+        label="Email"
+        variant="standard"
+        value={loginState.email}
+        onChange={handleChange}
+      />
+      <TextField
+        id="standard-password-input"
+        name="password"
+        label="Password"
+        variant="standard"
+        type="password"
+        autoComplete="current-password"
+        value={loginState.password}
+        onChange={handleChange}
+      />
+      <TextField
+        id="standard-password-input"
         name="confirmPass"
         label="Confirm Password"
         variant="standard"
+        type="password"
         value={loginState.confirmPass}
         onChange={handleChange}
       />
