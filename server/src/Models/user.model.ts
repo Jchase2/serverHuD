@@ -9,6 +9,7 @@ export class User extends Model {
   @Column
   password!: string;
 
-  @Column(DataType.JSONB)
+  @Column(DataType.ARRAY(DataType.JSONB))
   servers!: object | null;
 }
+

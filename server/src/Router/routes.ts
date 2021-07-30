@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import {registerUser, loginUser, getUserServers} from '../Controllers/api';
+import {registerUser, loginUser, getUserServers, addServer} from '../Controllers/api';
 import jwt from 'koa-jwt';
 
 const router = new Router();
@@ -13,6 +13,7 @@ router
 router.use(jwt({ secret: process.env.SECRET_KEY || 'insecureuY47Qf2xo3M9kKjF67hq' }));
 
 router
-  .get('/', getUserServers)
+  .get('/servers', getUserServers)
+  .post('/servers', addServer)
 
 export default router;
