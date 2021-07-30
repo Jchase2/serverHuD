@@ -51,7 +51,8 @@ export const loginUser = async (ctx: any) => {
     if (!validatedPass) throw new Error("Incorrect username or password!");
     const accessToken = jwt.sign(
       { _id: user.id },
-      process.env.SECRET_KEY || "insecureuY47Qf2xo3M9kKjF67hq"
+      process.env.SECRET_KEY || "insecureuY47Qf2xo3M9kKjF67hq",
+      {expiresIn: '7d'}
     );
     ctx.body = { accessToken };
     ctx.status = 200;
