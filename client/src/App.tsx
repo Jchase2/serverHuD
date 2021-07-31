@@ -1,16 +1,15 @@
-import React, {useState} from "react";
 import "./App.css";
 import "@fontsource/roboto";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Header from "./components/header/Header";
 import Dashboard from "./components/dashboard/Dashboard";
 import Register from "./components/register/Register";
+import { Grid } from "@material-ui/core";
 function App() {
-  const [serverList, setServerList] = useState([]);
   return (
-    <>
-      <Router>
-        <Header />
+    <Router>
+      <Header />
+      <Grid container justify="center" alignItems="center">
         <Switch>
           <Route path="/register">
             <Register />
@@ -19,8 +18,8 @@ function App() {
             <Dashboard />
           </Route>
         </Switch>
-      </Router>
-    </>
+      </Grid>
+    </Router>
   );
 }
 
