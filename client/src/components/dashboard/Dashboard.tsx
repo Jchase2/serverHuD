@@ -1,6 +1,7 @@
+import Server from '../server/Server';
 const Dashboard = () => {
   return (
-    <p>Dashboard</p>
+    <Server />
   );
 }
 

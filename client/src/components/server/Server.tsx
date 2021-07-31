@@ -1,6 +1,7 @@
+import AddServer from './AddServer';
 const Server = () => {
   return (
-    <p>Server</p>
+    <AddServer />
   );
 }
 

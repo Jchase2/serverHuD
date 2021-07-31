@@ -30,3 +30,18 @@ export const registerFunc = async (registerObj: object) => {
     }
   );
 };
+
+export const postServer = async (newServer: object) => {
+  axios({
+    method: "post",
+    url: process.env.REACT_APP_BACKEND_URL + '/server',
+    data: newServer,
+  }).then(
+    (response) => {
+      console.log(response);
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
+}
