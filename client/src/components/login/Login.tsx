@@ -2,35 +2,50 @@ import TextField from "@material-ui/core/TextField";
 import { Button } from "@material-ui/core";
 import { Grid } from "@material-ui/core";
 import { useState } from "react";
-import { registerFunc } from "../../services/api";
+import { loginFunc } from "../../services/api";
+import { useHistory } from "react-router-dom";
 
-const Register = () => {
-  const [registerState, setRegisterState] = useState({
+
+const Login = (props: any) => {
+
+  const history = useHistory();
+
+  const [loginState, setLoginState] = useState({
     email: "",
     password: "",
     confirmPass: "",
   });
 
   const handleChange = (e: any) => {
-    setRegisterState((currentEvent) => ({
+    setLoginState((currentEvent) => ({
       ...currentEvent,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    registerFunc({
+    let result = await loginFunc({
       email: e.target.email.value,
       password: e.target.password.value,
     });
 
-    setRegisterState({
+    setLoginState({
       email: "",
       password: "",
       confirmPass: "",
     });
+
+    if(result?.status === 200){
+      console.log("Logged in!")
+      localStorage.setItem('accessToken', result.data.accessToken);
+      // sets authed to true in root component.
+      props.setAuth();
+      history.push('/dashboard')
+    } else {
+      console.log("Error")
+    }
   };
 
   return (
@@ -48,7 +63,7 @@ const Register = () => {
             name="email"
             label="Email"
             variant="standard"
-            value={registerState.email}
+            value={loginState.email}
             onChange={handleChange}
             fullWidth
             style={{ marginBottom: "2em" }}
@@ -62,20 +77,7 @@ const Register = () => {
             variant="standard"
             type="password"
             autoComplete="current-password"
-            value={registerState.password}
-            onChange={handleChange}
-            fullWidth
-            style={{ marginBottom: "2em" }}
-          />
-        </Grid>
-        <Grid item>
-          <TextField
-            id="standard-password-input"
-            name="confirmPass"
-            label="Confirm Password"
-            variant="standard"
-            type="password"
-            value={registerState.confirmPass}
+            value={loginState.password}
             onChange={handleChange}
             fullWidth
             style={{ marginBottom: "2em" }}
@@ -83,7 +85,7 @@ const Register = () => {
         </Grid>
         <Grid item>
           <Button type="submit" color="inherit" variant="contained">
-            Register
+            Login
           </Button>
         </Grid>
       </Grid>
@@ -91,4 +93,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;
