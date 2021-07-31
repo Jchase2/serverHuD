@@ -1,8 +1,5 @@
-import AddServer from './AddServer';
-const Server = () => {
-  return (
-    <AddServer />
-  );
-}
+const Server = (props: any) => {
+  return <p>{props.serverUrl}</p>;
+};
 
 export default Server;

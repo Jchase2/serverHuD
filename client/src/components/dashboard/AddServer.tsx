@@ -4,9 +4,7 @@ import { Grid } from "@material-ui/core";
 import { useState } from "react";
 import { postServer } from "../../services/api";
 
-
 const AddServer = (props: any) => {
-
   const [serverState, setServerState] = useState({
     url: "",
   });
@@ -21,7 +19,7 @@ const AddServer = (props: any) => {
     e.preventDefault();
     postServer(serverState);
     setServerState({
-      url: ""
+      url: "",
     });
   };
 
@@ -29,28 +27,23 @@ const AddServer = (props: any) => {
     <form onSubmit={handleSubmit}>
       <Grid
         container
-        direction="column"
+        direction="row"
         align-items="center"
         justifyContent="center"
-        style={{ marginBottom: "2em" }}
       >
-        <Grid item>
-          <TextField
-            id="standard-basic"
-            name="server"
-            label="Server URL"
-            variant="standard"
-            value={serverState.url}
-            onChange={handleChange}
-            fullWidth
-            style={{ marginBottom: "2em" }}
-          />
-        </Grid>
-        <Grid item>
-          <Button type="submit" color="inherit" variant="contained">
-            Login
-          </Button>
-        </Grid>
+        <TextField
+          id="standard-basic"
+          name="server"
+          label="Server URL"
+          variant="standard"
+          value={serverState.url}
+          onChange={handleChange}
+          fullWidth
+          style={{ marginBottom: "2em" }}
+        />
+        <Button type="submit" color="inherit" variant="contained">
+          Add Server
+        </Button>
       </Grid>
     </form>
   );

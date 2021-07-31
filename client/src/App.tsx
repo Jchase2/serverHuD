@@ -5,6 +5,7 @@ import {
   Switch,
   Route,
 } from "react-router-dom";
+import {useEffect} from 'react';
 import Header from "./components/header/Header";
 import Dashboard from "./components/dashboard/Dashboard";
 import Login from "./components/login/Login";
@@ -13,13 +14,27 @@ import Register from "./components/register/Register";
 import { Grid } from "@material-ui/core";
 import { useState } from "react";
 import PrivateRoute from './components/private/PrivateRoute';
+import { getServers } from './services/api';
 
 function App() {
   let initialState = 'false';
   if(localStorage.getItem('accessToken')){
     initialState = 'true';
   }
+
+  interface IServer {
+    serverList: string[]
+  }
+
   const [isAuthed, setIsAuthed] = useState(initialState);
+  const [serverList, setServerList] = useState<IServer[]>([]);
+
+  useEffect(() => {
+    getServers().then((e: any) => {
+      let newServerList = [...serverList].concat(e);
+      setServerList(newServerList)
+    });
+  }, []);
 
   const setAuth = () => {
     if(localStorage.getItem('accessToken') !== null){
@@ -35,9 +50,11 @@ function App() {
     }
   }
 
+
+
   return (
     <Router>
-      <Header isAuthed={isAuthed} logOut={globalLogOut}/>
+      <Header isAuthed={isAuthed} globalLogOut={globalLogOut}/>
       <Grid container justifyContent="center" alignItems="center">
         <Switch>
           <Route path="/register">
@@ -47,7 +64,7 @@ function App() {
             <Login setAuth={setAuth} />
           </Route>
           <PrivateRoute isAuthed={isAuthed} path="/dashboard">
-            <Dashboard />
+            <Dashboard serverList={serverList}/>
           </PrivateRoute>
           <Route path="/">
             <HomePage />

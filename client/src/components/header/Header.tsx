@@ -37,7 +37,7 @@ const Header = (props: any) => {
     return (
       <>
         <Button color="inherit" onClick={() => {
-          props.logOut()
+          props.globalLogOut()
           history.push("/")
         }}>
           Logout
@@ -48,7 +48,6 @@ const Header = (props: any) => {
 
   const classes = useStyles();
   const history = useHistory();
-  console.log("isAuthed: ", props.isAuthed)
   return (
     <div className={classes.root}>
       <AppBar position="static">

@@ -1,7 +1,6 @@
 import { Route, Redirect } from "react-router-dom";
 
 const PrivateRoute = (props: any) => {
-  console.log("children: ", props)
   return (
     <Route
       render={() =>
