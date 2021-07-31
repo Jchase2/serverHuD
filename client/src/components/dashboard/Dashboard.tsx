@@ -7,7 +7,9 @@ const Dashboard = (props: any) => {
     <>
       <AddServer />
       {props.serverList.map((e: any) => (
-        <Server serverUrl={e?.url} />
+        <div key={e?.url}>
+          <Server serverUrl={e?.url} />
+        </div>
       ))}
     </>
   );

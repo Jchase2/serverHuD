@@ -1,29 +1,24 @@
 import "./App.css";
 import "@fontsource/roboto";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-} from "react-router-dom";
-import {useEffect} from 'react';
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { useEffect } from "react";
 import Header from "./components/header/Header";
 import Dashboard from "./components/dashboard/Dashboard";
 import Login from "./components/login/Login";
 import HomePage from "./components/homepage/HomePage";
 import Register from "./components/register/Register";
-import { Grid } from "@material-ui/core";
 import { useState } from "react";
-import PrivateRoute from './components/private/PrivateRoute';
-import { getServers } from './services/api';
+import PrivateRoute from "./components/private/PrivateRoute";
+import { getServers } from "./services/api";
 
 function App() {
-  let initialState = 'false';
-  if(localStorage.getItem('accessToken')){
-    initialState = 'true';
+  let initialState = "false";
+  if (localStorage.getItem("accessToken")) {
+    initialState = "true";
   }
 
   interface IServer {
-    serverList: string[]
+    serverList: string[];
   }
 
   const [isAuthed, setIsAuthed] = useState(initialState);
@@ -32,30 +27,28 @@ function App() {
   useEffect(() => {
     getServers().then((e: any) => {
       let newServerList = [...serverList].concat(e);
-      setServerList(newServerList)
+      setServerList(newServerList);
     });
   }, []);
 
   const setAuth = () => {
-    if(localStorage.getItem('accessToken') !== null){
-      localStorage.setItem('authed', 'true');
-      setIsAuthed('true');
+    if (localStorage.getItem("accessToken") !== null) {
+      localStorage.setItem("authed", "true");
+      setIsAuthed("true");
     }
   };
 
   const globalLogOut = () => {
-    if(localStorage.getItem('accessToken')){
+    if (localStorage.getItem("accessToken")) {
       localStorage.clear();
-      setIsAuthed('false');
+      setIsAuthed("false");
     }
-  }
-
+  };
 
 
   return (
     <Router>
-      <Header isAuthed={isAuthed} globalLogOut={globalLogOut}/>
-      <Grid container justifyContent="center" alignItems="center">
+        <Header isAuthed={isAuthed} globalLogOut={globalLogOut} />
         <Switch>
           <Route path="/register">
             <Register />
@@ -64,13 +57,12 @@ function App() {
             <Login setAuth={setAuth} />
           </Route>
           <PrivateRoute isAuthed={isAuthed} path="/dashboard">
-            <Dashboard serverList={serverList}/>
+            <Dashboard serverList={serverList} />
           </PrivateRoute>
           <Route path="/">
             <HomePage />
           </Route>
         </Switch>
-      </Grid>
     </Router>
   );
 }
