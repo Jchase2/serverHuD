@@ -42,6 +42,7 @@ const Login = (props: any) => {
       localStorage.setItem('accessToken', result.data.accessToken);
       // sets authed to true in root component.
       props.setAuth();
+      console.log("running history")
       history.push('/dashboard')
     } else {
       console.log("Error")

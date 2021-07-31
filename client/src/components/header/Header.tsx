@@ -33,6 +33,19 @@ const Header = (props: any) => {
     );
   };
 
+  const logout = () => {
+    return (
+      <>
+        <Button color="inherit" onClick={() => {
+          props.logOut()
+          history.push("/")
+        }}>
+          Logout
+        </Button>
+      </>
+    );
+  };
+
   const classes = useStyles();
   const history = useHistory();
   console.log("isAuthed: ", props.isAuthed)
@@ -51,7 +64,7 @@ const Header = (props: any) => {
           <Typography variant="h6" className={classes.title}>
             serverHuD
           </Typography>
-          {props.isAuthed === false ? loginAndRegister() : "Welcome!"}
+          {props.isAuthed === 'false' ? loginAndRegister() : logout()}
         </Toolbar>
       </AppBar>
     </div>
