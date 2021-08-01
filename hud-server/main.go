@@ -17,6 +17,8 @@ import (
 	"github.com/shirou/gopsutil/host"
 )
 
+var configUrl = "http://jamesdchase.com"
+
 // GenerateAPIKey creates a key for
 // the API upon setup, unused for now
 func GenerateAPIKey() string {
@@ -93,8 +95,8 @@ func main() {
 			"hostName":              GetHostname(),
 			"uptimeInHours":         GetUptime(),
 			"gbFreeOnCurrPartition": GetDiskUsage(),
-			"certExpires":           GetCertStatus("darknedgy.net", "443"),
-			"upOrDown":              GetStatus("http://darknedgy.net"),
+			"certExpires":           GetCertStatus(configUrl, "443"),
+			"upOrDown":              GetStatus(configUrl),
 		})
 	})
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
