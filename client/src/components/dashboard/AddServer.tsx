@@ -7,6 +7,9 @@ const AddServer = (props: any) => {
   const [serverState, setServerState] = useState({
     url: "",
     name: "",
+    status: "",
+    sslStatus: "",
+    sslExpiry: 0
   });
 
   const handleChange = (e: any) => {
@@ -21,7 +24,10 @@ const AddServer = (props: any) => {
     props.addNewServer(serverState);
     setServerState({
       url: "",
-      name: ""
+      name: "",
+      status: "",
+      sslStatus: "",
+      sslExpiry: 0
     });
   };
 

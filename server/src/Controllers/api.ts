@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
 import {getSslDetails, hudServerData, isUp} from '../Utils/serverDetails';
-
+import shortHash from "shorthash2";
 
 const userSchema = Joi.object({
   email: Joi.string().email().required(),
@@ -88,6 +88,7 @@ export const fetchHudServer = async (ctx: any) => {
 };
 
 const serverSchema = Joi.object({
+  id: Joi.string(),
   url: Joi.string().uri().required(),
   name: Joi.string().required(),
   status: Joi.string(),
@@ -100,11 +101,12 @@ const serverSchema = Joi.object({
 export const addServer = async (ctx: any) => {
 
   console.log("isup test: ", await isUp(ctx.request.body.url))
-
+  let serverId = shortHash(ctx.request.body.url);
   let sslInfo = await getSslDetails(ctx.request.body.url);
   const user = await User.findByPk(ctx.state.user._id);
   const status = await isUp(ctx.request.body.url);
   const value = await serverSchema.validateAsync({
+    id: serverId,
     url: ctx.request.body.url,
     name: ctx.request.body.name,
     status: status,

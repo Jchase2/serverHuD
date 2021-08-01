@@ -5,6 +5,8 @@ import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid/Grid";
+import { useHistory } from "react-router-dom";
+
 
 const useStyles = makeStyles({
   root: {
@@ -26,6 +28,8 @@ const useStyles = makeStyles({
 });
 
 const Server = (props: any) => {
+  const history = useHistory();
+  console.log("props.serverData: ", props.serverData)
   const classes = useStyles();
   return (
     <Grid
@@ -51,7 +55,7 @@ const Server = (props: any) => {
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size="small">More Info</Button>
+          <Button size="small" onClick={() => history.push("/serverinfo")}>More Info</Button>
         </CardActions>
       </Card>
     </Grid>
