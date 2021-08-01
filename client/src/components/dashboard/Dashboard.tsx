@@ -14,17 +14,12 @@ const Dashboard = (props: any) => {
   useEffect(() => {
     getServers().then((e: any) => {
       console.log("e: ", e)
-      if(e.data !== undefined){
+      if(e.data !== undefined && e.data !== "Error"){
         let newServerList = [...serverList].concat(e.data);
         setServerList(newServerList);
       }
     });
   }, []);
-
-
-  useEffect(() => {
-    console.log("updated")
-  }, [serverList])
 
   const addNewServer = async (newServer: any) => {
     postServer(newServer).then(() => {
