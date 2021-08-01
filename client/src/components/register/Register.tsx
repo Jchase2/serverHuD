@@ -24,10 +24,10 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    registerFunc({
+    let res = await registerFunc({
       email: e.target.email.value,
       password: e.target.password.value,
     });
@@ -38,7 +38,11 @@ const Register = () => {
       confirmPass: "",
     });
 
-    history.push('/login');
+    if(res === 201){
+      history.push('/login');
+    } else {
+      alert("Registration failed! Please try again.")
+    }
 
   };
 

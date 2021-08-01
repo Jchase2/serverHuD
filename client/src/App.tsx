@@ -1,7 +1,6 @@
 import "./App.css";
 import "@fontsource/roboto";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import { useEffect } from "react";
+import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
 import Header from "./components/header/Header";
 import Dashboard from "./components/dashboard/Dashboard";
 import Login from "./components/login/Login";
@@ -33,7 +32,6 @@ function App() {
     }
   };
 
-
   return (
     <Router>
         <Header isAuthed={isAuthed} globalLogOut={globalLogOut} />
@@ -48,7 +46,7 @@ function App() {
             <Dashboard />
           </PrivateRoute>
           <Route path="/">
-            <HomePage />
+            {isAuthed === "true" ? <Redirect to="/dashboard" /> : <HomePage />}
           </Route>
         </Switch>
     </Router>

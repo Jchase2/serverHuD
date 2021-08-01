@@ -17,16 +17,16 @@ export const loginFunc = async (loginObj: object) => {
 };
 
 export const registerFunc = async (registerObj: object) => {
-  axios({
+  return axios({
     method: "post",
     url: process.env.REACT_APP_BACKEND_URL + "/register",
     data: registerObj,
   }).then(
     (response) => {
-      console.log(response);
+      return response.status
     },
     (error) => {
-      console.log(error);
+      return error.request.status
     }
   );
 };
