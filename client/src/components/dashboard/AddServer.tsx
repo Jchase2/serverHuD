@@ -5,6 +5,7 @@ import { useState } from "react";
 import { postServer } from "../../services/api";
 
 const AddServer = (props: any) => {
+
   const [serverState, setServerState] = useState({
     url: "",
   });
@@ -18,6 +19,7 @@ const AddServer = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     postServer(serverState);
+    props.addNewServer(serverState)
     setServerState({
       url: "",
     });

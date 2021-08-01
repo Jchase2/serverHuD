@@ -31,6 +31,10 @@ function App() {
     });
   }, []);
 
+  const addNewServer = (newServer: any) => {
+    setServerList([...serverList].concat(newServer))
+  }
+
   const setAuth = () => {
     if (localStorage.getItem("accessToken") !== null) {
       localStorage.setItem("authed", "true");
@@ -57,7 +61,7 @@ function App() {
             <Login setAuth={setAuth} />
           </Route>
           <PrivateRoute isAuthed={isAuthed} path="/dashboard">
-            <Dashboard serverList={serverList} />
+            <Dashboard serverList={serverList} addNewServer={addNewServer}/>
           </PrivateRoute>
           <Route path="/">
             <HomePage />
