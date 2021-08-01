@@ -41,7 +41,13 @@ const Server = (props: any) => {
             color="textSecondary"
             gutterBottom
           >
-            {props.serverUrl}
+            {props.serverData.url}
+          </Typography>
+          <Typography variant="h5" component="h2">
+            {props.serverData.name}
+          </Typography>
+          <Typography variant="body2" component="p">
+            SSL: {props.serverData.sslStatus === "true" ? 'Active' : 'Down!'}
           </Typography>
         </CardContent>
         <CardActions>

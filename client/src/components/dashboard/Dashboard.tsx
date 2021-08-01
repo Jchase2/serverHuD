@@ -25,11 +25,11 @@ const Dashboard = (props: any) => {
     setServerList([...serverList].concat(newServer));
   };
 
-  const displayServerList = (servUrl: any) => {
-    console.log(serverList);
+  const displayServerList = (serverData: any) => {
+    console.log("ServerList: ", serverList);
     return (
-      <div key={servUrl}>
-        <Server serverUrl={servUrl} />
+      <div key={serverData.url}>
+        <Server serverData={serverData}/>
       </div>
     );
   };
@@ -39,7 +39,7 @@ const Dashboard = (props: any) => {
       <AddServer addNewServer={addNewServer} />
       <Grid container justifyContent="center">
         {serverList.length ? (
-          serverList.map((e: any) => displayServerList(e?.url))
+          serverList.map((e: any) => displayServerList(e))
         ) : (
           <div>You are not monitoring any servers, add one to get started!</div>
         )}
