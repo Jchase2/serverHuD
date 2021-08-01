@@ -3,7 +3,8 @@ import { Sequelize } from "sequelize-typescript";
 import bcrypt from "bcrypt";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
-import getSslDetails from '../Utils/checkSSL';
+import {getSslDetails, hudServerData, isUp} from '../Utils/serverDetails';
+
 
 const userSchema = Joi.object({
   email: Joi.string().email().required(),
@@ -75,23 +76,42 @@ export const getUserServers = async (ctx: any) => {
   }
 };
 
+export const fetchHudServer = async (ctx: any) => {
+  const user = await User.findByPk(ctx.state.user._id);
+  if (user?.servers) {
+    ctx.body = user?.servers;
+    ctx.status = 200;
+  } else {
+    ctx.body = "No servers found!";
+    ctx.status = 404;
+  }
+};
+
 const serverSchema = Joi.object({
   url: Joi.string().uri().required(),
   name: Joi.string().required(),
+  status: Joi.string(),
   sslStatus: Joi.string().required(),
   sslExpiry: Joi.number(),
+  hudServerUrl: Joi.string().uri(),
   uptime: Joi.string(),
 });
 
 export const addServer = async (ctx: any) => {
+
+  console.log("isup test: ", await isUp(ctx.request.body.url))
+
   let sslInfo = await getSslDetails(ctx.request.body.url);
   const user = await User.findByPk(ctx.state.user._id);
+  const status = await isUp(ctx.request.body.url);
   const value = await serverSchema.validateAsync({
     url: ctx.request.body.url,
     name: ctx.request.body.name,
+    status: status,
     sslStatus: sslInfo.valid.toString(),
     sslExpiry: sslInfo.daysRemaining,
-    // uptime: ctx.request.body.uptime
+    hudServerUrl: ctx.request.body.hudServerUrl,
+    uptime: ctx.request.body.uptime
   });
   try {
     if (!user) throw Error("User not found!");
