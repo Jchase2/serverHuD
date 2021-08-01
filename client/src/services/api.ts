@@ -33,17 +33,18 @@ export const registerFunc = async (registerObj: object) => {
 
 export const postServer = async (newServer: object) => {
   console.log("newServer: ", newServer)
-  axios({
+  return axios({
     method: "post",
     url: process.env.REACT_APP_BACKEND_URL + "/servers",
     data: newServer,
     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
   }).then(
     (response) => {
-      console.log(response);
+      return response;
     },
     (error) => {
-      console.log(error.message);
+      console.log(error.message)
+      return error;
     }
   );
 };
@@ -55,10 +56,10 @@ export const getServers = async () => {
     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
   }).then(
     (response) => {
-      return response.data;
+      return response
     },
     (error) => {
-      console.log('getServers error: ', error);
+      return error
     }
   );
 };

@@ -13,16 +13,25 @@ const Dashboard = (props: any) => {
 
   useEffect(() => {
     getServers().then((e: any) => {
-      if(e !== undefined){
-        let newServerList = [...serverList].concat(e);
+      console.log("e: ", e)
+      if(e.data !== undefined){
+        let newServerList = [...serverList].concat(e.data);
         setServerList(newServerList);
       }
     });
   }, []);
 
-  const addNewServer = (newServer: any) => {
-    postServer(newServer);
-    setServerList([...serverList].concat(newServer));
+
+  useEffect(() => {
+    console.log("updated")
+  }, [serverList])
+
+  const addNewServer = async (newServer: any) => {
+    postServer(newServer).then(() => {
+      getServers().then((e) => {
+        setServerList(e.data);
+      })
+    })
   };
 
   const displayServerList = (serverData: any) => {
