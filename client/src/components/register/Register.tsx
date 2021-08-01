@@ -3,8 +3,14 @@ import { Button } from "@material-ui/core";
 import { Grid } from "@material-ui/core";
 import { useState } from "react";
 import { registerFunc } from "../../services/api";
+import { useHistory } from "react-router-dom";
+
 
 const Register = () => {
+
+  const history = useHistory();
+
+
   const [registerState, setRegisterState] = useState({
     email: "",
     password: "",
@@ -31,6 +37,9 @@ const Register = () => {
       password: "",
       confirmPass: "",
     });
+
+    history.push('/login');
+
   };
 
   return (

@@ -5,9 +5,7 @@ import { useState } from "react";
 import { loginFunc } from "../../services/api";
 import { useHistory } from "react-router-dom";
 
-
 const Login = (props: any) => {
-
   const history = useHistory();
 
   const [loginState, setLoginState] = useState({
@@ -37,15 +35,14 @@ const Login = (props: any) => {
       confirmPass: "",
     });
 
-    if(result?.status === 200){
-      console.log("Logged in!")
-      localStorage.setItem('accessToken', result.data.accessToken);
+    if (result?.status === 200) {
+      console.log("Logged in!");
+      localStorage.setItem("accessToken", result.data.accessToken);
       // sets authed to true in root component.
       props.setAuth();
-      console.log("running history")
-      history.push('/dashboard')
+      history.push("/dashboard");
     } else {
-      console.log("Error")
+      console.log("Error");
     }
   };
 

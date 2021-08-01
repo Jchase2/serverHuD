@@ -9,31 +9,15 @@ import HomePage from "./components/homepage/HomePage";
 import Register from "./components/register/Register";
 import { useState } from "react";
 import PrivateRoute from "./components/private/PrivateRoute";
-import { getServers } from "./services/api";
-
 function App() {
+
   let initialState = "false";
   if (localStorage.getItem("accessToken")) {
     initialState = "true";
   }
 
-  interface IServer {
-    serverList: string[];
-  }
-
   const [isAuthed, setIsAuthed] = useState(initialState);
-  const [serverList, setServerList] = useState<IServer[]>([]);
 
-  useEffect(() => {
-    getServers().then((e: any) => {
-      let newServerList = [...serverList].concat(e);
-      setServerList(newServerList);
-    });
-  }, []);
-
-  const addNewServer = (newServer: any) => {
-    setServerList([...serverList].concat(newServer))
-  }
 
   const setAuth = () => {
     if (localStorage.getItem("accessToken") !== null) {
@@ -61,7 +45,7 @@ function App() {
             <Login setAuth={setAuth} />
           </Route>
           <PrivateRoute isAuthed={isAuthed} path="/dashboard">
-            <Dashboard serverList={serverList} addNewServer={addNewServer}/>
+            <Dashboard />
           </PrivateRoute>
           <Route path="/">
             <HomePage />

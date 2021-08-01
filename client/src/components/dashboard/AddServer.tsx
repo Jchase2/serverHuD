@@ -2,7 +2,6 @@ import TextField from "@material-ui/core/TextField";
 import { Button } from "@material-ui/core";
 import { Grid } from "@material-ui/core";
 import { useState } from "react";
-import { postServer } from "../../services/api";
 
 const AddServer = (props: any) => {
 
@@ -18,7 +17,6 @@ const AddServer = (props: any) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    postServer(serverState);
     props.addNewServer(serverState)
     setServerState({
       url: "",
