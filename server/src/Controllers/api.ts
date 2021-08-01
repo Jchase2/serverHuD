@@ -3,6 +3,7 @@ import { Sequelize } from "sequelize-typescript";
 import bcrypt from "bcrypt";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
+import getSslDetails from '../Utils/checkSSL';
 
 const userSchema = Joi.object({
   email: Joi.string().email().required(),
@@ -76,12 +77,21 @@ export const getUserServers = async (ctx: any) => {
 
 const serverSchema = Joi.object({
   url: Joi.string().uri().required(),
+  name: Joi.string().required(),
+  sslStatus: Joi.string().required(),
+  sslExpiry: Joi.number(),
+  uptime: Joi.string(),
 });
 
 export const addServer = async (ctx: any) => {
+  let sslInfo = await getSslDetails(ctx.request.body.url);
   const user = await User.findByPk(ctx.state.user._id);
   const value = await serverSchema.validateAsync({
     url: ctx.request.body.url,
+    name: ctx.request.body.name,
+    sslStatus: sslInfo.valid.toString(),
+    sslExpiry: sslInfo.daysRemaining,
+    // uptime: ctx.request.body.uptime
   });
   try {
     if (!user) throw Error("User not found!");
@@ -102,3 +112,4 @@ export const addServer = async (ctx: any) => {
     ctx.status = 400;
   }
 };
+
