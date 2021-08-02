@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getIndServer } from "../../services/api";
+import { getIndServer, deleteServer } from "../../services/api";
 import {
   Main,
   Box,
@@ -70,8 +70,14 @@ const ServerInfo = (props: any) => {
           align="center"
           justify="center"
         >
-          <Button plain={false} onClick={() => history.push("/server")}>
+          <Button plain={false} onClick={() => history.push("/dashboard")}>
             Dashboard
+          </Button>
+          <Button plain={false} color={"red"} onClick={() => {
+              deleteServer(paramStr)
+              history.push('/dashboard')
+            }}>
+            Delete
           </Button>
         </CardFooter>
       </Card>

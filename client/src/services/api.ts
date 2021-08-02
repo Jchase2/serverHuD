@@ -80,3 +80,18 @@ export const getIndServer = async (id: string) => {
     }
   );
 };
+
+export const deleteServer = async (id: string) => {
+  return axios({
+    method: "put",
+    url: process.env.REACT_APP_BACKEND_URL + `/servers/delete/${id}`,
+    headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+  }).then(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      return error;
+    }
+  );
+};

@@ -1,25 +1,11 @@
-import {
-  Header,
-  Box,
-  Button,
-  ResponsiveContext,
-  Nav,
-  Menu,
-} from "grommet";
+import { Header, Box, Button, ResponsiveContext, Nav, Menu } from "grommet";
 import { useHistory } from "react-router-dom";
 
 const ClientHeader = (props: any) => {
   const loginAndRegister = () => {
     return (
-      <Box
-        direction="row"
-        alignContent="between"
-        gap="xsmall"
-      >
-        <Button
-          label="Register"
-          onClick={() => history.push("/register")}
-        />
+      <Box direction="row" alignContent="between" gap="xsmall">
+        <Button label="Register" onClick={() => history.push("/register")} />
         <Button label="Login" onClick={() => history.push("/login")} />
       </Box>
     );
@@ -27,13 +13,13 @@ const ClientHeader = (props: any) => {
 
   const logout = () => {
     return (
-        <Button
-          label="Logout"
-          onClick={() => {
-            props.globalLogOut();
-            history.push("/");
-          }}
-        />
+      <Button
+        label="Logout"
+        onClick={() => {
+          props.globalLogOut();
+          history.push("/");
+        }}
+      />
     );
   };
 
@@ -42,7 +28,7 @@ const ClientHeader = (props: any) => {
     <>
       <Header>
         <Box direction="row" align="center" gap="small">
-          ServerHuD
+          {<Button onClick={() => history.push("/")}>ServerHuD</Button>}
         </Box>
         <ResponsiveContext.Consumer>
           {(responsive) =>

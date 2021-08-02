@@ -1,4 +1,5 @@
-import { Grid, makeStyles, Button } from "@material-ui/core";
+import { Grid, makeStyles } from "@material-ui/core";
+import { Button } from 'grommet';
 import { useHistory } from "react-router-dom";
 
 
@@ -17,7 +18,7 @@ const HomePage = () => {
         <h1>Keep an eye on your servers with serverHuD.</h1>
       </Grid>
       <Grid item>
-        <Button color="primary" variant="contained" onClick={() => history.push("/register")}>
+        <Button plain={false} onClick={() => history.push("/register")}>
           Sign Up
         </Button>
       </Grid>
