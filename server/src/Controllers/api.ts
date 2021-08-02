@@ -100,9 +100,11 @@ const serverSchema = Joi.object({
 
 export const addServer = async (ctx: any) => {
 
+  console.log("attempting to add: ", ctx.request.body)
   console.log("isup test: ", await isUp(ctx.request.body.url))
   let serverId = shortHash(ctx.request.body.url);
-  let sslInfo = await getSslDetails(ctx.request.body.url);
+  let sslInfo = await getSslDetails(ctx.request.body.url)
+  if(sslInfo.errno) sslInfo.valid = false;
   const user = await User.findByPk(ctx.state.user._id);
   const status = await isUp(ctx.request.body.url);
   const value = await serverSchema.validateAsync({

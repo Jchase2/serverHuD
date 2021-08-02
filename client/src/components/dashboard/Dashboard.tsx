@@ -45,7 +45,7 @@ const Dashboard = (props: any) => {
     <>
       <AddServer addNewServer={addNewServer} />
       <Grid container justifyContent="center">
-        {serverList.length ? (
+        {serverList?.length ? (
           serverList.map((e: any) => displayServerList(e))
         ) : (
           <div>You are not monitoring any servers, add one to get started!</div>

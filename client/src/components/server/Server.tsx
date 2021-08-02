@@ -51,6 +51,9 @@ const Server = (props: any) => {
             {props.serverData.name}
           </Typography>
           <Typography variant="body2" component="p">
+            Server Status: {props.serverData.status === "up" ? 'Up' : 'Down!'}
+          </Typography>
+          <Typography variant="body2" component="p">
             SSL: {props.serverData.sslStatus === "true" ? 'Active' : 'Down!'}
           </Typography>
         </CardContent>
