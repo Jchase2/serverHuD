@@ -65,3 +65,18 @@ export const getServers = async () => {
     }
   );
 };
+
+export const getIndServer = async (id: string) => {
+  return axios({
+    method: "get",
+    url: process.env.REACT_APP_BACKEND_URL + `/servers/${id}`,
+    headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+  }).then(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      return error;
+    }
+  );
+};

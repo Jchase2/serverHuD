@@ -58,7 +58,7 @@ const Server = (props: any) => {
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size="small" onClick={() => history.push("/serverinfo")}>More Info</Button>
+          <Button size="small" onClick={() => history.push('/server/' + props.serverData.id)}>More Info</Button>
         </CardActions>
       </Card>
     </Grid>

@@ -76,6 +76,27 @@ export const getUserServers = async (ctx: any) => {
   }
 };
 
+export const getIndServer = async (ctx: any) => {
+  const user = await User.findByPk(ctx.state.user._id);
+  if (user?.servers) {
+    // Response from findByPk is non-iteratable, this converts
+    // it to a regular array of objects :') This is probably
+    // pretty inefficient but it's just one small obj so whatever.
+    let userServers = JSON.parse(JSON.stringify(user.servers));
+    userServers.map((e: any) => {
+      if(ctx.params.id === e.id){
+        console.log("e: ", e)
+        ctx.body = e;
+        ctx.status = 200;
+      }
+    })
+  } else {
+    ctx.body = "Server not found!";
+    ctx.status = 404;
+  }
+}
+
+
 export const fetchHudServer = async (ctx: any) => {
   const user = await User.findByPk(ctx.state.user._id);
   if (user?.servers) {
@@ -99,9 +120,6 @@ const serverSchema = Joi.object({
 });
 
 export const addServer = async (ctx: any) => {
-
-  console.log("attempting to add: ", ctx.request.body)
-  console.log("isup test: ", await isUp(ctx.request.body.url))
   let serverId = shortHash(ctx.request.body.url);
   let sslInfo = await getSslDetails(ctx.request.body.url)
   if(sslInfo.errno) sslInfo.valid = false;
