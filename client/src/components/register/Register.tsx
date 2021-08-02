@@ -1,21 +1,19 @@
-import TextField from "@material-ui/core/TextField";
-import { Button } from "@material-ui/core";
-import { Grid } from "@material-ui/core";
+import { Hide, View } from "grommet-icons";
+import { Box, Button, TextInput, Main, Form } from "grommet";
 import { useState } from "react";
 import { registerFunc } from "../../services/api";
 import { useHistory } from "react-router-dom";
 
-
 const Register = () => {
-
   const history = useHistory();
-
 
   const [registerState, setRegisterState] = useState({
     email: "",
     password: "",
     confirmPass: "",
+    grommet: "",
   });
+  const [reveal, setReveal] = useState(false);
 
   const handleChange = (e: any) => {
     setRegisterState((currentEvent) => ({
@@ -36,71 +34,54 @@ const Register = () => {
       email: "",
       password: "",
       confirmPass: "",
+      grommet: "",
     });
 
-    if(res === 201){
-      history.push('/login');
+    if (res === 201) {
+      history.push("/login");
     } else {
-      alert("Registration failed! Please try again.")
+      alert("Registration failed! Please try again.");
     }
-
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Grid
-        container
-        direction="column"
-        align-items="center"
-        justifyContent="center"
-        style={{ marginBottom: "2em" }}
-      >
-        <Grid item>
-          <TextField
-            id="standard-basic"
-            name="email"
-            label="Email"
-            variant="standard"
-            value={registerState.email}
-            onChange={handleChange}
-            fullWidth
-            style={{ marginBottom: "2em" }}
-          />
-        </Grid>
-        <Grid item>
-          <TextField
-            id="standard-password-input"
-            name="password"
-            label="Password"
-            variant="standard"
-            type="password"
-            autoComplete="current-password"
+    <Main align="center"  pad="large">
+      <Form onSubmit={handleSubmit}>
+        <TextInput
+          value={registerState.email}
+          placeholder="email"
+          name="email"
+          onChange={handleChange}
+        />
+        <Box direction="row">
+          <TextInput
             value={registerState.password}
+            name="password"
+            placeholder="password"
+            type={reveal ? "text" : "password"}
             onChange={handleChange}
-            fullWidth
-            style={{ marginBottom: "2em" }}
           />
-        </Grid>
-        <Grid item>
-          <TextField
-            id="standard-password-input"
-            name="confirmPass"
-            label="Confirm Password"
-            variant="standard"
-            type="password"
+          <Button
+            icon={reveal ? <View size="medium" /> : <Hide size="medium" />}
+            onClick={() => setReveal(!reveal)}
+          />
+        </Box>
+        <Box direction="row">
+          <TextInput
             value={registerState.confirmPass}
+            name="confirmPass"
+            placeholder="confirm password"
+            type={reveal ? "text" : "password"}
             onChange={handleChange}
-            fullWidth
-            style={{ marginBottom: "2em" }}
           />
-        </Grid>
-        <Grid item>
-          <Button type="submit" color="inherit" variant="contained">
-            Register
-          </Button>
-        </Grid>
-      </Grid>
-    </form>
+          <Button
+            icon={reveal ? <View size="medium" /> : <Hide size="medium" />}
+            onClick={() => setReveal(!reveal)}
+          />
+        </Box>
+        <Button label="Register" type="submit" active>Register</Button>
+      </Form>
+    </Main>
   );
 };
 

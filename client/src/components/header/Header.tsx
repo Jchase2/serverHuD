@@ -1,11 +1,8 @@
-import Button from "@material-ui/core/Button";
 import {
   Header,
   Box,
-  Button as GrommetButton,
+  Button,
   ResponsiveContext,
-  Anchor,
-  Grommet,
   Nav,
   Menu,
 } from "grommet";
@@ -14,19 +11,23 @@ import { useHistory } from "react-router-dom";
 const ClientHeader = (props: any) => {
   const loginAndRegister = () => {
     return (
-      <>
-        <GrommetButton
+      <Box
+        direction="row"
+        alignContent="between"
+        gap="xsmall"
+      >
+        <Button
           label="Register"
           onClick={() => history.push("/register")}
         />
-        <GrommetButton label="Login" onClick={() => history.push("/login")} />
-      </>
+        <Button label="Login" onClick={() => history.push("/login")} />
+      </Box>
     );
   };
 
   const logout = () => {
     return (
-        <GrommetButton
+        <Button
           label="Logout"
           onClick={() => {
             props.globalLogOut();
