@@ -1,6 +1,5 @@
-import TextField from "@material-ui/core/TextField";
-import { Button } from "@material-ui/core";
-import { Grid } from "@material-ui/core";
+import { Box, Grommet, Image, Text, TextInput, Button, Main } from "grommet";
+import { Hide, View } from "grommet-icons";
 import { useState } from "react";
 import { loginFunc } from "../../services/api";
 import { useHistory } from "react-router-dom";
@@ -13,6 +12,7 @@ const Login = (props: any) => {
     password: "",
     confirmPass: "",
   });
+  const [reveal, setReveal] = useState(false);
 
   const handleChange = (e: any) => {
     setLoginState((currentEvent) => ({
@@ -47,47 +47,36 @@ const Login = (props: any) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Grid
-        container
-        direction="column"
-        align-items="center"
-        justifyContent="center"
-        style={{ marginBottom: "2em" }}
-      >
-        <Grid item>
-          <TextField
-            id="standard-basic"
-            name="email"
-            label="Email"
-            variant="standard"
-            value={loginState.email}
-            onChange={handleChange}
-            fullWidth
-            style={{ marginBottom: "2em" }}
-          />
-        </Grid>
-        <Grid item>
-          <TextField
-            id="standard-password-input"
+    <Main align="center" pad="large">
+      <form onSubmit={handleSubmit}>
+        <TextInput
+          name="email"
+          type="email"
+          placeholder="email"
+          value={loginState.email}
+          onChange={handleChange}
+        />
+        <Box direction="row">
+          <TextInput
             name="password"
-            label="Password"
-            variant="standard"
-            type="password"
-            autoComplete="current-password"
+            type={reveal ? "text" : "password"}
+            placeholder="password"
             value={loginState.password}
             onChange={handleChange}
-            fullWidth
-            style={{ marginBottom: "2em" }}
           />
-        </Grid>
-        <Grid item>
-          <Button type="submit" color="inherit" variant="contained">
-            Login
-          </Button>
-        </Grid>
-      </Grid>
-    </form>
+          <Button
+            icon={reveal ? <View size="medium" /> : <Hide size="medium" />}
+            onClick={() => setReveal(!reveal)}
+            plain={false}
+            color="gray"
+            secondary
+          />
+        </Box>
+        <Button type="submit" plain={false}>
+          Login
+        </Button>
+      </form>
+    </Main>
   );
 };
 

@@ -14,6 +14,8 @@ const Register = () => {
     grommet: "",
   });
   const [reveal, setReveal] = useState(false);
+  const [secondaryReveal, setSecondaryReveal] = useState(false);
+
 
   const handleChange = (e: any) => {
     setRegisterState((currentEvent) => ({
@@ -64,6 +66,8 @@ const Register = () => {
           <Button
             icon={reveal ? <View size="medium" /> : <Hide size="medium" />}
             onClick={() => setReveal(!reveal)}
+            plain={false}
+            color="gray"
           />
         </Box>
         <Box direction="row">
@@ -71,15 +75,17 @@ const Register = () => {
             value={registerState.confirmPass}
             name="confirmPass"
             placeholder="confirm password"
-            type={reveal ? "text" : "password"}
+            type={secondaryReveal ? "text" : "password"}
             onChange={handleChange}
           />
           <Button
-            icon={reveal ? <View size="medium" /> : <Hide size="medium" />}
-            onClick={() => setReveal(!reveal)}
+            icon={secondaryReveal ? <View size="medium" /> : <Hide size="medium" />}
+            onClick={() => setSecondaryReveal(!secondaryReveal)}
+            plain={false}
+            color="gray"
           />
         </Box>
-        <Button label="Register" type="submit" active>Register</Button>
+        <Button plain={false} label="Register" type="submit" active>Register</Button>
       </Form>
     </Main>
   );
