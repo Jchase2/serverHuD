@@ -1,67 +1,39 @@
-import { makeStyles } from "@material-ui/core/styles";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
-import CardContent from "@material-ui/core/CardContent";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid/Grid";
 import { useHistory } from "react-router-dom";
-
-
-const useStyles = makeStyles({
-  root: {
-    minWidth: 275,
-  },
-  bullet: {
-    display: "inline-block",
-    margin: "0 2px",
-    transform: "scale(0.8)",
-  },
-  title: {
-    fontSize: 14,
-    alignContent: "center",
-    justifyContent: "center",
-  },
-  pos: {
-    marginBottom: 12,
-  },
-});
+import {
+  Main,
+  Box,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Button,
+} from "grommet";
 
 const Server = (props: any) => {
   const history = useHistory();
-  console.log("props.serverData: ", props.serverData)
-  const classes = useStyles();
   return (
-    <Grid
-      container
-      direction="column"
-      justifyContent="center"
-      alignItems="center"
-    >
-      <Card className={classes.root}>
-        <CardContent>
-          <Typography
-            className={classes.title}
-            color="textSecondary"
-            gutterBottom
+    <Main pad="medium">
+      <Card height="small" width="small" background="light-1">
+        <CardHeader background="dark-1" pad="small">{props.serverData.url}</CardHeader>
+        <CardBody pad="small">
+            <Box>Server: {props.serverData.name}</Box>
+            <Box>
+              Server Status: {props.serverData.status === "up" ? "Up" : "Down!"}
+            </Box>
+            <Box>
+              SSL: {props.serverData.sslStatus === "true" ? "Active" : "Down!"}
+            </Box>
+        </CardBody>
+        <CardFooter pad={{ horizontal: "small" }} background="light-2" align="center" justify="center">
+          <Button
+            plain={false}
+            onClick={() => history.push("/server/" + props.serverData.id)}
           >
-            {props.serverData.url}
-          </Typography>
-          <Typography variant="h5" component="h2">
-            {props.serverData.name}
-          </Typography>
-          <Typography variant="body2" component="p">
-            Server Status: {props.serverData.status === "up" ? 'Up' : 'Down!'}
-          </Typography>
-          <Typography variant="body2" component="p">
-            SSL: {props.serverData.sslStatus === "true" ? 'Active' : 'Down!'}
-          </Typography>
-        </CardContent>
-        <CardActions>
-          <Button size="small" onClick={() => history.push('/server/' + props.serverData.id)}>More Info</Button>
-        </CardActions>
+            More Info
+          </Button>
+        </CardFooter>
       </Card>
-    </Grid>
+    </Main>
   );
 };
 
