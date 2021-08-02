@@ -12,7 +12,6 @@ import {
 } from "grommet";
 import { useHistory } from "react-router-dom";
 
-
 const ServerInfo = (props: any) => {
   interface IServer {
     name: string;
@@ -42,15 +41,28 @@ const ServerInfo = (props: any) => {
   return (
     <Main align="center" justify="center">
       <Card height="medium" width="medium" background="light-1">
-        <CardHeader background="dark-1" pad="small">
-          {serverData.name}
-        </CardHeader>
+        {serverData.status === "down" ? (
+          <CardHeader background="status-error" pad="small">
+            {serverData.name}
+          </CardHeader>
+        ) : serverData.status === "up" && serverData.sslStatus === "false" ? (
+          <CardHeader background="status-warning" pad="small">
+            {serverData.name}
+          </CardHeader>
+        ) : (
+          <CardHeader background="dark-1" pad="small">
+            {serverData.name}
+          </CardHeader>
+        )}
         <CardBody pad="small">
           <Box>Server URL: {serverData.url}</Box>
           <Box>
             Server Status: {serverData.status === "up" ? "Up" : "Down!"}
           </Box>
           <Box>SSL: {serverData.sslStatus === "true" ? "Active" : "Down!"}</Box>
+          {serverData.sslStatus === "true" ? (
+            <Box> SSL Expires: {serverData.sslExpiry} Days</Box>
+          ) : null}
           <Box> SSL Expires: {serverData.sslExpiry} Days</Box>
         </CardBody>
         <CardFooter
@@ -59,10 +71,7 @@ const ServerInfo = (props: any) => {
           align="center"
           justify="center"
         >
-          <Button
-            plain={false}
-            onClick={() => history.push("/server")}
-          >
+          <Button plain={false} onClick={() => history.push("/server")}>
             Dashboard
           </Button>
         </CardFooter>

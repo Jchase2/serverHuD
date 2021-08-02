@@ -44,7 +44,7 @@ const Dashboard = (props: any) => {
   return (
     <Main direction="column" align="center" justify="center">
       <AddServer addNewServer={addNewServer} />
-      <Box direction="row-responsive" justify="center" align="center">
+      <Box direction="row-responsive" justify="center" align="center" wrap={true}>
         {serverList?.length ? (
           serverList.map((e: any) => displayServerList(e))
         ) : (
