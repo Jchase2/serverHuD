@@ -85,7 +85,6 @@ export const getIndServer = async (ctx: any) => {
     let userServers = JSON.parse(JSON.stringify(user.servers));
     userServers.map((e: any) => {
       if(ctx.params.id === e.id){
-        console.log("e: ", e)
         ctx.body = e;
         ctx.status = 200;
       }
