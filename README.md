@@ -4,16 +4,13 @@ Web based heads up display for servers
 ## ToDo:
 
 - Replace 'any' with types where I haven't.
-- Implement independent server page.
-- Style server page.
 - Implementing an uptime graph.
 - Implementing PWA
 - Client side form validation.
 - Integrate conditional uptime rendering and stuff.
-- Make it pretty.
-- Refactor front end.
 - hud-server authentication.
 - AddServer, optional hud-server field.
+- Make sure duplicates can't be added
 
 ## Backend API
 
