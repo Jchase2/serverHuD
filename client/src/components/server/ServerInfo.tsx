@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getIndServer } from "../../services/api";
-import { Layout } from "antd";
-
-const { Header, Footer, Sider, Content } = Layout;
 
 const ServerInfo = (props: any) => {
   interface IServer {
@@ -32,15 +29,13 @@ const ServerInfo = (props: any) => {
   }, []);
 
   return (
-    <Layout>
-      <Content>
+    <>
         Name: {serverData.name}
         URL: {serverData.url}
         Status: {serverData.status}
         SSL: {serverData.sslStatus}
         SSL Expires: {serverData.sslExpiry}
-      </Content>
-    </Layout>
+        </>
   );
 };
 

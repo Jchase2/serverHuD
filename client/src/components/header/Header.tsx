@@ -1,73 +1,71 @@
-import { makeStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
+import {
+  Header,
+  Box,
+  Button as GrommetButton,
+  ResponsiveContext,
+  Anchor,
+  Grommet,
+  Nav,
+  Menu,
+} from "grommet";
 import { useHistory } from "react-router-dom";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-  },
-}));
-
-const Header = (props: any) => {
+const ClientHeader = (props: any) => {
   const loginAndRegister = () => {
     return (
       <>
-        <Button color="inherit" onClick={() => history.push("/register")}>
-          Register
-        </Button>
-        <Button color="inherit" onClick={() => history.push("/login")}>
-          Login
-        </Button>
+        <GrommetButton
+          label="Register"
+          onClick={() => history.push("/register")}
+        />
+        <GrommetButton label="Login" onClick={() => history.push("/login")} />
       </>
     );
   };
 
   const logout = () => {
     return (
-      <>
-        <Button color="inherit" onClick={() => {
-          props.globalLogOut()
-          history.push("/")
-        }}>
-          Logout
-        </Button>
-      </>
+        <GrommetButton
+          label="Logout"
+          onClick={() => {
+            props.globalLogOut();
+            history.push("/");
+          }}
+        />
     );
   };
 
-  const classes = useStyles();
   const history = useHistory();
   return (
-    <div className={classes.root}>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="menu"
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" className={classes.title}>
-            serverHuD
-          </Typography>
-          {props.isAuthed === 'false' ? loginAndRegister() : logout()}
-        </Toolbar>
-      </AppBar>
-    </div>
+    <>
+      <Header>
+        <Box direction="row" align="center" gap="small">
+          ServerHuD
+        </Box>
+        <ResponsiveContext.Consumer>
+          {(responsive) =>
+            responsive === "small" ? (
+              <Menu
+                label="Click me"
+                items={[
+                  {
+                    label: "Register",
+                    onClick: () => history.push("/register"),
+                  },
+                  { label: "Login", onClick: () => history.push("/login") },
+                ]}
+              />
+            ) : (
+              <Nav direction="row">
+                {props.isAuthed === "false" ? loginAndRegister() : logout()}
+              </Nav>
+            )
+          }
+        </ResponsiveContext.Consumer>
+      </Header>
+    </>
   );
 };
 
-export default Header;
+export default ClientHeader;
