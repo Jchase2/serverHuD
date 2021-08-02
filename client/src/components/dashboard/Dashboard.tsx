@@ -19,6 +19,7 @@ const Dashboard = (props: any) => {
         setServerList(newServerList);
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addNewServer = async (newServer: any) => {
@@ -37,6 +38,8 @@ const Dashboard = (props: any) => {
       </div>
     );
   };
+
+  console.log("serverList: ", serverList)
 
   return (
     <>

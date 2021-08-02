@@ -23,27 +23,29 @@ export const registerFunc = async (registerObj: object) => {
     data: registerObj,
   }).then(
     (response) => {
-      return response.status
+      return response.status;
     },
     (error) => {
-      return error.request.status
+      return error.request.status;
     }
   );
 };
 
-export const postServer = async (newServer: object) => {
-  console.log("newServer: ", newServer)
+export const postServer = async (newServer: any) => {
+  if (newServer.url.substr(0, 7) !== "http://") {
+    newServer.url = 'http://' + newServer.url;
+  }
   return axios({
     method: "post",
     url: process.env.REACT_APP_BACKEND_URL + "/servers",
     data: newServer,
-    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+    headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
   }).then(
     (response) => {
       return response;
     },
     (error) => {
-      console.log(error.message)
+      console.log(error.message);
       return error;
     }
   );
@@ -53,13 +55,13 @@ export const getServers = async () => {
   return axios({
     method: "get",
     url: process.env.REACT_APP_BACKEND_URL + "/servers",
-    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+    headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
   }).then(
     (response) => {
-      return response
+      return response;
     },
     (error) => {
-      return error
+      return error;
     }
   );
 };
