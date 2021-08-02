@@ -30,7 +30,8 @@ const AddServer = (props: any) => {
   };
 
   return (
-    <Main align="center" pad="large">
+    <Main align="center" justify="center" pad="large">
+      <p>New Server:</p>
       <Form onSubmit={handleSubmit}>
         <Box pad="xsmall">
           <TextInput
@@ -48,9 +49,11 @@ const AddServer = (props: any) => {
             onChange={handleChange}
           />
         </Box>
-        <Button type="submit" plain={false}>
-          Add Server
-        </Button>
+        <Box align="center">
+          <Button type="submit" plain={false}>
+            Add Server
+          </Button>
+        </Box>
       </Form>
     </Main>
   );
