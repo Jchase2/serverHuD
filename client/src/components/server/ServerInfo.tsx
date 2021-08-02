@@ -63,7 +63,6 @@ const ServerInfo = (props: any) => {
           {serverData.sslStatus === "true" ? (
             <Box> SSL Expires: {serverData.sslExpiry} Days</Box>
           ) : null}
-          <Box> SSL Expires: {serverData.sslExpiry} Days</Box>
         </CardBody>
         <CardFooter
           pad="small"
