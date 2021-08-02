@@ -1,6 +1,4 @@
-import TextField from "@material-ui/core/TextField";
-import { Button } from "@material-ui/core";
-import { Grid } from "@material-ui/core";
+import { Box, Button, TextInput, Main, Form } from "grommet";
 import { useState } from "react";
 
 const AddServer = (props: any) => {
@@ -9,7 +7,7 @@ const AddServer = (props: any) => {
     name: "",
     status: "",
     sslStatus: "",
-    sslExpiry: 0
+    sslExpiry: 0,
   });
 
   const handleChange = (e: any) => {
@@ -27,50 +25,34 @@ const AddServer = (props: any) => {
       name: "",
       status: "",
       sslStatus: "",
-      sslExpiry: 0
+      sslExpiry: 0,
     });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Grid
-        container
-        direction="column"
-        align-items="center"
-        justifyContent="center"
-        style={{ marginBottom: "2em" }}
-      >
-        <Grid item>
-          <TextField
+    <Main align="center" pad="large">
+      <Form onSubmit={handleSubmit}>
+        <Box pad="xsmall">
+          <TextInput
             id="standard-basic"
             name="name"
-            label="Name"
-            variant="standard"
+            placeholder="name"
             value={serverState.name}
             onChange={handleChange}
-            fullWidth
-            style={{ marginBottom: "2em" }}
           />
-        </Grid>
-        <Grid item>
-          <TextField
+          <TextInput
             id="standard-password-input"
             name="url"
-            label="url"
-            variant="standard"
+            placeholder="url"
             value={serverState.url}
             onChange={handleChange}
-            fullWidth
-            style={{ marginBottom: "2em" }}
           />
-        </Grid>
-        <Grid item>
-          <Button type="submit" color="inherit" variant="contained">
-            Submit
-          </Button>
-        </Grid>
-      </Grid>
-    </form>
+        </Box>
+        <Button type="submit" plain={false}>
+          Add Server
+        </Button>
+      </Form>
+    </Main>
   );
 };
 

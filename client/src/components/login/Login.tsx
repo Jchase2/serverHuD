@@ -1,4 +1,4 @@
-import { Box, Grommet, Image, Text, TextInput, Button, Main } from "grommet";
+import { Box, TextInput, Button, Main } from "grommet";
 import { Hide, View } from "grommet-icons";
 import { useState } from "react";
 import { loginFunc } from "../../services/api";
@@ -69,7 +69,6 @@ const Login = (props: any) => {
             onClick={() => setReveal(!reveal)}
             plain={false}
             color="gray"
-            secondary
           />
         </Box>
         <Button type="submit" plain={false}>
