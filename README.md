@@ -10,26 +10,9 @@ Web based heads up display for servers
 - hud-server authentication.
 - Make sure duplicates can't be added
 
-## Backend API
+## Secondary Server
 
-  ### /login POST
-
-  {
-    "email": your_email_string,
-    "password": your_password_string
-  }
-
-  ### /register POST
-  {
-    "email": your_email_string,
-    "password": your_password_string
-  }
-
-  ### /servers GET Returns
-  {
-    url: url_string,
-    name: name_string,
-    sslStatus: boolean_string,
-    sslExpiry: integer_days_to_expiry,
-  }
+If you'd like to run serverHuD with the optional Go server on your linux servers,
+simply deploy the hud-server project on this repo to your linux server. When you
+enter your server to be monitored, put the url or IP of the endpoint you configured
 
