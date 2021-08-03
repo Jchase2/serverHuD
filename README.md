@@ -7,9 +7,7 @@ Web based heads up display for servers
 - Implementing an uptime graph.
 - Implementing PWA
 - Client side form validation.
-- Integrate conditional uptime rendering and stuff.
 - hud-server authentication.
-- AddServer, optional hud-server field.
 - Make sure duplicates can't be added
 
 ## Backend API
