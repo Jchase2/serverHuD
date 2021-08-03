@@ -129,6 +129,7 @@ const serverSchema = Joi.object({
   sslExpiry: Joi.number(),
   hudServerUrl: Joi.string().uri(),
   uptime: Joi.object().allow({}),
+  upgrades: Joi.string().allow('')
 });
 
 const SplitTime = (numberOfHours: number) => {
@@ -154,6 +155,7 @@ export const addServer = async (ctx: any) => {
     sslStatus: sslInfo.valid.toString(),
     sslExpiry: sslInfo.daysRemaining,
     uptime: SplitTime(hudData.uptimeInHours),
+    upgrades: hudData.upgrades
   });
   try {
     if (!user) throw Error("User not found!");

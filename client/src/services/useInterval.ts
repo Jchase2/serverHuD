@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 
 
 // This is a slightly modified version of Dan Abramov's code
-// which is encourages people to use.
+// which he encourages people to use.
 
 function useInterval(callback: () => void, delay: number | null) {
   const savedCallback = useRef(callback);

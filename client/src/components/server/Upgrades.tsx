@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getIndServer, deleteServer } from "../../services/api";
+import { getIndServer } from "../../services/api";
 import {
   Main,
   Box,
@@ -27,6 +27,7 @@ const ServerInfo = (props: any) => {
     status: string;
     url: string;
     uptime: IUptime;
+    upgrades: string
   }
   const [serverData, setServerData] = useState<IServer>({
     name: "",
@@ -35,12 +36,13 @@ const ServerInfo = (props: any) => {
     sslStatus: "",
     status: "",
     url: "",
-    uptime: {Days: 0, Hours: 0}
+    uptime: {Days: 0, Hours: 0},
+    upgrades: ''
   });
 
   const location = useLocation();
   var parts = location.pathname.split("/");
-  var paramStr = parts[parts.length - 1];
+  var paramStr = parts[parts.length - 2];
   useEffect(() => {
     getIndServer(paramStr).then((e: any) => {
       setServerData(e.data);
@@ -50,32 +52,22 @@ const ServerInfo = (props: any) => {
   const history = useHistory();
   return (
     <Main align="center" justify="center">
-      <Card height="medium" width="large" background="light-1">
-        {serverData?.status === "down" ? (
+      <Card height="large" width="large" background="light-1">
+        {serverData.status === "down" ? (
           <CardHeader background="status-error" pad="small">
-            {serverData?.name}
+            {serverData.name}
           </CardHeader>
-        ) : serverData?.status === "up" && serverData?.sslStatus === "false" ? (
+        ) : serverData.status === "up" && serverData.sslStatus === "false" ? (
           <CardHeader background="status-warning" pad="small">
-            {serverData?.name}
+            {serverData.name}
           </CardHeader>
         ) : (
           <CardHeader background="dark-1" pad="small">
-            {serverData?.name}
+            {serverData.name}
           </CardHeader>
         )}
         <CardBody pad="small">
-          <Box>Server URL: {serverData?.url}</Box>
-          <Box>
-            Server Status: {serverData?.status === "up" ? "Up" : "Down!"}
-          </Box>
-          <Box>SSL: {serverData?.sslStatus === "true" ? "Active" : "Down!"}</Box>
-          {serverData?.sslStatus === "true" ? (
-            <Box> SSL Expires: {serverData?.sslExpiry} Days</Box>
-          ) : null}
-          {
-            serverData?.uptime.Hours > 0 || serverData?.uptime.Days > 0 ? <Box>Uptime: {serverData?.uptime.Days + " Days " + serverData.uptime.Hours + " Hours "}</Box> : null
-          }
+          <Box>Available Upgrades: {serverData.upgrades}</Box>
         </CardBody>
         <CardFooter
           pad="small"
@@ -83,17 +75,8 @@ const ServerInfo = (props: any) => {
           align="center"
           justify="center"
         >
-          <Button plain={false} onClick={() => history.push("/dashboard")}>
-            Dashboard
-          </Button>
-          <Button plain={false} onClick={() => history.push(`/server/${serverData?.id}/upgrades`)}>
-            Upgrades
-          </Button>
-          <Button plain={false} color={"red"} onClick={() => {
-              deleteServer(paramStr)
-              history.push('/dashboard')
-            }}>
-            Delete
+          <Button plain={false} onClick={() => history.push(`/server/${serverData?.id}`)}>
+            Back to Server
           </Button>
         </CardFooter>
       </Card>

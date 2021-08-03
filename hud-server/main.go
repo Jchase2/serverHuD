@@ -5,8 +5,10 @@ import (
 	"crypto/tls"
 	b64 "encoding/base64"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -42,8 +44,20 @@ func GetStatus(url string) string {
 	return strconv.Itoa(resp.StatusCode)
 }
 
+func GetUpgradeable() string {
+	cmd := exec.Command("/usr/bin/apt", "list", "--upgradeable")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("cmd.Run() failed with %s\n", err)
+	}
+	cmd.Run()
+	fmt.Printf("combined out:\n%s\n", string(out))
+	return string(out)
+}
+
 //GetCertStatus returns cert expiration for url
 func GetCertStatus(url string, port string) string {
+
 	conn, err := net.Dial("tcp", url+":"+port)
 	if err != nil {
 		fmt.Println("NO")
@@ -97,6 +111,7 @@ func main() {
 			"gbFreeOnCurrPartition": GetDiskUsage(),
 			"certExpires":           GetCertStatus(configUrl, "443"),
 			"upOrDown":              GetStatus(configUrl),
+			"upgrades":              GetUpgradeable(),
 		})
 	})
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")

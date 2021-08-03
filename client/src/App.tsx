@@ -7,6 +7,7 @@ import Login from "./components/login/Login";
 import HomePage from "./components/homepage/HomePage";
 import Register from "./components/register/Register";
 import ServerInfo from "./components/server/ServerInfo";
+import Upgrades from "./components/server/Upgrades";
 import { useState } from "react";
 import PrivateRoute from "./components/private/PrivateRoute";
 function App() {
@@ -45,6 +46,9 @@ function App() {
           </Route>
           <PrivateRoute isAuthed={isAuthed} path="/dashboard">
             <Dashboard />
+          </PrivateRoute>
+          <PrivateRoute isAuthed={isAuthed} path="/server/:id/upgrades">
+            <Upgrades />
           </PrivateRoute>
           <PrivateRoute isAuthed={isAuthed} path="/server/:id">
             <ServerInfo />
