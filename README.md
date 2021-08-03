@@ -9,6 +9,8 @@ Web based heads up display for servers
 - Client side form validation.
 - hud-server authentication.
 - Make sure duplicates can't be added
+- Implement push notifications or polling to check for down servers or services.
+- Integrate user email verification and email alerts.
 
 ## Secondary Server
 
