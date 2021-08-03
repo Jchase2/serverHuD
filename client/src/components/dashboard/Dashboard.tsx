@@ -3,6 +3,7 @@ import AddServer from "./AddServer";
 import { useState, useEffect } from "react";
 import { getServers, postServer } from "../../services/api";
 import { Main, Box } from "grommet";
+import useInterval from "../../services/useInterval";
 
 const Dashboard = (props: any) => {
   interface IServer {
@@ -28,6 +29,14 @@ const Dashboard = (props: any) => {
       });
     });
   };
+
+  const updateServers = async () => {
+    getServers().then((e) => {
+      setServerList(e.data);
+    })
+  }
+
+  useInterval(updateServers, 5000)
 
   const displayServerList = (serverData: any) => {
     return (
