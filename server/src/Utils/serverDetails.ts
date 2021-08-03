@@ -1,5 +1,6 @@
 import sslChecker from "ssl-checker";
 import axios from "axios";
+import prependHttp from "prepend-http";
 const sr = require("server-reachability");
 
 export const isUp = async (hostname: string) => {
@@ -20,9 +21,10 @@ export const getSslDetails = async (hostname: string) => {
 };
 
 export const hudServerData = async (url: string) => {
+  console.log("url hud: ", url)
   return axios({
     method: "get",
-    url: url,
+    url: prependHttp(url, {https: false}),
   }).then(
     (response) => {
       return response.data;

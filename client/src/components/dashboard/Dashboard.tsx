@@ -13,7 +13,6 @@ const Dashboard = (props: any) => {
 
   useEffect(() => {
     getServers().then((e: any) => {
-      console.log("e: ", e);
       if (e.data !== undefined && e.data !== "Error") {
         let newServerList = [...serverList].concat(e.data);
         setServerList(newServerList);
@@ -31,15 +30,12 @@ const Dashboard = (props: any) => {
   };
 
   const displayServerList = (serverData: any) => {
-    console.log("ServerList: ", serverList);
     return (
       <div key={serverData.url}>
         <Server serverData={serverData} />
       </div>
     );
   };
-
-  console.log("serverList: ", serverList);
 
   return (
     <Main direction="column" align="center" justify="center">

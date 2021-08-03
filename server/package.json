@@ -43,6 +43,7 @@
     "koa-jwt": "^4.0.1",
     "koa-logger": "^3.2.1",
     "pg": "^8.7.1",
+    "prepend-http": "^3.0.1",
     "sequelize": "^6.6.5",
     "sequelize-typescript": "^2.1.0",
     "server-reachability": "^1.1.15",

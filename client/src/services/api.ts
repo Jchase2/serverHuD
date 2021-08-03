@@ -52,7 +52,7 @@ export const postServer = async (newServer: any) => {
 };
 
 export const getServers = async () => {
-  return axios({
+  return await axios({
     method: "get",
     url: process.env.REACT_APP_BACKEND_URL + "/servers",
     headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },

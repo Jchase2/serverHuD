@@ -13,12 +13,19 @@ import {
 import { useHistory } from "react-router-dom";
 
 const ServerInfo = (props: any) => {
+
+  interface IUptime {
+    Days: number,
+    Hours: number
+  }
+
   interface IServer {
     name: string;
     sslExpiry: number;
     sslStatus: string;
     status: string;
     url: string;
+    uptime: IUptime;
   }
   const [serverData, setServerData] = useState<IServer>({
     name: "",
@@ -26,6 +33,7 @@ const ServerInfo = (props: any) => {
     sslStatus: "",
     status: "",
     url: "",
+    uptime: {Days: 0, Hours: 0}
   });
 
   const location = useLocation();
@@ -63,6 +71,9 @@ const ServerInfo = (props: any) => {
           {serverData.sslStatus === "true" ? (
             <Box> SSL Expires: {serverData.sslExpiry} Days</Box>
           ) : null}
+          {
+            serverData?.uptime.Hours > 0 || serverData?.uptime.Days > 0 ? <Box>Uptime: {serverData?.uptime.Days + " Days " + serverData.uptime.Hours + " Hours "}</Box> : null
+          }
         </CardBody>
         <CardFooter
           pad="small"

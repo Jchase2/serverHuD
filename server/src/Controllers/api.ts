@@ -1,7 +1,7 @@
 import { User } from "../Models/user.model";
 import { Sequelize } from "sequelize-typescript";
 import bcrypt from "bcrypt";
-import Joi from "joi";
+import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
 import shortHash from "shorthash2";
@@ -103,7 +103,6 @@ export const deleteServer = async (ctx: any) => {
     // pretty inefficient but it's just one small obj so whatever.
     let userServers = JSON.parse(JSON.stringify(user.servers));
     let result = userServers.filter((e: any) => ctx.params.id != e.id);
-    console.log("result: ", result);
     try {
       if (!user) throw Error("User not found!");
       await User.update(
@@ -120,43 +119,41 @@ export const deleteServer = async (ctx: any) => {
   }
 };
 
-export const fetchHudServer = async (ctx: any) => {
-  const user = await User.findByPk(ctx.state.user._id);
-  if (user?.servers) {
-    ctx.body = user?.servers;
-    ctx.status = 200;
-  } else {
-    ctx.body = "No servers found!";
-    ctx.status = 404;
-  }
-};
-
 const serverSchema = Joi.object({
   id: Joi.string(),
   url: Joi.string().uri().required(),
+  optionalUrl: Joi.string().uri().allow(''),
   name: Joi.string().required(),
   status: Joi.string(),
   sslStatus: Joi.string().required(),
   sslExpiry: Joi.number(),
   hudServerUrl: Joi.string().uri(),
-  uptime: Joi.string(),
+  uptime: Joi.object().allow({}),
 });
+
+const SplitTime = (numberOfHours: number) => {
+  var Days=Math.floor(numberOfHours/24);
+  var Remainder=numberOfHours % 24;
+  var Hours=Math.floor(Remainder);
+  return({"Days":Days,"Hours":Hours})
+}
 
 export const addServer = async (ctx: any) => {
   let serverId = shortHash(ctx.request.body.url);
   let sslInfo = await getSslDetails(ctx.request.body.url);
   if (sslInfo.errno) sslInfo.valid = false;
+  const hudData = await hudServerData(ctx.request.body.optionalUrl);
   const user = await User.findByPk(ctx.state.user._id);
   const status = await isUp(ctx.request.body.url);
   const value = await serverSchema.validateAsync({
     id: serverId,
     url: ctx.request.body.url,
+    optionalUrl: ctx.request.body.optionalUrl,
     name: ctx.request.body.name,
     status: status,
     sslStatus: sslInfo.valid.toString(),
     sslExpiry: sslInfo.daysRemaining,
-    hudServerUrl: ctx.request.body.hudServerUrl,
-    uptime: ctx.request.body.uptime,
+    uptime: SplitTime(hudData.uptimeInHours),
   });
   try {
     if (!user) throw Error("User not found!");

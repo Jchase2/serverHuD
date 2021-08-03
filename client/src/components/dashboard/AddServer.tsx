@@ -4,6 +4,7 @@ import { useState } from "react";
 const AddServer = (props: any) => {
   const [serverState, setServerState] = useState({
     url: "",
+    optionalUrl: "",
     name: "",
     status: "",
     sslStatus: "",
@@ -22,6 +23,7 @@ const AddServer = (props: any) => {
     props.addNewServer(serverState);
     setServerState({
       url: "",
+      optionalUrl: "",
       name: "",
       status: "",
       sslStatus: "",
@@ -46,6 +48,13 @@ const AddServer = (props: any) => {
             name="url"
             placeholder="url"
             value={serverState.url}
+            onChange={handleChange}
+          />
+          <TextInput
+            id="standard-basic"
+            name="optionalUrl"
+            placeholder="optional backend url"
+            value={serverState.optionalUrl}
             onChange={handleChange}
           />
         </Box>

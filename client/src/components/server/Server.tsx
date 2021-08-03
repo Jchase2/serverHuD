@@ -13,7 +13,7 @@ const Server = (props: any) => {
   const history = useHistory();
   return (
     <Main pad="medium">
-      <Card height="small" width="medium" background="light-1">
+      <Card background="light-1">
         {props.serverData.status === "down" ? (
           <CardHeader background="status-error" pad="small">
             {props.serverData.name}
