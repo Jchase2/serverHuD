@@ -13,10 +13,9 @@ import {
 import { useHistory } from "react-router-dom";
 
 const ServerInfo = (props: any) => {
-
   interface IUptime {
-    Days: number,
-    Hours: number
+    Days: number;
+    Hours: number;
   }
 
   interface IServer {
@@ -27,6 +26,7 @@ const ServerInfo = (props: any) => {
     status: string;
     url: string;
     uptime: IUptime;
+    upgrades: string;
   }
   const [serverData, setServerData] = useState<IServer>({
     name: "",
@@ -35,7 +35,8 @@ const ServerInfo = (props: any) => {
     sslStatus: "",
     status: "",
     url: "",
-    uptime: {Days: 0, Hours: 0}
+    uptime: { Days: 0, Hours: 0 },
+    upgrades: "",
   });
 
   const location = useLocation();
@@ -69,13 +70,21 @@ const ServerInfo = (props: any) => {
           <Box>
             Server Status: {serverData?.status === "up" ? "Up" : "Down!"}
           </Box>
-          <Box>SSL: {serverData?.sslStatus === "true" ? "Active" : "Down!"}</Box>
+          <Box>
+            SSL: {serverData?.sslStatus === "true" ? "Active" : "Down!"}
+          </Box>
           {serverData?.sslStatus === "true" ? (
             <Box> SSL Expires: {serverData?.sslExpiry} Days</Box>
           ) : null}
-          {
-            serverData?.uptime.Hours > 0 || serverData?.uptime.Days > 0 ? <Box>Uptime: {serverData?.uptime.Days + " Days " + serverData.uptime.Hours + " Hours "}</Box> : null
-          }
+          {serverData?.uptime.Hours > 0 || serverData?.uptime.Days > 0 ? (
+            <Box>
+              Uptime:{" "}
+              {serverData?.uptime.Days +
+                " Days " +
+                serverData.uptime.Hours +
+                " Hours "}
+            </Box>
+          ) : null}
         </CardBody>
         <CardFooter
           pad="small"
@@ -86,13 +95,22 @@ const ServerInfo = (props: any) => {
           <Button plain={false} onClick={() => history.push("/dashboard")}>
             Dashboard
           </Button>
-          <Button plain={false} onClick={() => history.push(`/server/${serverData?.id}/upgrades`)}>
-            Upgrades
-          </Button>
-          <Button plain={false} color={"red"} onClick={() => {
-              deleteServer(paramStr)
-              history.push('/dashboard')
-            }}>
+          {serverData.upgrades ? (
+            <Button
+              plain={false}
+              onClick={() => history.push(`/server/${serverData?.id}/upgrades`)}
+            >
+              Upgrades
+            </Button>
+          ) : null}
+          <Button
+            plain={false}
+            color={"red"}
+            onClick={() => {
+              deleteServer(paramStr);
+              history.push("/dashboard");
+            }}
+          >
             Delete
           </Button>
         </CardFooter>
