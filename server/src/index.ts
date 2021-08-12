@@ -15,5 +15,5 @@ app.use(router.routes());
 
 (async () => {
   await sequelize.sync({force: true});
-  app.listen(process.env.PORT || 3001, () => console.log(`Server running on port: ${process.env.PORT}`));
+  app.listen( 3001, () => console.log(`Server running on port: ${3001}`));
 })();

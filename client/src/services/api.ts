@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const loginFunc = async (loginObj: object) => {
-  let result = await axios({
+  return axios({
     method: "post",
     url: process.env.REACT_APP_BACKEND_URL + "/login",
     data: loginObj,
@@ -13,7 +13,6 @@ export const loginFunc = async (loginObj: object) => {
       return error;
     }
   );
-  return result;
 };
 
 export const registerFunc = async (registerObj: object) => {
@@ -52,7 +51,7 @@ export const postServer = async (newServer: any) => {
 };
 
 export const getServers = async () => {
-  return await axios({
+  return axios({
     method: "get",
     url: process.env.REACT_APP_BACKEND_URL + "/servers",
     headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },

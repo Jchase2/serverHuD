@@ -10,7 +10,6 @@ const Login = (props: any) => {
   const [loginState, setLoginState] = useState({
     email: "",
     password: "",
-    confirmPass: "",
   });
   const [reveal, setReveal] = useState(false);
 
@@ -32,7 +31,6 @@ const Login = (props: any) => {
     setLoginState({
       email: "",
       password: "",
-      confirmPass: "",
     });
 
     if (result?.status === 200) {
