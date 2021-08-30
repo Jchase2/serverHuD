@@ -13,7 +13,7 @@ const userSchema = Joi.object({
 
 export const registerUser = async (ctx: any) => {
   try {
-    const value = await userSchema.validateAsync({
+    await userSchema.validateAsync({
       email: ctx.request.body.email,
       password: ctx.request.body.password,
     });
@@ -29,6 +29,7 @@ export const registerUser = async (ctx: any) => {
     ctx.body = "User Created!";
     ctx.status = 201;
   } catch (e) {
+    console.log(e)
     ctx.status = 400;
     ctx.body = `${e}`;
   }
@@ -36,7 +37,7 @@ export const registerUser = async (ctx: any) => {
 
 export const loginUser = async (ctx: any) => {
   try {
-    const value = await userSchema.validateAsync({
+    await userSchema.validateAsync({
       email: ctx.request.body.email,
       password: ctx.request.body.password,
     });

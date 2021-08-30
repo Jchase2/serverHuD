@@ -1,10 +1,28 @@
-import { Box, TextInput, Button, Main } from "grommet";
+import { TextInput } from "grommet";
 import { Hide, View } from "grommet-icons";
 import { useState } from "react";
+import {
+  Flex,
+  Box,
+  FormControl,
+  Heading,
+  Input,
+  Button,
+  IconButton,
+  Image,
+  useColorMode,
+  useColorModeValue,
+  Select,
+  useMediaQuery,
+} from "@chakra-ui/react";
+import { GrView } from "react-icons/gr";
+import { BiHide } from "react-icons/bi";
 import { loginFunc } from "../../services/api";
 import { useHistory } from "react-router-dom";
 
 const Login = (props: any) => {
+  const { toggleColorMode } = useColorMode();
+  let SwitchIcon: any;
   const history = useHistory();
 
   const [loginState, setLoginState] = useState({
@@ -12,6 +30,9 @@ const Login = (props: any) => {
     password: "",
   });
   const [reveal, setReveal] = useState(false);
+  if (reveal) {
+    SwitchIcon = BiHide;
+  } else SwitchIcon = GrView;
 
   const handleChange = (e: any) => {
     setLoginState((currentEvent) => ({
@@ -45,35 +66,48 @@ const Login = (props: any) => {
   };
 
   return (
-    <Main align="center" pad="large">
-      <form onSubmit={handleSubmit}>
-        <TextInput
-          name="email"
-          type="email"
-          placeholder="email"
-          value={loginState.email}
-          onChange={handleChange}
-        />
-        <Box direction="row">
+    <Flex
+      minH="80vh"
+      align="center"
+      justifyContent="center"
+      flexDirection="column"
+    >
+      <Box p={8} borderWidth={1} borderRadius={8} boxShadow="lg" minW="35vw">
+        <Heading textAlign="center" mb={6}>Login</Heading>
+        <form onSubmit={handleSubmit}>
+          <FormControl></FormControl>
           <TextInput
-            name="password"
-            type={reveal ? "text" : "password"}
-            placeholder="password"
-            value={loginState.password}
+            name="email"
+            type="email"
+            placeholder="email"
+            value={loginState.email}
             onChange={handleChange}
           />
-          <Button
-            icon={reveal ? <View size="medium" /> : <Hide size="medium" />}
-            onClick={() => setReveal(!reveal)}
-            plain={false}
-            color="gray"
-          />
-        </Box>
-        <Button type="submit" plain={false}>
-          Login
-        </Button>
-      </form>
-    </Main>
+          <Flex>
+            <TextInput
+              name="password"
+              type={reveal ? "text" : "password"}
+              placeholder="password"
+              value={loginState.password}
+              onChange={handleChange}
+            />
+            <IconButton
+              aria-label="reveal"
+              icon={<SwitchIcon />}
+              onClick={() => {
+                if (reveal) setReveal(false);
+                else setReveal(true);
+              }}
+              plain={false}
+              color="gray"
+            />
+          </Flex>
+          <Button colorScheme="facebook" type="submit" plain={false}>
+            Login
+          </Button>
+        </form>
+      </Box>
+    </Flex>
   );
 };
 

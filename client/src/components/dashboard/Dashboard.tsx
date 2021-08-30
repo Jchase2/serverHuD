@@ -33,10 +33,10 @@ const Dashboard = (props: any) => {
   const updateServers = async () => {
     getServers().then((e) => {
       setServerList(e.data);
-    })
-  }
+    });
+  };
 
-  useInterval(updateServers, 5000)
+  //useInterval(updateServers, 5000)
 
   const displayServerList = (serverData: any) => {
     return (
@@ -49,7 +49,12 @@ const Dashboard = (props: any) => {
   return (
     <Main direction="column" align="center" justify="center">
       <AddServer addNewServer={addNewServer} />
-      <Box direction="row-responsive" justify="center" align="center" wrap={true}>
+      <Box
+        direction="row-responsive"
+        justify="center"
+        align="center"
+        wrap={true}
+      >
         {serverList?.length ? (
           serverList.map((e: any) => displayServerList(e))
         ) : (

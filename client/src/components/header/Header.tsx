@@ -1,12 +1,20 @@
-import { Header, Box, Button, ResponsiveContext, Nav, Menu } from "grommet";
+import { Header, Box,  ResponsiveContext, Nav, Menu } from "grommet";
+import { Button } from "@chakra-ui/react"
 import { useHistory } from "react-router-dom";
 
 const ClientHeader = (props: any) => {
   const loginAndRegister = () => {
     return (
       <Box direction="row" alignContent="between" gap="xsmall">
-        <Button label="Register" onClick={() => history.push("/register")} />
-        <Button label="Login" onClick={() => history.push("/login")} />
+        <Button
+          
+          onClick={() => history.push("/register")}
+        >
+          Register
+        </Button>
+        <Button colorScheme="facebook" onClick={() => history.push("/login")}>
+          Login
+        </Button>
       </Box>
     );
   };
@@ -26,8 +34,11 @@ const ClientHeader = (props: any) => {
   const history = useHistory();
   return (
     <>
-      <Header>
-        <Box direction="row" align="center" gap="small">
+      <Header
+        background="#b8c6db; background-image: linear-gradient(315deg, #b8c6db 0%, #f5f7fa 74%);"
+        pad="10px"
+      >
+        <Box direction="row" align="center" gap="small" pad="10px">
           {<Button onClick={() => history.push("/")}>ServerHuD</Button>}
         </Box>
         <ResponsiveContext.Consumer>
@@ -35,6 +46,7 @@ const ClientHeader = (props: any) => {
             responsive === "small" ? (
               <Menu
                 label="Click me"
+                color="grey"
                 items={[
                   {
                     label: "Register",
