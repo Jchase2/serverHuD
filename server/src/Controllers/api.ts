@@ -8,7 +8,7 @@ import shortHash from "shorthash2";
 
 const userSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().min(8).alphanum().required(),
+  password: Joi.string().min(1).alphanum().required(),
 });
 
 export const registerUser = async (ctx: any) => {
@@ -130,7 +130,8 @@ const serverSchema = Joi.object({
   sslExpiry: Joi.number(),
   hudServerUrl: Joi.string().uri(),
   uptime: Joi.object().allow({}),
-  upgrades: Joi.string().allow('')
+  upgrades: Joi.string().allow(''),
+  diskSpace: Joi.number().allow()
 });
 
 const SplitTime = (numberOfHours: number) => {
@@ -156,7 +157,8 @@ export const addServer = async (ctx: any) => {
     sslStatus: sslInfo.valid.toString(),
     sslExpiry: sslInfo.daysRemaining,
     uptime: SplitTime(hudData.uptimeInHours),
-    upgrades: hudData.upgrades
+    upgrades: hudData.upgrades,
+    diskSpace: hudData.gbFreeOnCurrPartition
   });
   try {
     if (!user) throw Error("User not found!");

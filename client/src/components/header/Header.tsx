@@ -22,12 +22,14 @@ const ClientHeader = (props: any) => {
   const logout = () => {
     return (
       <Button
-        label="Logout"
+        colorScheme="facebook"
         onClick={() => {
           props.globalLogOut();
           history.push("/");
         }}
-      />
+      >
+        Logout
+      </Button>
     );
   };
 

@@ -27,6 +27,7 @@ const ServerInfo = (props: any) => {
     url: string;
     uptime: IUptime;
     upgrades: string;
+    diskSpace: number;
   }
   const [serverData, setServerData] = useState<IServer>({
     name: "",
@@ -37,6 +38,7 @@ const ServerInfo = (props: any) => {
     url: "",
     uptime: { Days: 0, Hours: 0 },
     upgrades: "",
+    diskSpace: 0
   });
 
   const location = useLocation();

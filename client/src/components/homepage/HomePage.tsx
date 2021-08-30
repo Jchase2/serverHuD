@@ -41,7 +41,7 @@ const HomePage = () => {
               serverHuD
             </Text>
           </Heading>
-          <Text color={"gray.500"}>
+          <Text color="gray.900">
             serverHuD is a convenient way to avoid surprise outages and monitor
             the status of your SSL certs, upgrades, and more!
           </Text>
