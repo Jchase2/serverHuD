@@ -4,7 +4,7 @@ to monitor their services, servers or websites.
 
 ![serverHuD image](https://i.ibb.co/8D1Yc7Y/example-serverhud.png)
 
-### Built With
+## Built With
 
 The (primary) technologies used in the development of this project:
 
