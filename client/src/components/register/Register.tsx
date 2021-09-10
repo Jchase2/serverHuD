@@ -7,12 +7,11 @@ import {
   FormLabel,
   Button,
   IconButton,
-  useColorMode,
   Input,
 } from "@chakra-ui/react";
 import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
-import { Main, Form } from "grommet";
+import { Form } from "grommet";
 import { useState } from "react";
 import { registerFunc } from "../../services/api";
 import { useHistory } from "react-router-dom";
@@ -66,6 +65,7 @@ const Register = () => {
     if (res === 201) {
       history.push("/login");
     } else {
+        console.log(res)
         setIsError(true);
         setStateMessage("Passwaords do not match");
     }

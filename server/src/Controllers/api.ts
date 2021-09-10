@@ -8,7 +8,7 @@ import shortHash from "shorthash2";
 
 const userSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().min(1).alphanum().required(),
+  password: Joi.string().min(8).alphanum().required(),
 });
 
 export const registerUser = async (ctx: any) => {
@@ -128,7 +128,6 @@ const serverSchema = Joi.object({
   status: Joi.string(),
   sslStatus: Joi.string().required(),
   sslExpiry: Joi.number(),
-  hudServerUrl: Joi.string().uri(),
   uptime: Joi.object().allow({}),
   upgrades: Joi.string().allow(''),
   diskSpace: Joi.number().allow()
@@ -143,7 +142,7 @@ const SplitTime = (numberOfHours: number) => {
 
 export const addServer = async (ctx: any) => {
   let serverId = shortHash(ctx.request.body.url);
-  let sslInfo = await getSslDetails(ctx.request.body.url);
+  let sslInfo: any = await getSslDetails(ctx.request.body.url);
   if (sslInfo.errno) sslInfo.valid = false;
   const hudData = await hudServerData(ctx.request.body.optionalUrl);
   const user = await User.findByPk(ctx.state.user._id);

@@ -5,23 +5,11 @@ import {
   Container,
   Text,
   Button,
-  Stack,
-  Icon,
-  useColorModeValue,
-  createIcon,
+  Stack
 } from "@chakra-ui/react";
 import "animate.css"
-import { useHistory } from "react-router-dom";
-
-// const useStyles = makeStyles({
-//   root: {
-//     height: "70vh",
-//   },
-//animate__fadeInUp
-// });
 
 const HomePage = () => {
-  const history = useHistory();
   return (
     <>
       <Container maxW={"3xl"} className="animate__animated animate__fadeInUp" paddingTop="100px">
@@ -70,15 +58,5 @@ const HomePage = () => {
     </>
   );
 };
-// <Grid container className={classes.root} direction="column" justifyContent="center" alignItems="center">
-//   <Grid item>
-//     <h1>Keep an eye on your servers with serverHuD.</h1>
-//   </Grid>
-//   <Grid item>
-//     <Button plain={false} onClick={() => history.push("/register")}>
-//       Sign Up
-//     </Button>
-//   </Grid>
-// </Grid>
 
 export default HomePage;
