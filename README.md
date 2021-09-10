@@ -2,9 +2,7 @@
 Web based heads up display for servers and websites. Designed by a dev for server admins, website admins, or devs 
 to monitor their services, servers or websites. 
 
-```
 ![serverHuD image](https://i.ibb.co/8D1Yc7Y/example-serverhud.png)
-```
 
 ### Built With
 
