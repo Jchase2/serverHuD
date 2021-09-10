@@ -2,9 +2,13 @@
 Web based heads up display for servers and websites. Designed by a dev for server admins, website admins, or devs 
 to monitor their services, servers or websites. 
 
+```
+![serverHuD image](https://i.ibb.co/8D1Yc7Y/example-serverhud.png)
+```
+
 ### Built With
 
-The technologies we used in the development of this project:
+The (primary) technologies used in the development of this project:
 
 - Front End: [React](https://reactjs.org/), [Chakra UI](https://chakra-ui.com/), [Axios](https://axios-http.com/)
 - Back End: [Postgres](https://www.postgresql.org/), [sequelize-typescript](https://www.npmjs.com/package/sequelize-typescript), [NodeJS](https://nodejs.org/en/), [KoA](https://koajs.com/)

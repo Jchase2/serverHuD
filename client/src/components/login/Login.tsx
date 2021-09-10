@@ -5,15 +5,13 @@ import {
   Box,
   FormControl,
   Heading,
-  FormLabel,
   Button,
   IconButton,
   Input,
+  Stack
 } from "@chakra-ui/react";
-
 import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
-
 import { loginFunc } from "../../services/api";
 import { useHistory } from "react-router-dom";
 
@@ -85,37 +83,36 @@ const Login = (props: any) => {
         </Heading>
         <form onSubmit={handleSubmit}>
           <FormControl isRequired>
-            <FormLabel> Email </FormLabel>
-            <Input
-              name="email"
-              type="email"
-              placeholder="Email"
-              value={loginState.email}
-              onChange={handleChange}
-            />
-            <FormLabel isRequired mt={4}>
-              {" "}
-              Password{" "}
-            </FormLabel>
-            <Flex>
+            <Stack spacing={3}>
               <Input
-                name="password"
-                type={reveal ? "text" : "password"}
-                placeholder="Password"
-                value={loginState.password}
+                name="email"
+                type="email"
+                placeholder="Email"
+                value={loginState.email}
                 onChange={handleChange}
+                isRequired
               />
-              <IconButton
-                aria-label="reveal"
-                icon={<SwitchIcon />}
-                onClick={() => {
-                  if (reveal) setReveal(false);
-                  else setReveal(true);
-                }}
-                plain={false}
-                color="gray"
-              />
-            </Flex>
+              <Flex>
+                <Input
+                  name="password"
+                  type={reveal ? "text" : "password"}
+                  placeholder="Password"
+                  value={loginState.password}
+                  onChange={handleChange}
+                  isRequired
+                />
+                <IconButton
+                  aria-label="reveal"
+                  icon={<SwitchIcon />}
+                  onClick={() => {
+                    if (reveal) setReveal(false);
+                    else setReveal(true);
+                  }}
+                  plain={false}
+                  color="gray"
+                />
+              </Flex>
+            </Stack>
           </FormControl>
           <Button mt={4} colorScheme="facebook" type="submit" plain={false}>
             Login

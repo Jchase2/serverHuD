@@ -11,7 +11,6 @@ import {
 } from "@chakra-ui/react";
 import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
-import { Form } from "grommet";
 import { useState } from "react";
 import { registerFunc } from "../../services/api";
 import { useHistory } from "react-router-dom";
@@ -25,7 +24,6 @@ const Register = () => {
     email: "",
     password: "",
     confirmPass: "",
-    grommet: "",
   });
   const [reveal, setReveal] = useState(false);
   const [secondaryReveal, setSecondaryReveal] = useState(false);
@@ -59,7 +57,6 @@ const Register = () => {
       email: "",
       password: "",
       confirmPass: "",
-      grommet: "",
     });
 
     if (res === 201) {
@@ -67,7 +64,7 @@ const Register = () => {
     } else {
         console.log(res)
         setIsError(true);
-        setStateMessage("Passwaords do not match");
+        setStateMessage("Ensure your passwords match and are at least 8 characters long!");
     }
   };
 
@@ -87,7 +84,7 @@ const Register = () => {
         <Heading textAlign="center" mb={6}>
           Register
         </Heading>
-        <Form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           <FormControl isRequired>
             <FormLabel> Email </FormLabel>
             <Input
@@ -152,7 +149,7 @@ const Register = () => {
           >
             Register
           </Button>
-        </Form>
+        </form>
       </Box>
     </Flex>
   );

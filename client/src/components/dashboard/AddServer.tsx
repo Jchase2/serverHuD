@@ -1,4 +1,5 @@
-import { Box, Button, TextInput, Main, Form } from "grommet";
+import { ErrorShow } from "../Error/ErrorShow";
+import { Box, Button, Input, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 
 const AddServer = (props: any) => {
@@ -32,39 +33,44 @@ const AddServer = (props: any) => {
   };
 
   return (
-    <Main align="center" justify="center" pad="large">
+    <Box
+      p={8}
+      m={2}
+      borderWidth={1}
+      borderRadius={8}
+      boxShadow="lg"
+      w="20vw"
+      align="center"
+      justify="center"
+    >
       <p>New Server:</p>
-      <Form onSubmit={handleSubmit}>
-        <Box pad="xsmall">
-          <TextInput
+      <form onSubmit={handleSubmit}>
+        <Stack spacing={1}>
+          <Input
             id="standard-basic"
             name="name"
             placeholder="name"
             value={serverState.name}
             onChange={handleChange}
           />
-          <TextInput
+          <Input
             id="standard-password-input"
             name="url"
             placeholder="url"
             value={serverState.url}
             onChange={handleChange}
           />
-          <TextInput
+          <Input
             id="standard-basic"
             name="optionalUrl"
             placeholder="optional backend url"
             value={serverState.optionalUrl}
             onChange={handleChange}
           />
-        </Box>
-        <Box align="center">
-          <Button type="submit" plain={false}>
-            Add Server
-          </Button>
-        </Box>
-      </Form>
-    </Main>
+          <Button type="submit">Add Server</Button>
+        </Stack>
+      </form>
+    </Box>
   );
 };
 
