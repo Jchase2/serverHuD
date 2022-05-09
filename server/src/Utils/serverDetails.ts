@@ -1,11 +1,11 @@
 import sslChecker from "ssl-checker";
 import axios from "axios";
 import prependHttp from "prepend-http";
-const sr = require("server-reachability");
+const isReachable = require('is-reachable');
 
 export const isUp = async (hostname: string) => {
   let fixedUrl = hostname.replace(/^https?\:\/\//i, "").replace(/\/$/, "");
-  let res = await sr.isReachable(fixedUrl, 80);
+  let res = await isReachable(fixedUrl);
   if (res) return "up";
   else return "down";
 };
