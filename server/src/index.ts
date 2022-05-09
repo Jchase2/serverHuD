@@ -14,6 +14,6 @@ app.use(koaBody());
 app.use(router.routes());
 
 (async () => {
-  await sequelize.sync({force: true});
+  await sequelize.sync({force: false});
   app.listen( 3001, () => console.log(`Server running on port: ${3001}`));
 })();
