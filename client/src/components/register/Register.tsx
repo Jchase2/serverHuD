@@ -62,7 +62,7 @@ const Register = () => {
     if (res === 201) {
       history.push("/login");
     } else {
-        console.log(res)
+        console.log("error is: ", res)
         setIsError(true);
         setStateMessage("Ensure your passwords match and are at least 8 characters long!");
     }
@@ -93,7 +93,7 @@ const Register = () => {
               name="email"
               onChange={handleChange}
             />
-            <FormLabel isRequired mt={4}>
+            <FormLabel mt={4}>
               {" "}
               Password{" "}
             </FormLabel>
@@ -112,11 +112,9 @@ const Register = () => {
                   if (reveal) setReveal(false);
                   else setReveal(true);
                 }}
-                plain={false}
-                color="gray"
               />
             </Flex>
-            <FormLabel isRequired mt={4}>
+            <FormLabel mt={4}>
               {" "}
               Confirm Password{" "}
             </FormLabel>
@@ -135,17 +133,14 @@ const Register = () => {
                   if (secondaryReveal) setSecondaryReveal(false);
                   else setSecondaryReveal(true);
                 }}
-                plain={false}
                 color="gray"
               />
             </Flex>
           </FormControl>
           <Button
             mt={5}
-            plain={false}
             colorScheme="facebook"
             type="submit"
-            active
           >
             Register
           </Button>

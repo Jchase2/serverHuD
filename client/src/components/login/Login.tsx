@@ -108,13 +108,11 @@ const Login = (props: any) => {
                     if (reveal) setReveal(false);
                     else setReveal(true);
                   }}
-                  plain={false}
-                  color="gray"
                 />
               </Flex>
             </Stack>
           </FormControl>
-          <Button mt={4} colorScheme="facebook" type="submit" plain={false}>
+          <Button mt={4} colorScheme="facebook" type="submit">
             Login
           </Button>
         </form>

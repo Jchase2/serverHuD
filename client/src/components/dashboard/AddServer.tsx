@@ -1,4 +1,3 @@
-import { ErrorShow } from "../Error/ErrorShow";
 import { Box, Button, Input, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 
@@ -40,8 +39,8 @@ const AddServer = (props: any) => {
       borderRadius={8}
       boxShadow="lg"
       w="20vw"
-      align="center"
-      justify="center"
+      alignItems="center"
+      justifyContent="center"
     >
       <p>New Server:</p>
       <form onSubmit={handleSubmit}>

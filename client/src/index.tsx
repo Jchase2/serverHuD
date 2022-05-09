@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import { ChakraProvider } from "@chakra-ui/react";
 import { extendTheme } from "@chakra-ui/react";
+import { Grommet } from "grommet";
 
 const config = {
   initialColorMode: "light",
@@ -14,9 +15,11 @@ const theme = extendTheme({ config });
 
 ReactDOM.render(
   <React.StrictMode>
-    <ChakraProvider theme={theme}>
-      <App />
-    </ChakraProvider>
+    <Grommet plain>
+      <ChakraProvider theme={theme}>
+        <App />
+      </ChakraProvider>
+    </Grommet>
   </React.StrictMode>,
   document.getElementById("root")
 );
