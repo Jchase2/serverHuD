@@ -1,4 +1,4 @@
-import Server from "../server/Server";
+import Server from "../../components/server/Server";
 import AddServer from "./AddServer";
 import { useState, useEffect } from "react";
 import { getServers, postServer } from "../../services/api";

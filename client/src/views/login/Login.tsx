@@ -1,4 +1,4 @@
-import { ErrorShow } from "../Error/ErrorShow";
+import { ErrorShow } from "../../components/Error/ErrorShow";
 import { useState } from "react";
 import {
   Flex,

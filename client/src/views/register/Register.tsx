@@ -1,4 +1,4 @@
-import { ErrorShow } from "../Error/ErrorShow";
+import { ErrorShow } from "../../components/Error/ErrorShow";
 import {
   Flex,
   Box,
