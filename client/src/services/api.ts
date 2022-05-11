@@ -31,7 +31,7 @@ export const registerFunc = async (registerObj: object) => {
 };
 
 export const postServer = async (newServer: any) => {
-  if (newServer.url.substr(0, 7) !== "http://") {
+  if (newServer.url.substr(0, 7) !== "http://" && newServer.url.substr(0, 8) !== "https://") {
     newServer.url = 'http://' + newServer.url;
   }
   return axios({
