@@ -130,7 +130,7 @@ const serverSchema = Joi.object({
   sslExpiry: Joi.number(),
   uptime: Joi.object().allow({}),
   upgrades: Joi.string().allow(''),
-  diskSpace: Joi.number().allow()
+  diskSpace: Joi.number().allow('')
 });
 
 const SplitTime = (numberOfHours: number) => {
@@ -144,7 +144,7 @@ export const addServer = async (ctx: any) => {
   let serverId = shortHash(ctx.request.body.url);
   let sslInfo: any = await getSslDetails(ctx.request.body.url);
   if (sslInfo.errno) sslInfo.valid = false;
-  const hudData = await hudServerData(ctx.request.body.optionalUrl);
+  const hudData = ctx.request.body.optionalUrl ? await hudServerData(ctx.request.body.optionalUrl) : null;
   const user = await User.findByPk(ctx.state.user._id);
   const status = await isUp(ctx.request.body.url);
   const value = await serverSchema.validateAsync({
@@ -155,9 +155,9 @@ export const addServer = async (ctx: any) => {
     status: status,
     sslStatus: sslInfo.valid.toString(),
     sslExpiry: sslInfo.daysRemaining,
-    uptime: SplitTime(hudData.uptimeInHours),
-    upgrades: hudData.upgrades,
-    diskSpace: hudData.gbFreeOnCurrPartition
+    uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
+    upgrades: hudData ? hudData.upgrades : '',
+    diskSpace: hudData ? hudData.gbFreeOnCurrPartition : ''
   });
   try {
     if (!user) throw Error("User not found!");
