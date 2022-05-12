@@ -1,10 +1,10 @@
 import { User } from "../Models/user.model";
+import { Server } from "../Models/server.model";
 import { Sequelize } from "sequelize-typescript";
 import bcrypt from "bcrypt";
 import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
-import shortHash from "shorthash2";
 
 const userSchema = Joi.object({
   email: Joi.string().email().required(),
@@ -29,7 +29,7 @@ export const registerUser = async (ctx: any) => {
     ctx.body = "User Created!";
     ctx.status = 201;
   } catch (e) {
-    console.log(e)
+    console.log(e);
     ctx.status = 400;
     ctx.body = `${e}`;
   }
@@ -58,7 +58,7 @@ export const loginUser = async (ctx: any) => {
       process.env.SECRET_KEY || "insecureuY47Qf2xo3M9kKjF67hq",
       { expiresIn: "7d" }
     );
-    ctx.body = { accessToken };
+    ctx.body = { accessToken: accessToken, userId: user.id };
     ctx.status = 200;
   } catch (e) {
     ctx.body = `${e}`;
@@ -67,9 +67,9 @@ export const loginUser = async (ctx: any) => {
 };
 
 export const getUserServers = async (ctx: any) => {
-  const user = await User.findByPk(ctx.state.user._id);
-  if (user?.servers) {
-    ctx.body = user?.servers;
+  const serverList = await Server.findAll(ctx.state.user._id);
+  if (serverList) {
+    ctx.body = serverList;
     ctx.status = 200;
   } else {
     ctx.body = "No servers found!";
@@ -78,18 +78,12 @@ export const getUserServers = async (ctx: any) => {
 };
 
 export const getIndServer = async (ctx: any) => {
-  const user = await User.findByPk(ctx.state.user._id);
-  if (user?.servers) {
-    // Response from findByPk is non-iteratable, this converts
-    // it to a regular array of objects :') This is probably
-    // pretty inefficient but it's just one small obj so whatever.
-    let userServers = JSON.parse(JSON.stringify(user.servers));
-    userServers.map((e: any) => {
-      if (ctx.params.id === e.id) {
-        ctx.body = e;
-        ctx.status = 200;
-      }
-    });
+
+  const server = await Server.findByPk(ctx.params.id);
+
+  if (server) {
+    ctx.body = server;
+    ctx.status = 200;
   } else {
     ctx.body = "Server not found!";
     ctx.status = 404;
@@ -97,58 +91,51 @@ export const getIndServer = async (ctx: any) => {
 };
 
 export const deleteServer = async (ctx: any) => {
-  const user = await User.findByPk(ctx.state.user._id);
-  if (user?.servers) {
-    // Response from findByPk is non-iteratable, this converts
-    // it to a regular array of objects :') This is probably
-    // pretty inefficient but it's just one small obj so whatever.
-    let userServers = JSON.parse(JSON.stringify(user.servers));
-    let result = userServers.filter((e: any) => ctx.params.id != e.id);
-    try {
-      if (!user) throw Error("User not found!");
-      await User.update(
-        {
-          servers: result,
-        },
-        { where: { id: user.id } }
-      );
+  Server.destroy({
+    where: {
+      id: ctx.params.id,
+    },
+  })
+    .then((data) => {
+      ctx.body = "Server deleted!";
       ctx.status = 204;
-    } catch (error) {
-      ctx.body = `${error}`;
-      ctx.status = 400;
-    }
-  }
+    })
+    .catch((error) => {
+      console.log("ERROR DELETING")
+      ctx.status = 404;
+    });
 };
 
 const serverSchema = Joi.object({
-  id: Joi.string(),
+  userid: Joi.number().required(),
   url: Joi.string().uri().required(),
-  optionalUrl: Joi.string().uri().allow(''),
+  optionalUrl: Joi.string().uri().allow(""),
   name: Joi.string().required(),
   status: Joi.string(),
   sslStatus: Joi.string().required(),
   sslExpiry: Joi.number(),
   uptime: Joi.object().allow({}),
-  upgrades: Joi.string().allow(''),
-  diskSpace: Joi.number().allow('')
+  upgrades: Joi.string().allow(""),
+  diskSpace: Joi.number(),
 });
 
 const SplitTime = (numberOfHours: number) => {
-  var Days=Math.floor(numberOfHours/24);
-  var Remainder=numberOfHours % 24;
-  var Hours=Math.floor(Remainder);
-  return({"Days":Days,"Hours":Hours})
-}
+  var Days = Math.floor(numberOfHours / 24);
+  var Remainder = numberOfHours % 24;
+  var Hours = Math.floor(Remainder);
+  return { Days: Days, Hours: Hours };
+};
 
 export const addServer = async (ctx: any) => {
-  let serverId = shortHash(ctx.request.body.url);
   let sslInfo: any = await getSslDetails(ctx.request.body.url);
   if (sslInfo.errno) sslInfo.valid = false;
-  const hudData = ctx.request.body.optionalUrl ? await hudServerData(ctx.request.body.optionalUrl) : null;
+  const hudData = ctx.request.body.optionalUrl
+    ? await hudServerData(ctx.request.body.optionalUrl)
+    : null;
   const user = await User.findByPk(ctx.state.user._id);
   const status = await isUp(ctx.request.body.url);
   const value = await serverSchema.validateAsync({
-    id: serverId,
+    userid: ctx.state.user._id,
     url: ctx.request.body.url,
     optionalUrl: ctx.request.body.optionalUrl,
     name: ctx.request.body.name,
@@ -156,24 +143,16 @@ export const addServer = async (ctx: any) => {
     sslStatus: sslInfo.valid.toString(),
     sslExpiry: sslInfo.daysRemaining,
     uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
-    upgrades: hudData ? hudData.upgrades : '',
-    diskSpace: hudData ? hudData.gbFreeOnCurrPartition : ''
+    upgrades: hudData ? hudData.upgrades : "",
+    diskSpace: hudData ? hudData.gbFreeOnCurrPartition : -1,
   });
   try {
     if (!user) throw Error("User not found!");
-    await User.update(
-      {
-        servers: Sequelize.fn(
-          "array_append",
-          Sequelize.col("servers"),
-          JSON.stringify(value)
-        ),
-      },
-      { where: { id: user.id } }
-    );
+    await Server.create(value);
     ctx.body = "Server added.";
     ctx.status = 201;
   } catch (error) {
+    console.log("ERROR IS: ", error);
     ctx.body = `${error}`;
     ctx.status = 400;
   }

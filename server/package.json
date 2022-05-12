@@ -47,7 +47,6 @@
     "prepend-http": "^3.0.1",
     "sequelize": "^6.19.0",
     "sequelize-typescript": "^2.1.3",
-    "shorthash2": "^1.0.3",
     "ssl-checker": "^2.0.7"
   }
 }

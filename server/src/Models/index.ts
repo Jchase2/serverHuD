@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize-typescript'
 import { User } from './user.model';
+import { Server } from './server.model';
 
 export const sequelize = new Sequelize({
   database: process.env.DATABASE,
@@ -8,4 +9,4 @@ export const sequelize = new Sequelize({
   password: process.env.DB_PW,
 })
 
-sequelize.addModels([User]);
+sequelize.addModels([User, Server]);

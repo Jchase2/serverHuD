@@ -1,4 +1,5 @@
-import { Table, Column, Model, CreatedAt, UpdatedAt, DataType } from 'sequelize-typescript'
+import { Table, Column, Model, CreatedAt, UpdatedAt, DataType, HasMany } from 'sequelize-typescript'
+import { Server } from './server.model'
 
 @Table
 export class User extends Model {
@@ -9,7 +10,5 @@ export class User extends Model {
   @Column
   password!: string;
 
-  @Column(DataType.ARRAY(DataType.JSONB))
-  servers!: object | null;
 }
 
