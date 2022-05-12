@@ -55,6 +55,7 @@ const Login = (props: any) => {
     if (result?.status === 200) {
       console.log("Logged in!");
       localStorage.setItem("accessToken", result.data.accessToken);
+      localStorage.setItem('userId', result.data.userId);
       // sets authed to true in root component.
       props.setAuth();
       history.push("/dashboard");

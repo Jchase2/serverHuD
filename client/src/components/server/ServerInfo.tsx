@@ -42,15 +42,17 @@ const ServerInfo = (props: any) => {
   });
 
   const location = useLocation();
-  var parts = location.pathname.split("/");
-  var paramStr = parts[parts.length - 1];
+  const parts = location.pathname.split("/");
+  const paramStr = parts[parts.length - 1];
   useEffect(() => {
     getIndServer(paramStr).then((e: any) => {
       setServerData(e.data);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   const history = useHistory();
+
   return (
     <Main align="center" justify="center">
       <Card height="medium" width="large" background="light-1">
@@ -78,7 +80,7 @@ const ServerInfo = (props: any) => {
           {serverData?.sslStatus === "true" ? (
             <Box> SSL Expires: {serverData?.sslExpiry} Days</Box>
           ) : null}
-          {serverData?.uptime.Hours > 0 || serverData?.uptime.Days > 0 ? (
+          {serverData?.uptime?.Hours > 0 || serverData?.uptime?.Days > 0 ? (
             <Box>
               Uptime:{" "}
               {serverData?.uptime.Days +
