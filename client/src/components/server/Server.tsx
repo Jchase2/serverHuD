@@ -8,8 +8,24 @@ import {
   CardFooter,
   Button,
 } from "grommet";
+import io from "socket.io-client";
+import { useEffect } from "react";
 
 const Server = (props: any) => {
+  useEffect(() => {
+
+
+    const socket = io("localhost:3001", {
+      extraHeaders: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+      transports: ["websocket"],
+    });
+    socket.on("connected", () => {
+      console.log("Why doesn't this work lol.");
+    });
+  }, []);
+
   const history = useHistory();
   return (
     <Main pad="medium">
