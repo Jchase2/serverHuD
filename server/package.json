@@ -23,7 +23,8 @@
     "@types/node": "^16.11.33",
     "@types/validator": "^13.7.2",
     "tsc-watch": "^4.6.2",
-    "typescript": "^4.6.4"
+    "typescript": "^4.6.4",
+    "nodemon": "^2.0.22"
   },
   "dependencies": {
     "@koa/cors": "^3.3.0",

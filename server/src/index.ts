@@ -31,3 +31,5 @@ const io = new Server(server, {
 io.on('connection', function(socket: Socket){
   console.log(socket.id)
 })
+
+export default io;

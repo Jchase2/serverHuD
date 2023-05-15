@@ -9,48 +9,61 @@ import {
   Button,
 } from "grommet";
 import io from "socket.io-client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { cloneDeep } from "lodash";
 
 const Server = (props: any) => {
+
+  console.log("PROPS IS: ", props)
+
+  const [currServerState, setCurrServerState] = useState(props.serverData);
+
   useEffect(() => {
-
-
     const socket = io("localhost:3001", {
       extraHeaders: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
       transports: ["websocket"],
     });
-    socket.on("connected", () => {
-      console.log("Why doesn't this work lol.");
+    socket.on("connect", () => {
+      console.log("Connected to " + socket.id);
     });
+
+    socket.on('status-update', (statusUpdate) => {
+      let internalServer = cloneDeep(currServerState);
+      internalServer.status = statusUpdate;
+      setCurrServerState(internalServer);
+    })
+
+
   }, []);
 
   const history = useHistory();
+
   return (
     <Main pad="medium">
       <Card background="light-1">
-        {props.serverData.status === "down" ? (
+        {currServerState.status === "down" ? (
           <CardHeader background="status-error" pad="small">
-            {props.serverData.name}
+            {currServerState.name}
           </CardHeader>
-        ) : props.serverData.status === "up" &&
-          props.serverData.sslStatus === "false" ? (
+        ) : currServerState.status === "up" &&
+          currServerState.sslStatus === "false" ? (
           <CardHeader background="status-warning" pad="small">
-            {props.serverData.name}
+            {currServerState.name}
           </CardHeader>
         ) : (
           <CardHeader background="dark-1" pad="small">
-            {props.serverData.name}
+            {currServerState.name}
           </CardHeader>
         )}
         <CardBody pad="small">
-          <Box>Server URL: {props.serverData.url}</Box>
+          <Box>Server URL: {currServerState.url}</Box>
           <Box>
-            Server Status: {props.serverData.status === "up" ? "Up" : "Down!"}
+            Server Status: {currServerState.status === "up" ? "Up" : "Down!"}
           </Box>
           <Box>
-            SSL: {props.serverData.sslStatus === "true" ? "Active" : "Down!"}
+            SSL: {currServerState.sslStatus === "true" ? "Active" : "Down!"}
           </Box>
         </CardBody>
         <CardFooter
@@ -61,7 +74,7 @@ const Server = (props: any) => {
         >
           <Button
             plain={false}
-            onClick={() => history.push("/server/" + props.serverData.id)}
+            onClick={() => history.push("/server/" + currServerState.id)}
           >
             More Info
           </Button>
