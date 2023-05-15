@@ -14,8 +14,6 @@ import { cloneDeep } from "lodash";
 
 const Server = (props: any) => {
 
-  console.log("PROPS IS: ", props)
-
   const [currServerState, setCurrServerState] = useState(props.serverData);
 
   useEffect(() => {
@@ -33,7 +31,6 @@ const Server = (props: any) => {
     });
 
     socket.on('status-update', (statusUpdate) => {
-      console.log("Status-Update ran for socketio: ", statusUpdate)
       let internalServer = cloneDeep(currServerState);
       internalServer.status = statusUpdate;
       setCurrServerState(internalServer);

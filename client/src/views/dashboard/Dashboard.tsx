@@ -12,8 +12,6 @@ const Dashboard = (props: any) => {
 
   const [serverList, setServerList] = useState<IServer[]>([]);
 
-  console.log("SERVER LIST IS: ", serverList)
-
   useEffect(() => {
     getServers().then((e: any) => {
       if (e.data !== undefined && e.data !== "Error") {

@@ -6,9 +6,8 @@ import koaBody from "koa-body";
 import logger from "koa-logger";
 import cors from "@koa/cors";
 import { Server, Socket } from "socket.io";
-import { verifyToken } from "./Utils/jwt";
 import http from "http";
-import { isUp } from "./Utils/serverDetails";
+import { sioJwtVerify, sioUrlChecker } from "./Controllers/sockets";
 
 const app = new Koa();
 app.use(logger());
@@ -31,27 +30,8 @@ const io = new Server(server, {
 })();
 
 io.on("connection", function (socket: Socket) {
-  console.log("Socket ID Is: ", socket.id);
-  console.log("Handshake.Headers: ", socket.handshake.auth);
-
-  // Middleware for checking our json web token...
-  io.use((socket, next) => {
-    if (verifyToken(socket.handshake.auth.token)) {
-      console.log("Verified JWT for Socket.io");
-      next();
-    } else {
-      next(new Error("Invalid jwt!"));
-    }
-  });
-
-  socket.on("registerUpdates", (data) => {
-    console.log("Registerupdate ran with data: ", data)
-    setInterval(async function () {
-      let result = await isUp(data);
-      console.log("RESULT IS: ", result);
-      socket.emit("status-update", result);
-    }, 60000);
-  });
+  sioJwtVerify(socket);
+  sioUrlChecker(socket);
 });
 
 export default io;
