@@ -30,9 +30,14 @@ const Server = (props: any) => {
       socket.emit('upCheck', props.serverData.url)
     });
 
-    socket.on('status-update', (statusUpdate) => {
+    socket.on('serverUpdate', (statusUpdate) => {
+      console.log("Status Update: ", statusUpdate)
       let internalServer = cloneDeep(currServerState);
-      internalServer.status = statusUpdate;
+      for (const [key, value] of Object.entries(statusUpdate)) {
+        if(internalServer[key] !== value) {
+          internalServer[key] = value;
+        }
+      }
       setCurrServerState(internalServer);
     })
 

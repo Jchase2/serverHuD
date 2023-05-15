@@ -2,6 +2,8 @@ import io from "../index";
 import { verifyToken } from "../Utils/jwt";
 import { isUp } from "../Utils/serverDetails";
 import { Socket } from "socket.io";
+import { User } from "../Models/user.model";
+import { Server } from "../Models/server.model";
 
 // Register for uptime checking on URL every 60 seconds.
 export function sioUpCheck(socket: Socket) {
@@ -9,8 +11,11 @@ export function sioUpCheck(socket: Socket) {
   socket.on("upCheck", (data) => {
     upInterval = setInterval(async function () {
       let result = await isUp(data);
-      socket.emit("status-update", result);
-    }, 60000);
+      let updateObj = {
+        status: result
+      };
+      socket.emit("serverUpdate", updateObj);
+    }, 10000);
   });
 
   socket.on("disconnect", () => {
@@ -36,4 +41,11 @@ export function sioJwtVerify(socket: Socket) {
       next(new Error("Invalid jwt!"));
     }
   });
+}
+
+// Update database if FE recieves somethign new.
+export function sioUpdateDb(socket: Socket) {
+  // socket.on("dbUpdate", (data) => {
+
+  // });
 }
