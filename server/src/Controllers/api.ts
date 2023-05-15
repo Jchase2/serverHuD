@@ -1,6 +1,5 @@
 import { User } from "../Models/user.model";
 import { Server } from "../Models/server.model";
-import { Sequelize } from "sequelize-typescript";
 import bcrypt from "bcrypt";
 import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";

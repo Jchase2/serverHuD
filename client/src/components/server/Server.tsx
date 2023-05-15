@@ -19,23 +19,29 @@ const Server = (props: any) => {
   const [currServerState, setCurrServerState] = useState(props.serverData);
 
   useEffect(() => {
+
     const socket = io("localhost:3001", {
+      auth: {
+        token: localStorage.getItem("accessToken")
+      },
       extraHeaders: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
       transports: ["websocket"],
     });
+
     socket.on("connect", () => {
       console.log("Connected to " + socket.id);
     });
 
     socket.on('status-update', (statusUpdate) => {
+      console.log("Status-Update ran for socketio: ", statusUpdate)
       let internalServer = cloneDeep(currServerState);
       internalServer.status = statusUpdate;
       setCurrServerState(internalServer);
     })
 
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const history = useHistory();
