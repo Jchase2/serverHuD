@@ -24,14 +24,12 @@ const Server = (props: any) => {
       auth: {
         token: localStorage.getItem("accessToken")
       },
-      extraHeaders: {
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
       transports: ["websocket"],
     });
 
     socket.on("connect", () => {
-      console.log("Connected to " + socket.id);
+      console.log("Connected to " + socket.id, " sending url: ", props.serverData.url);
+      socket.emit('registerUpdates', props.serverData.url)
     });
 
     socket.on('status-update', (statusUpdate) => {
