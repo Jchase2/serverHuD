@@ -27,7 +27,7 @@ const Server = (props: any) => {
 
     socket.on("connect", () => {
       console.log("Connected to " + socket.id, " sending url: ", props.serverData.url);
-      socket.emit('registerUpdates', props.serverData.url)
+      socket.emit('upCheck', props.serverData.url)
     });
 
     socket.on('status-update', (statusUpdate) => {
