@@ -5,6 +5,8 @@ import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
 
+const URL_EMPTY_DEFAULT = "http://";
+
 const userSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(8).alphanum().required(),
@@ -126,33 +128,50 @@ const SplitTime = (numberOfHours: number) => {
 };
 
 export const addServer = async (ctx: any) => {
-  let sslInfo: any = await getSslDetails(ctx.request.body.url);
+  
+  const { url } = ctx.request.body;
+  // Check if URL is empty
+  if (!url || url === URL_EMPTY_DEFAULT) {
+    ctx.body = "URL cannot be empty.";
+    ctx.status = 422;
+    return;
+  }
+
+  let sslInfo: any = await getSslDetails(url);
   if (sslInfo.errno) sslInfo.valid = false;
   const hudData = ctx.request.body.optionalUrl
     ? await hudServerData(ctx.request.body.optionalUrl)
     : null;
   const user = await User.findByPk(ctx.state.user._id);
-  const status = await isUp(ctx.request.body.url);
-  const value = await serverSchema.validateAsync({
-    userid: ctx.state.user._id,
-    url: ctx.request.body.url,
-    optionalUrl: ctx.request.body.optionalUrl,
-    name: ctx.request.body.name,
-    status: status,
-    sslStatus: sslInfo.valid.toString(),
-    sslExpiry: sslInfo.daysRemaining,
-    uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
-    upgrades: hudData ? hudData.upgrades : "",
-    diskSpace: hudData ? hudData.gbFreeOnCurrPartition : -1,
-  });
+  const status = await isUp(url);
+
   try {
+    const value = await serverSchema.validateAsync({
+      userid: ctx.state.user._id,
+      url,
+      optionalUrl: ctx.request.body.optionalUrl,
+      name: ctx.request.body.name,
+      status: status,
+      sslStatus: sslInfo.valid.toString(),
+      sslExpiry: sslInfo.daysRemaining,
+      uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
+      upgrades: hudData ? hudData.upgrades : "",
+      diskSpace: hudData ? hudData.gbFreeOnCurrPartition : -1,
+    });
+
     if (!user) throw Error("User not found!");
     await Server.create(value);
     ctx.body = "Server added.";
     ctx.status = 201;
+
   } catch (error) {
     console.log("ERROR IS: ", error);
-    ctx.body = `${error}`;
-    ctx.status = 400;
+    if ((error as any)?.isJoi) {
+      ctx.body = "Input validation failed";
+      ctx.status = 422;
+    } else {
+      ctx.body = `${error}`;
+      ctx.status = 400;
+    }
   }
 };
