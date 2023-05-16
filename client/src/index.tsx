@@ -1,5 +1,5 @@
 import React from "react";
-import { createRoot } from 'react-dom/client';
+import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { ChakraProvider } from "@chakra-ui/react";
@@ -13,14 +13,12 @@ const config = {
 
 const theme = extendTheme({ config });
 
-const root = createRoot(document.getElementById('root') as HTMLElement); // createRoot(container!) if you use TypeScript
+const root = createRoot(document.getElementById("root") as HTMLElement); // createRoot(container!) if you use TypeScript
 
 root.render(
-  <React.StrictMode>
-    <Grommet plain>
-      <ChakraProvider theme={theme}>
-        <App />
-      </ChakraProvider>
-    </Grommet>
-  </React.StrictMode>,
+  <Grommet plain>
+    <ChakraProvider theme={theme}>
+      <App />
+    </ChakraProvider>
+  </Grommet>
 );

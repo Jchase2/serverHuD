@@ -5,22 +5,51 @@ import { Socket } from "socket.io";
 import { User } from "../Models/user.model";
 import { Server } from "../Models/server.model";
 
-// Register for uptime checking on URL every 60 seconds.
+// Register for status checking on URL every 60 seconds.
+// Only take action if it's different than stored status.
 export function sioUpCheck(socket: Socket) {
   let upInterval: ReturnType<typeof setInterval>;
-  socket.on("upCheck", (data) => {
+  socket.on("upCheck", async (data) => {
+    console.log("UPCHECK DATA: ", data);
+    console.log("Setting Interval");
+    // Check database for previous state
+    let serv = await Server.findAll({
+      where: {
+        id: data.id,
+      },
+      attributes: ["status"],
+    });
+
+    let res = serv[0].dataValues.status;
     upInterval = setInterval(async function () {
-      let result = await isUp(data);
-      let updateObj = {
-        status: result
-      };
-      socket.emit("serverUpdate", updateObj);
+      let checkUp = await isUp(data.url);
+      if (checkUp !== res) {
+        await Server.update(
+          { status: checkUp },
+          {
+            where: {
+              id: data.id,
+            },
+          }
+        );
+
+        serv = await Server.findAll({
+          where: {
+            id: data.id,
+          },
+          attributes: ["status"],
+        });
+        res = serv[0].dataValues.status;
+
+        socket.emit("serverUpdate", { status: checkUp });
+      }
     }, 10000);
   });
 
   socket.on("disconnect", () => {
+    console.log("Clearing interval.");
     clearInterval(upInterval);
-  })
+  });
 }
 
 // ToDo: Set this up so that if the SSL date
@@ -41,11 +70,4 @@ export function sioJwtVerify(socket: Socket) {
       next(new Error("Invalid jwt!"));
     }
   });
-}
-
-// Update database if FE recieves somethign new.
-export function sioUpdateDb(socket: Socket) {
-  // socket.on("dbUpdate", (data) => {
-
-  // });
 }
