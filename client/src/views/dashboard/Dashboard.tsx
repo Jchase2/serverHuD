@@ -1,5 +1,6 @@
 import Server from "../../components/server/Server";
 import AddServer from "./AddServer";
+import { ErrorShow } from "../../components/Error/ErrorShow";
 import { useState, useEffect } from "react";
 import { getServers, postServer } from "../../services/api";
 import { Main, Box } from "grommet";
@@ -11,6 +12,8 @@ const Dashboard = (props: any) => {
   }
 
   const [serverList, setServerList] = useState<IServer[]>([]);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [stateMessage, setStateMessage] = useState<string>("");
 
   useEffect(() => {
     getServers().then((e: any) => {
@@ -23,7 +26,13 @@ const Dashboard = (props: any) => {
   }, []);
 
   const addNewServer = async (newServer: any) => {
-    postServer(newServer).then(() => {
+    postServer(newServer).then((e) => {
+      if (e.status !== 201) {
+        setStateMessage(
+          "Soemthing went wrong! Please check your input and try again."
+        );
+        setIsError(true);
+      }
       getServers().then((e) => {
         setServerList(e.data);
       });
@@ -49,6 +58,11 @@ const Dashboard = (props: any) => {
   return (
     <Main direction="column" align="center" justify="center">
       <AddServer addNewServer={addNewServer} />
+      <ErrorShow
+        message={stateMessage}
+        isClosed={isError}
+        setIsError={setIsError}
+      />
       <Box
         direction="row-responsive"
         justify="center"
