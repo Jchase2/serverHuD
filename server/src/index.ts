@@ -7,7 +7,7 @@ import logger from "koa-logger";
 import cors from "@koa/cors";
 import { Server, Socket } from "socket.io";
 import http from "http";
-import { sioJwtVerify, sioUpCheck, sioUpdateDb } from "./Controllers/sockets";
+import { sioJwtVerify, sioUpCheck } from "./Controllers/sockets";
 
 const app = new Koa();
 app.use(logger());
@@ -32,7 +32,6 @@ const io = new Server(server, {
 io.on("connection", function (socket: Socket) {
   sioJwtVerify(socket);
   sioUpCheck(socket);
-  sioUpdateDb(socket);
 });
 
 export default io;

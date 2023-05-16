@@ -10,8 +10,6 @@ import { Server } from "../Models/server.model";
 export function sioUpCheck(socket: Socket) {
   let upInterval: ReturnType<typeof setInterval>;
   socket.on("upCheck", async (data) => {
-    console.log("UPCHECK DATA: ", data);
-    console.log("Setting Interval");
     // Check database for previous state
     let serv = await Server.findAll({
       where: {
@@ -19,8 +17,8 @@ export function sioUpCheck(socket: Socket) {
       },
       attributes: ["status"],
     });
-
     let res = serv[0].dataValues.status;
+    console.log("Setting Interval.");
     upInterval = setInterval(async function () {
       let checkUp = await isUp(data.url);
       if (checkUp !== res) {
@@ -32,7 +30,6 @@ export function sioUpCheck(socket: Socket) {
             },
           }
         );
-
         serv = await Server.findAll({
           where: {
             id: data.id,
@@ -40,7 +37,6 @@ export function sioUpCheck(socket: Socket) {
           attributes: ["status"],
         });
         res = serv[0].dataValues.status;
-
         socket.emit("serverUpdate", { status: checkUp });
       }
     }, 10000);

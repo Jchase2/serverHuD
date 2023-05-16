@@ -25,21 +25,28 @@ const Server = (props: any) => {
       transports: ["websocket"],
     });
 
-    socket.on("connect", () => {
+    function connectEvent() {
       console.log("Connected to " + socket.id, " sending url: ", props.serverData.url);
       socket.emit('upCheck', {id: props.serverData.id, url: props.serverData.url })
-    });
+    }
 
-    socket.on('serverUpdate', (statusUpdate) => {
-      console.log("Status Update: ", statusUpdate)
-      let internalServer = cloneDeep(currServerState);
-      for (const [key, value] of Object.entries(statusUpdate)) {
-        if(internalServer[key] !== value) {
-          internalServer[key] = value;
+    function statUpdate(statusUpdate: any) {
+        console.log("Status Update: ", statusUpdate)
+        let internalServer = cloneDeep(currServerState);
+        for (const [key, value] of Object.entries(statusUpdate)) {
+          if(internalServer[key] !== value) {
+            internalServer[key] = value;
+          }
         }
-      }
-      setCurrServerState(internalServer);
-    })
+        setCurrServerState(internalServer);
+    }
+
+    socket.on("connect", connectEvent);
+    socket.on('serverUpdate', statUpdate)
+
+    return () => {
+      socket.disconnect();
+    };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
