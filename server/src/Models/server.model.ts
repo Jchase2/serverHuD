@@ -4,7 +4,7 @@ import {
   Model,
   ForeignKey,
   BelongsTo,
-  DataType
+  DataType,
 } from "sequelize-typescript";
 
 import { User } from "./user.model";
@@ -45,5 +45,4 @@ export class Server extends Model {
 
   @BelongsTo(() => User)
   user!: User
-
 }

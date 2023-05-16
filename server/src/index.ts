@@ -8,6 +8,7 @@ import cors from "@koa/cors";
 import { Server, Socket } from "socket.io";
 import http from "http";
 import { sioJwtVerify, sioSSLCheck, sioUpCheck } from "./Controllers/sockets";
+import { Client } from "pg";
 
 const app = new Koa();
 app.use(logger());
@@ -26,6 +27,34 @@ const io = new Server(server, {
 
 (async () => {
   await sequelize.sync({ force: false });
+
+  // Here, we manually check if liveserver is a hypertable.
+  // If it's not, we convert it to one.
+  const client = new Client({
+    host: process.env.DB_HOST || "localhost",
+    port: Number(process.env.DB_PORT),
+    database: process.env.DATABASE,
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PW,
+  });
+  client.connect((err) => {
+    if (err) {
+      console.error("connection error", err.stack);
+    } else {
+      console.log("connected");
+    }
+  });
+
+  console.log("Attempting to create_hypertable...");
+
+  client.query(
+    `SELECT create_hypertable('"liveserver"', 'uptime', if_not_exists => TRUE);`,
+    (err, res) => {
+      if (err) throw err;
+      console.log("NO ERROR, Hypertable Ok.");
+      client.end();
+    }
+  );
   server.listen(3001, () => console.log(`Server running on port: ${3001}`));
 })();
 

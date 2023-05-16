@@ -21,10 +21,11 @@
     "@tsconfig/node16": "^1.0.2",
     "@types/koa": "^2.13.4",
     "@types/node": "^16.11.33",
+    "@types/pg": "^8.6.6",
     "@types/validator": "^13.7.2",
+    "nodemon": "^2.0.22",
     "tsc-watch": "^4.6.2",
-    "typescript": "^4.6.4",
-    "nodemon": "^2.0.22"
+    "typescript": "^4.6.4"
   },
   "dependencies": {
     "@koa/cors": "^3.3.0",
@@ -46,8 +47,8 @@
     "koa-logger": "^3.2.1",
     "pg": "^8.7.3",
     "prepend-http": "^3.0.1",
-    "sequelize": "^6.19.0",
-    "sequelize-typescript": "^2.1.3",
+    "sequelize": "^6.31.1",
+    "sequelize-typescript": "^2.1.5",
     "socket.io": "^4.5.1",
     "ssl-checker": "^2.0.7"
   }
