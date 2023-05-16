@@ -5,6 +5,8 @@ import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
 
+const URL_EMPTY_DEFAULT = "http://";
+
 const userSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(8).alphanum().required(),
@@ -128,9 +130,8 @@ const SplitTime = (numberOfHours: number) => {
 export const addServer = async (ctx: any) => {
   
   const { url } = ctx.request.body;
-
   // Check if URL is empty
-  if (!url) {
+  if (!url || url === URL_EMPTY_DEFAULT) {
     ctx.body = "URL cannot be empty.";
     ctx.status = 422;
     return;
