@@ -32,3 +32,28 @@ export const setupUrlCron = async (
   }
   return false;
 };
+
+// Write util to start all jobs for servers in postgres where
+// those servers are not running.
+export const startServerJobs = async () => {
+  let servArr = await Server.findAll();
+
+  servArr.forEach((server) => {
+    let jobName = `${server?.dataValues.url}-${server?.dataValues.id}`;
+    let jobArray = scheduledJobs.map((elem) => elem.name);
+    if (!jobArray.includes(jobName)) {
+      console.log("Adding ", `${server.url}-${server.id}`, " to job list.");
+      let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
+        let checkUp = await isUp(server.url);
+        let resp = await LiveServer.create({
+          up: checkUp,
+          url: server.url,
+          time: Date.now(),
+          userid: server.userid,
+          serverid: server.id,
+        });
+      });
+      console.log("Created job process " + jobName + " which is running?: ", job.isRunning());
+    }
+  });
+};

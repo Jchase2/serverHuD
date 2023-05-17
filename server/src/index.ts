@@ -9,6 +9,7 @@ import { Server, Socket } from "socket.io";
 import http from "http";
 import { sioJwtVerify, sioSSLCheck, sioUpCheck } from "./Controllers/sockets";
 import { Client } from "pg";
+import { startServerJobs } from "./Utils/cronUtils";
 
 const app = new Koa();
 app.use(logger());
@@ -37,7 +38,7 @@ const io = new Server(server, {
     user: process.env.DB_USERNAME,
     password: process.env.DB_PW,
   });
-  client.connect((err) => {
+  await client.connect((err) => {
     if (err) {
       console.error("connection error", err.stack);
     } else {
@@ -47,7 +48,7 @@ const io = new Server(server, {
 
   console.log("Attempting to create_hypertable...");
 
-  client.query(
+  await client.query(
     `SELECT create_hypertable('"liveserver"', 'time', if_not_exists => TRUE);`,
     (err, res) => {
       if (err) throw err;
@@ -56,6 +57,9 @@ const io = new Server(server, {
     }
   );
   server.listen(3001, () => console.log(`Server running on port: ${3001}`));
+
+  console.log("Starting all server jobs.");
+  await startServerJobs();
 })();
 
 io.on("connection", function (socket: Socket) {
