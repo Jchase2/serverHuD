@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
+import { LiveServer } from "../Models/liveServer.model";
+import Cron from "croner";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -128,7 +130,7 @@ const SplitTime = (numberOfHours: number) => {
 };
 
 export const addServer = async (ctx: any) => {
-  
+
   const { url } = ctx.request.body;
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
@@ -160,8 +162,8 @@ export const addServer = async (ctx: any) => {
     });
 
     if (!user) throw Error("User not found!");
-    await Server.create(value);
-    ctx.body = "Server added.";
+    let dbResp = await Server.create(value);
+    ctx.body = {Status: "Server added.", id: dbResp.id};
     ctx.status = 201;
 
   } catch (error) {
@@ -175,3 +177,30 @@ export const addServer = async (ctx: any) => {
     }
   }
 };
+
+
+/*
+  jobType: uptime, ssl, etc.
+  id: server ID
+  url: host to monitor
+*/
+export const addJob = async (ctx: any) => {
+  // TODO: This will get moved to Utils
+  // with validation added and stuff.
+
+  const { url, id, userid } = ctx.request.body;
+
+  console.log("ctx.request.body", ctx.request.body)
+
+  Cron('*/60 * * * * *', async () => {
+    let checkUp = await isUp(url);
+    let resp = await LiveServer.create({
+      up: checkUp,
+      url: url,
+      time: Date.now(),
+      userid: userid,
+      serverid: id,
+    });
+  });
+
+}

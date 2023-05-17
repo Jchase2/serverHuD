@@ -11,12 +11,18 @@ import { User } from "./user.model";
 @Table({ timestamps: false, tableName: "liveserver" })
 export class LiveServer extends Model {
   @Column({ type: DataType.DATE, allowNull: false, primaryKey: true })
-  uptime!: string;
+  time!: string;
 
   @ForeignKey(() => User)
   @Column
   userid!: number;
 
   @Column
+  serverid!: number
+
+  @Column
   url!: string;
+
+  @Column
+  up!: string;
 }

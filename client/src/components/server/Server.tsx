@@ -27,7 +27,7 @@ const Server = (props: any) => {
 
     function connectEvent() {
       console.log("Connected to " + socket.id, " sending url: ", props.serverData.url);
-      socket.emit('upCheck', {id: props.serverData.id, url: props.serverData.url })
+      socket.emit('upCheck', {id: props.serverData.id, url: props.serverData.url, status: props.serverData.status })
       socket.emit('sslCheck', {id: props.serverData.id, url: props.serverData.url})
     }
 

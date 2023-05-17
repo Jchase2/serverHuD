@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import {registerUser, loginUser, getUserServers, addServer, getIndServer, deleteServer} from '../Controllers/api';
+import {registerUser, loginUser, getUserServers, addServer, getIndServer, deleteServer, addJob} from '../Controllers/api';
 import jwt from 'koa-jwt';
 
 const router = new Router();
@@ -17,5 +17,6 @@ router
   .get('/servers/:id', getIndServer)
   .put('/servers/delete/:id', deleteServer)
   .post('/servers', addServer)
+  .post('/addjob', addJob)
 
 export default router;

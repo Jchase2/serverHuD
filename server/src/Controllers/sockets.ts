@@ -2,41 +2,25 @@ import io from "../index";
 import { verifyToken } from "../Utils/jwt";
 import { isUp, getSslDetails } from "../Utils/serverDetails";
 import { Socket } from "socket.io";
+import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
 
-// Register for status checking on URL every 60 seconds.
-// Only take action if it's different than stored status.
+// Register for status checking from LiveServer every 10 seconds..
+// Only take action if current UI status is different than last stored status.
 export function sioUpCheck(socket: Socket) {
   let upInterval: ReturnType<typeof setInterval>;
   socket.on("upCheck", async (data) => {
-    // Check database for previous state
-    let serv = await Server.findAll({
-      where: {
-        id: data.id,
-      },
-      attributes: ["status"],
-    });
-    let res = serv[0]?.dataValues.status;
     console.log("Setting URL Interval.");
+    console.log("DATA IS: ", data)
     upInterval = setInterval(async function () {
-      let checkUp = await isUp(data.url);
-      if (checkUp !== res) {
-        await Server.update(
-          { status: checkUp },
-          {
-            where: {
-              id: data.id,
-            },
-          }
-        );
-        serv = await Server.findAll({
-          where: {
-            id: data.id,
-          },
-          attributes: ["status"],
-        });
-        res = serv[0]?.dataValues.status;
-        socket.emit("serverUpdate", { status: checkUp });
+      // Check database for previous state
+      let serv = await LiveServer.findOne({
+        where: { serverid: data.id },
+        order: [["time", "DESC"]],
+      });
+      let res = serv?.dataValues.up;
+      if (data.status !== res) {
+        socket.emit("serverUpdate", { status: res });
       }
     }, 10000);
   });
@@ -61,11 +45,14 @@ export function sioSSLCheck(socket: Socket) {
     });
     let res = serv[0]?.dataValues.sslExpiry;
     let resStatus = serv[0]?.dataValues.sslStatus;
-    if(res <= 1) {
-      console.log("Setting SSL Interval.")
+    if (res <= 1) {
+      console.log("Setting SSL Interval.");
       sslInterval = setInterval(async function () {
         let checkSsl: any = await getSslDetails(data.url);
-        if(checkSsl.daysRemaining != res || String(checkSsl.valid) != resStatus) {
+        if (
+          checkSsl.daysRemaining != res ||
+          String(checkSsl.valid) != resStatus
+        ) {
           await Server.update(
             { sslExpiry: checkSsl.daysRemaining, sslStatus: resStatus },
             {
@@ -82,7 +69,10 @@ export function sioSSLCheck(socket: Socket) {
           });
           res = serv[0]?.dataValues.sslExpiry;
           resStatus = serv[0]?.dataValues.sslStatus;
-          socket.emit("serverUpdate", { sslExpiry: checkSsl.daysRemaining, sslStatus: checkSsl.valid });
+          socket.emit("serverUpdate", {
+            sslExpiry: checkSsl.daysRemaining,
+            sslStatus: checkSsl.valid,
+          });
         }
       }, 300000);
     }

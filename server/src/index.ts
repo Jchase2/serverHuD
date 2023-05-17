@@ -48,7 +48,7 @@ const io = new Server(server, {
   console.log("Attempting to create_hypertable...");
 
   client.query(
-    `SELECT create_hypertable('"liveserver"', 'uptime', if_not_exists => TRUE);`,
+    `SELECT create_hypertable('"liveserver"', 'time', if_not_exists => TRUE);`,
     (err, res) => {
       if (err) throw err;
       console.log("NO ERROR, Hypertable Ok.");

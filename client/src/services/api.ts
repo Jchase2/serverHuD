@@ -34,6 +34,7 @@ export const postServer = async (newServer: any) => {
   if (newServer.url.substr(0, 7) !== "http://" && newServer.url.substr(0, 8) !== "https://") {
     newServer.url = 'http://' + newServer.url;
   }
+
   return axios({
     method: "post",
     url: process.env.REACT_APP_BACKEND_URL + "/servers",
@@ -41,6 +42,20 @@ export const postServer = async (newServer: any) => {
     headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
   }).then(
     (response) => {
+      console.log("RESPONSE: ", response)
+      axios({
+        method: "post",
+        url: process.env.REACT_APP_BACKEND_URL + "/addjob",
+        data: {id: response.data.id, ...newServer},
+        headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+      }).then(
+        (response) => {
+          console.log("RESP ON POSTSERVER STUFF: ", response)
+        },
+        (error) => {
+          console.log(error.message);
+        }
+      )
       return response;
     },
     (error) => {

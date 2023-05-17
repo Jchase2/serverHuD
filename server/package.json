@@ -37,6 +37,7 @@
     "@types/koa-logger": "^3.1.2",
     "axios": "^0.21.4",
     "bcrypt": "^5.0.1",
+    "croner": "^6.0.3",
     "dotenv": "^10.0.0",
     "is-reachable": "^5.2.0",
     "joi": "^17.6.0",
