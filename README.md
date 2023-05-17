@@ -6,18 +6,16 @@ to monitor their services, servers or websites.
 
 ## Built With
 
-The (primary) technologies used in the development of this project:
-
 - Front End: [React](https://reactjs.org/), [Chakra UI](https://chakra-ui.com/), [Axios](https://axios-http.com/)
-- Back End: [Postgres](https://www.postgresql.org/), [sequelize-typescript](https://www.npmjs.com/package/sequelize-typescript), [NodeJS](https://nodejs.org/en/), [KoA](https://koajs.com/)
-- Others: [JWT](https://jwt.io/)
+- Back End: [TimescaleDB](https://www.timescale.com/), [sequelize-typescript](https://www.npmjs.com/package/sequelize-typescript), [NodeJS](https://nodejs.org/en/), [KoA](https://koajs.com/)
+- Others: [JWT](https://jwt.io/), [Socket.IO](https://socket.io/)
 
 ## Getting Started
 
 If you'd like to run your own serverHuD instance:
 
-- Set up a postgres db
-- Copy the .env_example file to .env, fill in the database information.
+- Install TimescaleDB. Postgres *might* work but I haven't tested it, and it won't be as performant.
+- Copy the .env_example file to .env, fill in the TimescaleDB information.
 - Clone the repo then run:
   - ```cd client && npm i```
   - ```cd server && npm i```
