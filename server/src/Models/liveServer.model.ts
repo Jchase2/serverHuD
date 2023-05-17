@@ -25,4 +25,7 @@ export class LiveServer extends Model {
 
   @Column
   status!: string;
+
+  @Column
+  sslstatus!: string;
 }

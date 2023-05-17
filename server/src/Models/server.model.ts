@@ -26,12 +26,6 @@ export class Server extends Model {
   name!: string;
 
   @Column
-  status!: string;
-
-  @Column
-  sslStatus!: string;
-
-  @Column
   sslExpiry!: number;
 
   @Column(DataType.JSON)
