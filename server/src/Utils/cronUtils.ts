@@ -20,13 +20,21 @@ export const setupUrlCron = async (
     console.log("Adding ", `${url}-${id}`, " to job list.");
     let job = Cron("*/60 * * * * *", { name: name }, async () => {
       let checkUp = await isUp(url);
-      let resp = await LiveServer.create({
-        up: checkUp,
-        url: url,
-        time: Date.now(),
-        userid: userid,
-        serverid: id,
+      let currStatus = await LiveServer.findOne({
+        attributes: ["status"],
+        where: {
+          serverid: server?.id,
+        },
       });
+      if (checkUp != currStatus?.dataValues.status) {
+        let resp = await LiveServer.create({
+          status: checkUp,
+          url: url,
+          time: Date.now(),
+          userid: userid,
+          serverid: id,
+        });
+      }
     });
     return job.isRunning();
   }
@@ -44,16 +52,27 @@ export const startServerJobs = async () => {
     if (!jobArray.includes(jobName)) {
       console.log("Adding ", `${server.url}-${server.id}`, " to job list.");
       let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
-        let checkUp = await isUp(server.url);
-        let resp = await LiveServer.create({
-          up: checkUp,
-          url: server.url,
-          time: Date.now(),
-          userid: server.userid,
-          serverid: server.id,
+        let currStatus = await LiveServer.findOne({
+          attributes: ["status"],
+          where: {
+            serverid: server.id,
+          },
         });
+        let checkUp = await isUp(server.url);
+        if (checkUp != currStatus?.dataValues.status) {
+          let resp = await LiveServer.create({
+            status: checkUp,
+            url: server.url,
+            time: Date.now(),
+            userid: server.userid,
+            serverid: server.id,
+          });
+        }
       });
-      console.log("Created job process " + jobName + " which is running?: ", job.isRunning());
+      console.log(
+        "Created job process " + jobName + " which is running?: ",
+        job.isRunning()
+      );
     }
   });
 };

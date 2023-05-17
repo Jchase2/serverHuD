@@ -24,5 +24,5 @@ export class LiveServer extends Model {
   url!: string;
 
   @Column
-  up!: string;
+  status!: string;
 }

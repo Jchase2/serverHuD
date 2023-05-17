@@ -16,8 +16,9 @@ export function sioUpCheck(socket: Socket) {
         where: { serverid: data.id },
         order: [["time", "DESC"]],
       });
-      let res = serv?.dataValues.up;
-      if (data.status !== res) {
+
+      let res = serv?.dataValues.status;
+      if (data.status !== res && serv !== null) {
         socket.emit("serverUpdate", { status: res }, (resp: any) => {
           data.status = resp.status;
         })
