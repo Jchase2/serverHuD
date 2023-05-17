@@ -31,7 +31,7 @@ const Server = (props: any) => {
       socket.emit('sslCheck', {id: props.serverData.id, url: props.serverData.url})
     }
 
-    function statUpdate(statusUpdate: any) {
+    function statUpdate(statusUpdate: any, callback:any) {
         console.log("Status Update: ", statusUpdate)
         let internalServer = cloneDeep(currServerState);
         for (const [key, value] of Object.entries(statusUpdate)) {
@@ -40,6 +40,9 @@ const Server = (props: any) => {
           }
         }
         setCurrServerState(internalServer);
+        callback({
+          status: internalServer.status
+        });
     }
 
     socket.on("connect", connectEvent);

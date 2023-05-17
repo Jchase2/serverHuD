@@ -1,17 +1,15 @@
 import io from "../index";
 import { verifyToken } from "../Utils/jwt";
-import { isUp, getSslDetails } from "../Utils/serverDetails";
+import { getSslDetails } from "../Utils/serverDetails";
 import { Socket } from "socket.io";
 import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
-
 // Register for status checking from LiveServer every 10 seconds..
 // Only take action if current UI status is different than last stored status.
 export function sioUpCheck(socket: Socket) {
   let upInterval: ReturnType<typeof setInterval>;
   socket.on("upCheck", async (data) => {
     console.log("Setting URL Interval.");
-    console.log("DATA IS: ", data)
     upInterval = setInterval(async function () {
       // Check database for previous state
       let serv = await LiveServer.findOne({
@@ -20,7 +18,9 @@ export function sioUpCheck(socket: Socket) {
       });
       let res = serv?.dataValues.up;
       if (data.status !== res) {
-        socket.emit("serverUpdate", { status: res });
+        socket.emit("serverUpdate", { status: res }, (resp: any) => {
+          data.status = resp.status;
+        })
       }
     }, 10000);
   });

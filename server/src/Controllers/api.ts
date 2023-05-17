@@ -5,7 +5,7 @@ import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
 import { LiveServer } from "../Models/liveServer.model";
-import Cron from "croner";
+import { Cron, scheduledJobs } from 'croner';
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -187,20 +187,24 @@ export const addServer = async (ctx: any) => {
 export const addJob = async (ctx: any) => {
   // TODO: This will get moved to Utils
   // with validation added and stuff.
-
   const { url, id, userid } = ctx.request.body;
+  let server = await Server.findOne({
+    where: {id: id}
+  })
 
-  console.log("ctx.request.body", ctx.request.body)
-
-  Cron('*/60 * * * * *', async () => {
-    let checkUp = await isUp(url);
-    let resp = await LiveServer.create({
-      up: checkUp,
-      url: url,
-      time: Date.now(),
-      userid: userid,
-      serverid: id,
+  let jobName = `${server?.dataValues.url}-${server?.dataValues.id}`;
+  let jobArray = scheduledJobs.map(elem => elem.name);
+  if(!jobArray.includes(jobName)){
+    console.log("Adding ", `${url}-${id}`, " to job list.");
+    Cron('*/60 * * * * *', {name: `${url}-${id}`}, async () => {
+      let checkUp = await isUp(url);
+      let resp = await LiveServer.create({
+        up: checkUp,
+        url: url,
+        time: Date.now(),
+        userid: userid,
+        serverid: id,
+      });
     });
-  });
-
+  }
 }
