@@ -28,4 +28,7 @@ export class LiveServer extends Model {
 
   @Column
   sslstatus!: string;
+
+  @Column
+  diskSpace!: number;
 }

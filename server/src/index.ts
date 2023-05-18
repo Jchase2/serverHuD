@@ -7,7 +7,7 @@ import logger from "koa-logger";
 import cors from "@koa/cors";
 import { Server, Socket } from "socket.io";
 import http from "http";
-import { sioJwtVerify, sioSSLCheck, sioUpCheck } from "./Controllers/sockets";
+import { sioJwtVerify, sioUpCheck } from "./Controllers/sockets";
 import { Client } from "pg";
 import { startServerJobs } from "./Utils/cronUtils";
 
@@ -65,7 +65,6 @@ const io = new Server(server, {
 io.on("connection", function (socket: Socket) {
   sioJwtVerify(socket);
   sioUpCheck(socket);
-  sioSSLCheck(socket);
 });
 
 export default io;

@@ -5,6 +5,8 @@ import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
 import { setupUrlCron } from "../Utils/cronUtils";
+import { LiveServer } from "../Models/liveServer.model";
+import { getCurrentState } from "../Utils/apiUtils";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -69,9 +71,9 @@ export const loginUser = async (ctx: any) => {
 };
 
 export const getUserServers = async (ctx: any) => {
-  const serverList = await Server.findAll(ctx.state.user._id);
-  if (serverList) {
-    ctx.body = serverList;
+  let res = await getCurrentState(ctx.state.user._id);
+  if (res) {
+    ctx.body = res;
     ctx.status = 200;
   } else {
     ctx.body = "No servers found!";
@@ -179,15 +181,12 @@ export const addServer = async (ctx: any) => {
 
 
 /*
-  jobType: uptime, ssl, etc.
   id: server ID
   url: host to monitor
 */
 export const addJob = async (ctx: any) => {
-  // TODO: This will get moved to Utils
-  // with validation added and stuff.
   const { url, id, userid } = ctx.request.body;
-  const name = `${url}-${id}`;
+  const name = `${url}-status-${id}`;
   let resp = await setupUrlCron(name, url, userid, id);
   if(resp) {
     ctx.status = 200;

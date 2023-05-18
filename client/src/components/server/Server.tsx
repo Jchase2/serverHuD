@@ -13,46 +13,54 @@ import { useEffect, useState } from "react";
 import { cloneDeep } from "lodash";
 
 const Server = (props: any) => {
-
   const [currServerState, setCurrServerState] = useState(props.serverData);
 
   useEffect(() => {
-
     const socket = io("localhost:3001", {
       auth: {
-        token: localStorage.getItem("accessToken")
+        token: localStorage.getItem("accessToken"),
       },
       transports: ["websocket"],
     });
 
     function connectEvent() {
-      console.log("Connected to " + socket.id, " sending url: ", props.serverData.url);
-      socket.emit('upCheck', {id: props.serverData.id, url: props.serverData.url, status: props.serverData.status })
-      socket.emit('sslCheck', {id: props.serverData.id, url: props.serverData.url})
+      console.log(
+        "Connected to " + socket.id,
+        " sending url: ",
+        props.serverData.url,
+        " sending ssl status: ", props.serverData.sslStatus
+      );
+      socket.emit("upCheck", {
+        id: props.serverData.id,
+        url: props.serverData.url,
+        status: props.serverData.status,
+        sslStatus: props.serverData.sslStatus,
+      });
     }
 
-    function statUpdate(statusUpdate: any, callback:any) {
-        console.log("Status Update: ", statusUpdate)
-        let internalServer = cloneDeep(currServerState);
-        for (const [key, value] of Object.entries(statusUpdate)) {
-          if(internalServer[key] !== value) {
-            internalServer[key] = value;
-          }
+    function statUpdate(statusUpdate: any, callback: any) {
+      console.log("Status Update: ", statusUpdate);
+      let internalServer = cloneDeep(currServerState);
+      for (const [key, value] of Object.entries(statusUpdate)) {
+        if (internalServer[key] !== value) {
+          internalServer[key] = value;
         }
-        setCurrServerState(internalServer);
-        callback({
-          status: internalServer.status
-        });
+      }
+      setCurrServerState(internalServer);
+      callback({
+        status: internalServer.status,
+        sslStatus: internalServer.sslStatus,
+      });
     }
 
     socket.on("connect", connectEvent);
-    socket.on('serverUpdate', statUpdate)
+    socket.on("serverUpdate", statUpdate);
 
     return () => {
       socket.disconnect();
     };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const history = useHistory();

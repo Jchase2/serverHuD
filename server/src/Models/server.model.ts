@@ -28,14 +28,11 @@ export class Server extends Model {
   @Column
   sslExpiry!: number;
 
-  @Column(DataType.JSON)
-  uptime!: JSON;
-
   @Column
   upgrades!: string;
 
-  @Column
-  diskSpace!: number;
+  @Column(DataType.JSON)
+  uptime!: JSON;
 
   @BelongsTo(() => User)
   user!: User
