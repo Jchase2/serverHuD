@@ -4,7 +4,6 @@ import { isUp, getSslDetails } from "./serverDetails";
 import { Server } from "../Models/server.model";
 
 export const setupUrlCron = async (
-  name: string,
   url: string,
   userid: number,
   id: number
@@ -21,7 +20,7 @@ export const setupUrlCron = async (
     let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
       let checkUp = await isUp(url);
       let currStatus = await LiveServer.findOne({
-        attributes: ["status", "sslstatus"],
+        attributes: ["status", "sslStatus"],
         where: {
           serverid: server?.id,
         },
@@ -30,10 +29,9 @@ export const setupUrlCron = async (
         let resp = await LiveServer.create({
           status: checkUp,
           url: url,
-          time: Date.now(),
           userid: userid,
           serverid: id,
-          sslstatus: currStatus?.dataValues.sslstatus,
+          sslStatus: currStatus?.dataValues.sslStatus,
         });
       }
     });
@@ -43,7 +41,6 @@ export const setupUrlCron = async (
 };
 
 export const setupSslCron = async (
-  name: string,
   url: string,
   userid: number,
   id: number
@@ -67,20 +64,18 @@ export const setupSslCron = async (
       // First we're going to update liveServer time series data,
       // if there's been changes.
       let currStatus = await LiveServer.findOne({
-        attributes: ["sslstatus", "status"],
+        attributes: ["sslStatus", "status"],
         where: {
           serverid: server?.id,
         },
       });
-      if (checkSsl.valid.toString() != currStatus?.dataValues.sslstatus) {
-        console.log("ADDING NEW STATUS TO LIVE IN SSL CRON: ", checkSsl.valid.toString())
+      if (checkSsl?.valid?.toString() != currStatus?.dataValues.sslStatus) {
         let resp = await LiveServer.create({
           status: currStatus?.dataValues.status,
           url: url,
-          time: Date.now(),
           userid: userid,
           serverid: id,
-          sslstatus: checkSsl.valid.toString(),
+          sslStatus: checkSsl.errno ? false :  checkSsl.valid.toString(),
         });
       }
 
@@ -112,7 +107,7 @@ export const startServerJobs = async () => {
   let servArr = await Server.findAll();
   servArr.forEach((server) => {
     let { name, url, userid, id} = server;
-    setupUrlCron(name, url, userid, id);
-    setupSslCron(name, url, userid, id);
+    setupUrlCron(url, userid, id);
+    setupSslCron(url, userid, id);
   });
 };

@@ -49,8 +49,7 @@ const sslDbChecker = async (data: any, socket: Socket) => {
     order: [["time", "DESC"]],
   });
 
-  let res = serv?.dataValues.sslstatus;
-  console.log("SSL RES IS: ", res)
+  let res = serv?.dataValues.sslStatus;
   if (data.sslStatus !== res && serv !== null) {
     socket.emit("serverUpdate", { sslStatus: res }, (resp: any) => {
       data.sslStatus = resp.sslStatus;

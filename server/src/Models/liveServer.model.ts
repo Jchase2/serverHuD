@@ -10,8 +10,8 @@ import { User } from "./user.model";
 
 @Table({ timestamps: false, tableName: "liveserver" })
 export class LiveServer extends Model {
-  @Column({ type: DataType.DATE, allowNull: false, primaryKey: true })
-  time!: string;
+  @Column({ type: DataType.DATE, defaultValue: DataType.NOW, allowNull: false, primaryKey: true })
+  time!: Date;
 
   @ForeignKey(() => User)
   @Column
@@ -27,7 +27,7 @@ export class LiveServer extends Model {
   status!: string;
 
   @Column
-  sslstatus!: string;
+  sslStatus!: string;
 
   @Column
   diskSpace!: number;

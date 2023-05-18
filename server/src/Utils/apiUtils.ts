@@ -7,7 +7,7 @@ export const getCurrentState = async (userid: any) => {
     let combinedData = serverList.map(async server => {
       let res = await LiveServer.findOne({
         where: { serverid: server.id },
-        attributes: ['status', 'sslstatus'],
+        attributes: ['status', 'sslStatus'],
         order: [["time", "DESC"]],
       });
       Object.assign(server.dataValues, res?.dataValues);

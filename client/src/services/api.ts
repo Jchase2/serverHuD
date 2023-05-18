@@ -43,19 +43,6 @@ export const postServer = async (newServer: any) => {
   }).then(
     (response) => {
       console.log("RESPONSE: ", response)
-      axios({
-        method: "post",
-        url: process.env.REACT_APP_BACKEND_URL + "/addjob",
-        data: {id: response.data.id, ...newServer},
-        headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-      }).then(
-        (response) => {
-          console.log("RESP ON POSTSERVER STUFF: ", response)
-        },
-        (error) => {
-          console.log(error.message);
-        }
-      )
       return response;
     },
     (error) => {

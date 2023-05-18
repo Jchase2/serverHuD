@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
-import { setupUrlCron } from "../Utils/cronUtils";
+import { setupSslCron, setupUrlCron } from "../Utils/cronUtils";
 import { LiveServer } from "../Models/liveServer.model";
 import { getCurrentState } from "../Utils/apiUtils";
 
@@ -82,7 +82,6 @@ export const getUserServers = async (ctx: any) => {
 };
 
 export const getIndServer = async (ctx: any) => {
-
   const server = await Server.findByPk(ctx.params.id);
 
   if (server) {
@@ -105,7 +104,7 @@ export const deleteServer = async (ctx: any) => {
       ctx.status = 204;
     })
     .catch((error) => {
-      console.log("ERROR DELETING")
+      console.log("ERROR DELETING");
       ctx.status = 404;
     });
 };
@@ -115,11 +114,17 @@ const serverSchema = Joi.object({
   url: Joi.string().uri().required(),
   optionalUrl: Joi.string().uri().allow(""),
   name: Joi.string().required(),
-  status: Joi.string(),
-  sslStatus: Joi.string().required(),
   sslExpiry: Joi.number(),
   uptime: Joi.object().allow({}),
   upgrades: Joi.string().allow(""),
+});
+
+const liveServerSchema = Joi.object({
+  userid: Joi.number().required(),
+  serverid: Joi.number().required(),
+  url: Joi.string().uri().required(),
+  status: Joi.string().required(),
+  sslStatus: Joi.string().required(),
   diskSpace: Joi.number(),
 });
 
@@ -131,7 +136,6 @@ const SplitTime = (numberOfHours: number) => {
 };
 
 export const addServer = async (ctx: any) => {
-
   const { url } = ctx.request.body;
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
@@ -154,19 +158,29 @@ export const addServer = async (ctx: any) => {
       url,
       optionalUrl: ctx.request.body.optionalUrl,
       name: ctx.request.body.name,
-      status: status,
-      sslStatus: sslInfo.valid.toString(),
       sslExpiry: sslInfo.daysRemaining,
       uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
       upgrades: hudData ? hudData.upgrades : "",
-      diskSpace: hudData ? hudData.gbFreeOnCurrPartition : -1,
     });
 
     if (!user) throw Error("User not found!");
     let dbResp = await Server.create(value);
-    ctx.body = {Status: "Server added.", id: dbResp.id};
-    ctx.status = 201;
 
+    const liveValue = await liveServerSchema.validateAsync({
+      userid: ctx.state.user._id,
+      serverid: dbResp?.dataValues.id,
+      url,
+      status: status,
+      sslStatus: sslInfo.valid.toString(),
+      diskSpace: hudData ? hudData.gbFreeOnCurrPartition : -1,
+    });
+
+    await LiveServer.create(liveValue);
+    await setupUrlCron(url, ctx.state.user._id, dbResp?.dataValues.id);
+    await setupSslCron(url, ctx.state.user._id, dbResp?.dataValues.id);
+
+    ctx.body = { Status: "Server added.", id: dbResp.id };
+    ctx.status = 201;
   } catch (error) {
     console.log("ERROR IS: ", error);
     if ((error as any)?.isJoi) {
@@ -178,19 +192,3 @@ export const addServer = async (ctx: any) => {
     }
   }
 };
-
-
-/*
-  id: server ID
-  url: host to monitor
-*/
-export const addJob = async (ctx: any) => {
-  const { url, id, userid } = ctx.request.body;
-  const name = `${url}-status-${id}`;
-  let resp = await setupUrlCron(name, url, userid, id);
-  if(resp) {
-    ctx.status = 200;
-  } else {
-    ctx.status = 500;
-  }
-}
