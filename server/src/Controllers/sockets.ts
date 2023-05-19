@@ -4,6 +4,8 @@ import { Socket } from "socket.io";
 import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
 
+// TODO: Add more checks so this doesn't crash with bad input.
+
 // Register for status checking every 10 seconds..
 // Only take action if current UI status is different than last stored status.
 // This will check for all updates with different intervals using the same socket.

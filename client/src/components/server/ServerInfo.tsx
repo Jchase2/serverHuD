@@ -11,6 +11,8 @@ import {
   Button,
 } from "grommet";
 import { useHistory } from "react-router-dom";
+import { io } from "socket.io-client";
+import { cloneDeep } from "lodash";
 
 const ServerInfo = (props: any) => {
   interface IUptime {
@@ -38,19 +40,78 @@ const ServerInfo = (props: any) => {
     url: "",
     uptime: { Days: 0, Hours: 0 },
     upgrades: "",
-    diskSpace: 0
+    diskSpace: 0,
   });
+
+  const [socket, setSocket] = useState(
+    io("localhost:3001", {
+      auth: {
+        token: localStorage.getItem("accessToken"),
+      },
+      transports: ["websocket"],
+    })
+  );
 
   const location = useLocation();
   const parts = location.pathname.split("/");
   const paramStr = parts[parts.length - 1];
   useEffect(() => {
     getIndServer(paramStr).then((e: any) => {
-      console.log("ServerInfo IS: ", e)
-      setServerData(e.data);
+      console.log("Setting first data.");
+      setServerData(cloneDeep(e.data));
     });
+
+    // Must run at least one of these to start listening.
+    socket.on("connect", () => console.log("Connect recieved"))
+    socket.on("serverUpdate", () => console.log("serverUpdate recieved."));
+
+    return () => {
+      socket.disconnect();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    function connectEvent() {
+      if (serverData && serverData.url) {
+        console.log(
+          "Connected to " + socket.id,
+          " sending url: ",
+          serverData.url,
+          " sending ssl status: ",
+          serverData.sslStatus
+        );
+        socket.emit("upCheck", {
+          id: serverData.id,
+          url: serverData.url,
+          status: serverData.status,
+          sslStatus: serverData.sslStatus,
+        });
+      }
+    }
+
+    function statUpdate(statusUpdate: any, callback: any) {
+      if (serverData && serverData.url) {
+        console.log("Status Update: ", statusUpdate);
+        let internalServer: any = cloneDeep(serverData);
+        for (const [key, value] of Object.entries(statusUpdate)) {
+          if (internalServer[key] !== value) {
+            internalServer[key] = value;
+          }
+        }
+        setServerData(internalServer);
+        callback({
+          status: internalServer.status,
+          sslStatus: internalServer.sslStatus,
+        });
+      }
+    }
+
+    if(serverData && serverData.url) {
+      socket.on("connect", connectEvent);
+      socket.on("serverUpdate", statUpdate);
+    }
+  }, [serverData]);
 
   const history = useHistory();
 
