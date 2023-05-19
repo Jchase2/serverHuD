@@ -28,9 +28,6 @@ const io = new Server(server, {
 
 (async () => {
   await sequelize.sync({ force: false });
-
-  // Here, we manually check if liveserver is a hypertable.
-  // If it's not, we convert it to one.
   const client = new Client({
     host: process.env.DB_HOST || "localhost",
     port: Number(process.env.DB_PORT),
@@ -38,28 +35,19 @@ const io = new Server(server, {
     user: process.env.DB_USERNAME,
     password: process.env.DB_PW,
   });
-  await client.connect((err) => {
-    if (err) {
-      console.error("connection error", err.stack);
-    } else {
-      console.log("connected");
-    }
-  });
 
-  console.log("Attempting to create_hypertable...");
-
-  await client.query(
-    `SELECT create_hypertable('"liveserver"', 'time', if_not_exists => TRUE);`,
-    (err, res) => {
-      if (err) throw err;
-      console.log("NO ERROR, Hypertable Ok.");
-      client.end();
-    }
-  );
-  server.listen(3001, () => console.log(`Server running on port: ${3001}`));
-
-  console.log("Starting all server jobs.");
-  await startServerJobs();
+  try {
+    await client.connect();
+    console.log("Connected.")
+    console.log("Attempting to create_hypertable...");
+    let hypRes = await client.query(`SELECT create_hypertable('"liveserver"', 'time', if_not_exists => TRUE);`);
+    console.log("Hypertable Creation Response: ", hypRes);
+    server.listen(3001, () => console.log(`Server running on port: ${3001}`));
+    console.log("Starting all server jobs.");
+    await startServerJobs();
+  } catch (err) {
+    console.log("ERR IS: ", err);
+  }
 })();
 
 io.on("connection", function (socket: Socket) {

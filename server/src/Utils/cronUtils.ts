@@ -3,11 +3,7 @@ import { Cron, scheduledJobs } from "croner";
 import { isUp, getSslDetails } from "./serverDetails";
 import { Server } from "../Models/server.model";
 
-export const setupUrlCron = async (
-  url: string,
-  userid: number,
-  id: number
-) => {
+export const setupUrlCron = async (url: string, userid: number, id: number) => {
   let server = await Server.findOne({
     where: { id: id },
   });
@@ -20,12 +16,13 @@ export const setupUrlCron = async (
     let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
       let checkUp = await isUp(url);
       let currStatus = await LiveServer.findOne({
+        where: { serverid: server?.id },
         attributes: ["status", "sslStatus"],
-        where: {
-          serverid: server?.id,
-        },
+        order: [["time", "DESC"]],
       });
-      if (checkUp != currStatus?.dataValues.status) {
+
+      if (checkUp !== currStatus?.dataValues.status) {
+        console.log("RUNNING CREATE IN SETUP URL CRON.");
         let resp = await LiveServer.create({
           status: checkUp,
           url: url,
@@ -40,11 +37,7 @@ export const setupUrlCron = async (
   return false;
 };
 
-export const setupSslCron = async (
-  url: string,
-  userid: number,
-  id: number
-) => {
+export const setupSslCron = async (url: string, userid: number, id: number) => {
   let server = await Server.findOne({
     where: { id: id },
   });
@@ -64,18 +57,23 @@ export const setupSslCron = async (
       // First we're going to update liveServer time series data,
       // if there's been changes.
       let currStatus = await LiveServer.findOne({
-        attributes: ["sslStatus", "status"],
-        where: {
-          serverid: server?.id,
-        },
+        where: { serverid: server?.id },
+        attributes: ["status", "sslStatus"],
+        order: [["time", "DESC"]],
       });
-      if (checkSsl?.valid?.toString() != currStatus?.dataValues.sslStatus) {
+
+      if (
+        (checkSsl.errno && currStatus?.dataValues.sslStatus !== "false") || // if no ssl and we're not storing false
+        (checkSsl.valid &&
+          checkSsl?.valid?.toString() !== currStatus?.dataValues.sslStatus) // or if result of ssl isn't equal to stored ssl status
+      ) {
+        console.log("RUNNING CREATE IN SETUP SSL CRON. ");
         let resp = await LiveServer.create({
           status: currStatus?.dataValues.status,
           url: url,
           userid: userid,
           serverid: id,
-          sslStatus: checkSsl.errno ? false :  checkSsl.valid.toString(),
+          sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
         });
       }
 
@@ -92,7 +90,7 @@ export const setupSslCron = async (
           {
             sslExpiry: checkSsl.daysRemaining,
           },
-          { where: {id: id}, }
+          { where: { id: id } }
         );
       }
     });
@@ -105,8 +103,32 @@ export const setupSslCron = async (
 // those servers are not running.
 export const startServerJobs = async () => {
   let servArr = await Server.findAll();
-  servArr.forEach((server) => {
-    let { name, url, userid, id} = server;
+  servArr.map(async (server) => {
+
+    let { url, userid, id } = server;
+
+    // Grab the last status of this server.
+    let currStatus = await LiveServer.findOne({
+      where: { serverid: id },
+      attributes: ["status", "sslStatus"],
+      order: [["time", "DESC"]],
+    });
+
+    // If currStatus is null, we'll insert immediately.
+    // This way we immediately have some data to work with.
+    if (currStatus === null) {
+      console.log("Creating first entry.");
+      let checkUp = await isUp(url);
+      let checkSsl: any = await getSslDetails(url);
+      await LiveServer.create({
+        status: checkUp,
+        url: url,
+        userid: userid,
+        serverid: id,
+        sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
+      });
+    }
+
     setupUrlCron(url, userid, id);
     setupSslCron(url, userid, id);
   });
