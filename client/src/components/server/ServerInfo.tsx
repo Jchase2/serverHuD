@@ -43,7 +43,7 @@ const ServerInfo = (props: any) => {
     diskSpace: 0,
   });
 
-  const [socket, setSocket] = useState(
+  const [socket] = useState(
     io("localhost:3001", {
       auth: {
         token: localStorage.getItem("accessToken"),
@@ -51,6 +51,8 @@ const ServerInfo = (props: any) => {
       transports: ["websocket"],
     })
   );
+
+  const [connectStatus, setConnectStatus] = useState(false);
 
   const location = useLocation();
   const parts = location.pathname.split("/");
@@ -61,9 +63,10 @@ const ServerInfo = (props: any) => {
       setServerData(cloneDeep(e.data));
     });
 
-    // Must run at least one of these to start listening.
-    socket.on("connect", () => console.log("Connect recieved"))
-    socket.on("serverUpdate", () => console.log("serverUpdate recieved."));
+    // Listening for connection and setting to true if we recieve one.
+    socket.on("connect", () => {
+      setConnectStatus(true);
+    });
 
     return () => {
       socket.disconnect();
@@ -107,11 +110,15 @@ const ServerInfo = (props: any) => {
       }
     }
 
-    if(serverData && serverData.url) {
-      socket.on("connect", connectEvent);
+    // Once we know connectStatus is true and serverData filled,
+    // connect to the socket and start listening for updates.
+    if (serverData && serverData.url && connectStatus) {
+      connectEvent();
       socket.on("serverUpdate", statUpdate);
+      setConnectStatus(false);
     }
-  }, [serverData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverData, connectStatus]);
 
   const history = useHistory();
 
@@ -161,7 +168,7 @@ const ServerInfo = (props: any) => {
           <Button plain={false} onClick={() => history.push("/dashboard")}>
             Dashboard
           </Button>
-          {serverData.upgrades ? (
+          {serverData?.upgrades ? (
             <Button
               plain={false}
               onClick={() => history.push(`/server/${serverData?.id}/upgrades`)}
