@@ -46,6 +46,7 @@ const ServerInfo = (props: any) => {
   const paramStr = parts[parts.length - 1];
   useEffect(() => {
     getIndServer(paramStr).then((e: any) => {
+      console.log("ServerInfo IS: ", e)
       setServerData(e.data);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

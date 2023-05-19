@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
 import { setupSslCron, setupUrlCron } from "../Utils/cronUtils";
 import { LiveServer } from "../Models/liveServer.model";
-import { getCurrentState } from "../Utils/apiUtils";
+import { getAllCombinedState, getOneCombinedState } from "../Utils/apiUtils";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -71,7 +71,7 @@ export const loginUser = async (ctx: any) => {
 };
 
 export const getUserServers = async (ctx: any) => {
-  let res = await getCurrentState(ctx.state.user._id);
+  let res = await getAllCombinedState(ctx.state.user._id);
   if (res) {
     ctx.body = res;
     ctx.status = 200;
@@ -82,7 +82,7 @@ export const getUserServers = async (ctx: any) => {
 };
 
 export const getIndServer = async (ctx: any) => {
-  const server = await Server.findByPk(ctx.params.id);
+  const server = await getOneCombinedState(ctx.params.id);
 
   if (server) {
     ctx.body = server;
