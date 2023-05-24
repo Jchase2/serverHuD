@@ -67,10 +67,10 @@ export const getServers = async () => {
   );
 };
 
-export const getIndServer = async (id: string) => {
+export const getServerUpData = async (id: string) => {
   return axios({
     method: "get",
-    url: process.env.REACT_APP_BACKEND_URL + `/servers/${id}`,
+    url: process.env.REACT_APP_BACKEND_URL + `/servers/updata/${id}`,
     headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
   }).then(
     (response) => {
@@ -81,6 +81,8 @@ export const getIndServer = async (id: string) => {
     }
   );
 };
+
+
 
 export const deleteServer = async (id: string) => {
   return axios({

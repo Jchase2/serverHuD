@@ -12,7 +12,7 @@ import {
 import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
 import { useState } from "react";
-import { registerFunc } from "../../services/api";
+import { registerFunc } from "../../services/api/api";
 import { useHistory } from "react-router-dom";
 
 const Register = () => {

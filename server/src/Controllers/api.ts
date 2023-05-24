@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
 import { setupSslCron, setupUrlCron } from "../Utils/cronUtils";
 import { LiveServer } from "../Models/liveServer.model";
-import { getAllCombinedState, getOneCombinedState } from "../Utils/apiUtils";
+import { SplitTime, getAllCombinedState, getMonitoredUpInfo, getOneCombinedState } from "../Utils/apiUtils";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -83,7 +83,6 @@ export const getUserServers = async (ctx: any) => {
 
 export const getIndServer = async (ctx: any) => {
   const server = await getOneCombinedState(ctx.params.id);
-
   if (server) {
     ctx.body = server;
     ctx.status = 200;
@@ -127,13 +126,6 @@ const liveServerSchema = Joi.object({
   sslStatus: Joi.string().required(),
   diskSpace: Joi.number(),
 });
-
-const SplitTime = (numberOfHours: number) => {
-  var Days = Math.floor(numberOfHours / 24);
-  var Remainder = numberOfHours % 24;
-  var Hours = Math.floor(Remainder);
-  return { Days: Days, Hours: Hours };
-};
 
 export const addServer = async (ctx: any) => {
   const { url } = ctx.request.body;
@@ -192,3 +184,9 @@ export const addServer = async (ctx: any) => {
     }
   }
 };
+
+export const getTimeseriesUpData = async (ctx: any) => {
+  let res = await getMonitoredUpInfo(ctx.params.id);
+  ctx.body = res;
+  ctx.status = 200;
+}

@@ -19,6 +19,7 @@ app.use(router.routes());
 
 const server = http.createServer(app.callback());
 
+// TODO: Probably set origin in env
 const io = new Server(server, {
   cors: {
     origin: "localhost:3000",
@@ -38,9 +39,11 @@ const io = new Server(server, {
 
   try {
     await client.connect();
-    console.log("Connected.")
+    console.log("Connected.");
     console.log("Attempting to create_hypertable...");
-    let hypRes = await client.query(`SELECT create_hypertable('"liveserver"', 'time', if_not_exists => TRUE);`);
+    let hypRes = await client.query(
+      `SELECT create_hypertable('"liveserver"', 'time', if_not_exists => TRUE);`
+    );
     console.log("Hypertable Creation Response: ", hypRes);
     server.listen(3001, () => console.log(`Server running on port: ${3001}`));
     console.log("Starting all server jobs.");

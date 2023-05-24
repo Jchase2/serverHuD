@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.19",
     "@chakra-ui/react": "^2.6.1",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@fontsource/roboto": "^4.5.5",
+    "@tanstack/react-query": "^4.29.7",
+    "@tanstack/react-query-devtools": "^4.29.7",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
@@ -26,14 +29,18 @@
     "polished": "^4.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.3.1",
+    "react-icons": "^4.8.0",
     "react-router-dom": "^5.3.1",
     "react-scripts": "5.0.1",
     "recharts": "^2.6.2",
     "socket.io-client": "^4.5.1",
     "styled-components": "^5.3.5",
-    "typescript": "^4.6.4",
+    "typescript": "^5.0.4",
+    "victory": "^36.6.10",
     "web-vitals": "^1.1.2"
+  },
+  "overrides": {
+    "typescript": "^5.0.4"
   },
   "scripts": {
     "start": "WATCHPACK_POLLING=true react-scripts start",

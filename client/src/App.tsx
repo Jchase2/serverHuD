@@ -1,16 +1,28 @@
 import "./App.css";
 import "@fontsource/roboto";
-import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
-import Header from "./components/header/Header";
-import Dashboard from "./views/dashboard/Dashboard";
-import Login from "./views/login/Login";
-import HomePage from "./views/homepage/HomePage";
-import Register from "./views/register/Register";
-import ServerInfo from "./components/server/ServerInfo";
-import Upgrades from "./components/server/Upgrades";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
+import Header from "./components/Header/Header";
+import Dashboard from "./views/Dashboard/Dashboard";
+import Login from "./views/Login/Login";
+import HomePage from "./views/Homepage/HomePage";
+import Register from "./views/Register/Register";
+import ServerDash from "./views/ServerDash/ServerDash";
+import Upgrades from "./views/ServerDash/Upgrades";
 import { useState } from "react";
-import PrivateRoute from "./components/private/PrivateRoute";
+import PrivateRoute from "./components/Private/PrivateRoute";
+import { useReactQuerySubscription } from "./services/socket";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+const queryClient = new QueryClient();
+
 function App() {
+  useReactQuerySubscription(queryClient);
 
   let initialState = "false";
   if (localStorage.getItem("accessToken")) {
@@ -18,7 +30,6 @@ function App() {
   }
 
   const [isAuthed, setIsAuthed] = useState(initialState);
-
 
   const setAuth = () => {
     if (localStorage.getItem("accessToken") !== null) {
@@ -36,7 +47,8 @@ function App() {
 
   return (
     <Router>
-        <Header isAuthed={isAuthed} globalLogOut={globalLogOut} />
+      <Header isAuthed={isAuthed} globalLogOut={globalLogOut} />
+      <QueryClientProvider client={queryClient}>
         <Switch>
           <Route path="/register">
             <Register />
@@ -51,12 +63,14 @@ function App() {
             <Upgrades />
           </PrivateRoute>
           <PrivateRoute isAuthed={isAuthed} path="/server/:id">
-            <ServerInfo />
+            <ServerDash />
           </PrivateRoute>
           <Route path="/">
             {isAuthed === "true" ? <Redirect to="/dashboard" /> : <HomePage />}
           </Route>
+          <ReactQueryDevtools initialIsOpen={true} />
         </Switch>
+      </QueryClientProvider>
     </Router>
   );
 }

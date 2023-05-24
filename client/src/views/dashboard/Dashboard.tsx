@@ -1,8 +1,8 @@
-import Server from "../../components/server/Server";
+import Server from "./Server";
 import AddServer from "./AddServer";
 import { ErrorShow } from "../../components/Error/ErrorShow";
 import { useState, useEffect } from "react";
-import { getServers, postServer } from "../../services/api";
+import { getServers, postServer } from "../../services/api/api";
 import { Main, Box } from "grommet";
 // import useInterval from "../../services/useInterval";
 
@@ -38,14 +38,6 @@ const Dashboard = (props: any) => {
       });
     });
   };
-
-  // const updateServers = async () => {
-  //   getServers().then((e) => {
-  //     setServerList(e.data);
-  //   });
-  // };
-
-  //useInterval(updateServers, 5000)
 
   const displayServerList = (serverData: any) => {
     return (

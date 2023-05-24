@@ -22,7 +22,7 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
       });
 
       if (checkUp !== currStatus?.dataValues.status) {
-        console.log("RUNNING CREATE IN SETUP URL CRON.");
+        console.log("RUNNING CREATE IN SETUP URL CRON FOR: ", url);
         let resp = await LiveServer.create({
           status: checkUp,
           url: url,
@@ -51,8 +51,6 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
     // No need to check SSL every minute.
     let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
       let checkSsl: any = await getSslDetails(url);
-
-      console.log("CHECK SSL GIVES US: ", checkSsl);
 
       // First we're going to update liveServer time series data,
       // if there's been changes.

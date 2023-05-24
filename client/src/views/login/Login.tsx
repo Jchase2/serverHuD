@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
-import { loginFunc } from "../../services/api";
+import { loginFunc } from "../../services/api/api";
 import { useHistory } from "react-router-dom";
 
 const Login = (props: any) => {

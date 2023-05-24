@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { getIndServer } from "../../services/api";
+import { useState } from "react";
 import {
   Main,
   Box,
@@ -12,7 +10,7 @@ import {
 } from "grommet";
 import { useHistory } from "react-router-dom";
 
-const ServerInfo = (props: any) => {
+const Upgrades = (props: any) => {
 
   interface IUptime {
     Days: number,
@@ -29,7 +27,7 @@ const ServerInfo = (props: any) => {
     uptime: IUptime;
     upgrades: string
   }
-  const [serverData, setServerData] = useState<IServer>({
+  const [serverData] = useState<IServer>({
     name: "",
     id: "",
     sslExpiry: 0,
@@ -40,15 +38,6 @@ const ServerInfo = (props: any) => {
     upgrades: ''
   });
 
-  const location = useLocation();
-  var parts = location.pathname.split("/");
-  var paramStr = parts[parts.length - 2];
-  useEffect(() => {
-    getIndServer(paramStr).then((e: any) => {
-      setServerData(e.data);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   const history = useHistory();
   return (
     <Main align="center" justify="center">
@@ -84,4 +73,4 @@ const ServerInfo = (props: any) => {
   );
 };
 
-export default ServerInfo;
+export default Upgrades;
