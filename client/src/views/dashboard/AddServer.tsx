@@ -38,7 +38,7 @@ const AddServer = (props: any) => {
       borderWidth={1}
       borderRadius={8}
       boxShadow="lg"
-      w="20vw"
+      minW="20vw"
       textAlign={"center"}
     >
       <Text m={2}>New Server:</Text>

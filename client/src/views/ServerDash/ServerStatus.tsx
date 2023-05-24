@@ -1,6 +1,5 @@
-import { Card, CardBody, Heading, Stack, Text } from "@chakra-ui/react";
+import { Card, CardBody, Heading, Stack } from "@chakra-ui/react";
 import UpGraph from "./UpGraph";
-import { InfoOutlineIcon } from "@chakra-ui/icons";
 import { UpStatus } from "../../components/UpStatus/UpStatus";
 
 const ServerStatus = (props: any) => {
