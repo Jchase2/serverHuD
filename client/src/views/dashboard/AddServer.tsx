@@ -1,4 +1,4 @@
-import { Box, Button, Input, Stack } from "@chakra-ui/react";
+import { Box, Button, Input, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 
 const AddServer = (props: any) => {
@@ -39,10 +39,9 @@ const AddServer = (props: any) => {
       borderRadius={8}
       boxShadow="lg"
       w="20vw"
-      alignItems="center"
-      justifyContent="center"
+      textAlign={"center"}
     >
-      <p>New Server:</p>
+      <Text m={2}>New Server:</Text>
       <form onSubmit={handleSubmit}>
         <Stack spacing={1}>
           <Input

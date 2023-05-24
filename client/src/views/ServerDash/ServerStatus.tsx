@@ -1,10 +1,7 @@
 import { Card, CardBody, Heading, Stack, Text } from "@chakra-ui/react";
 import UpGraph from "./UpGraph";
-import {
-  TriangleDownIcon,
-  TriangleUpIcon,
-  InfoOutlineIcon,
-} from "@chakra-ui/icons";
+import { InfoOutlineIcon } from "@chakra-ui/icons";
+import { UpStatus } from "../../components/UpStatus/UpStatus";
 
 const ServerStatus = (props: any) => {
   let { serverData, upData } = props;
@@ -18,29 +15,7 @@ const ServerStatus = (props: any) => {
     >
       <Stack>
         <CardBody>
-          {serverData?.status === "up" ? (
-            <Text>
-              <TriangleUpIcon color="green.500" /> Server Status: Up
-            </Text>
-          ) : (
-            <Text>
-              <TriangleDownIcon color="red.500" /> Server Status: Down!
-            </Text>
-          )}
-          {serverData?.sslStatus === "true" ? (
-            <Text>
-              <TriangleUpIcon color="green.500" /> SSL Status: Active
-            </Text>
-          ) : (
-            <Text>
-              <TriangleDownIcon color="red.500" /> SSL Status: Down!
-            </Text>
-          )}
-          {serverData?.sslStatus === "true" ? (
-            <Text>
-              <InfoOutlineIcon /> SSL Expires: {serverData?.sslExpiry} Days
-            </Text>
-          ) : null}
+          <UpStatus serverData={serverData} />
           {serverData?.uptime?.Hours > 0 || serverData?.uptime?.Days > 0 ? (
             <>
               Uptime:{" "}

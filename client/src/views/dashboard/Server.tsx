@@ -1,16 +1,10 @@
 import { useHistory } from "react-router-dom";
-import {
-  Main,
-  Box,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Button,
-} from "grommet";
 import io from "socket.io-client";
+import { Card, CardBody, CardHeader, CardFooter, Box, Button } from '@chakra-ui/react';
 import { useEffect, useState } from "react";
 import { cloneDeep } from "lodash";
+import { UpStatus } from "../../components/UpStatus/UpStatus";
+
 
 const Server = (props: any) => {
   const [currServerState, setCurrServerState] = useState(props.serverData);
@@ -66,46 +60,32 @@ const Server = (props: any) => {
   const history = useHistory();
 
   return (
-    <Main pad="medium">
-      <Card background="light-1">
+      <Card align="center" m={2} w="20vw">
         {currServerState.status === "down" ? (
-          <CardHeader background="status-error" pad="small">
+          <CardHeader borderRadius='md' w={'100%'} textAlign={'center'} backgroundColor="#e40000">
             {currServerState.name}
           </CardHeader>
         ) : currServerState.status === "up" &&
           currServerState.sslStatus === "false" ? (
-          <CardHeader background="status-warning" pad="small">
+          <CardHeader borderRadius='md' w={'100%'} textAlign={'center'} backgroundColor="#FF8800">
             {currServerState.name}
           </CardHeader>
         ) : (
-          <CardHeader background="dark-1" pad="small">
+          <CardHeader textColor={'#fff'} borderRadius='md' w={'100%'} textAlign={'center'} backgroundColor="#2f4858">
             {currServerState.name}
           </CardHeader>
         )}
-        <CardBody pad="small">
-          <Box>Server URL: {currServerState.url}</Box>
-          <Box>
-            Server Status: {currServerState.status === "up" ? "Up" : "Down!"}
-          </Box>
-          <Box>
-            SSL: {currServerState.sslStatus === "true" ? "Active" : "Down!"}
-          </Box>
+        <CardBody m={2}>
+          <UpStatus serverData={currServerState}/>
         </CardBody>
-        <CardFooter
-          pad="small"
-          background="light-2"
-          align="center"
-          justify="center"
-        >
+        <CardFooter>
           <Button
-            plain={false}
             onClick={() => history.push("/server/" + currServerState.id)}
           >
             More Info
           </Button>
         </CardFooter>
       </Card>
-    </Main>
   );
 };
 

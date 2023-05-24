@@ -3,7 +3,13 @@ import AddServer from "./AddServer";
 import { ErrorShow } from "../../components/Error/ErrorShow";
 import { useState, useEffect } from "react";
 import { getServers, postServer } from "../../services/api/api";
-import { Main, Box } from "grommet";
+import {
+  Flex,
+  Text,
+  Wrap,
+  WrapItem,
+} from "@chakra-ui/react";
+
 // import useInterval from "../../services/useInterval";
 
 const Dashboard = (props: any) => {
@@ -42,32 +48,31 @@ const Dashboard = (props: any) => {
   const displayServerList = (serverData: any) => {
     return (
       <div key={serverData.url}>
-        <Server serverData={serverData} />
+        <WrapItem>
+          <Server serverData={serverData} />
+        </WrapItem>
       </div>
     );
   };
 
   return (
-    <Main direction="column" align="center" justify="center">
+    <Flex direction={'column'} align={'center'} justify={'center'}>
       <AddServer addNewServer={addNewServer} />
       <ErrorShow
         message={stateMessage}
         isClosed={isError}
         setIsError={setIsError}
       />
-      <Box
-        direction="row-responsive"
-        justify="center"
-        align="center"
-        wrap={true}
-      >
+      <Wrap minW={"80vw"} justify={'center'}>
         {serverList?.length ? (
           serverList.map((e: any) => displayServerList(e))
         ) : (
-          <div>You are not monitoring any servers, add one to get started!</div>
+          <Text align="center">
+            You are not monitoring any servers, add one to get started!
+          </Text>
         )}
-      </Box>
-    </Main>
+      </Wrap>
+    </Flex>
   );
 };
 
