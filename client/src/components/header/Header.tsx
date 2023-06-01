@@ -7,7 +7,7 @@ const ClientHeader = (props: any) => {
     return (
       <Box direction="row" alignContent="between" gap="xsmall">
         <Button
-          
+
           onClick={() => history.push("/register")}
         >
           Register

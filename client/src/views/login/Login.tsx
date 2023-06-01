@@ -25,7 +25,7 @@ const Login = (props: any) => {
   });
 
   const [reveal, setReveal] = useState(false);
-  const [isError, setIsError] = useState<boolean>(false);
+  const [closed, setClosed] = useState<boolean>(true);
   const [stateMessage, setStateMessage] = useState<string>("");
 
   if (reveal) {
@@ -60,7 +60,7 @@ const Login = (props: any) => {
       props.setAuth();
       history.push("/dashboard");
     } else {
-      setIsError(true);
+      setClosed(false);
       setStateMessage("Email or Password is incorrect");
       console.log("Error");
     }
@@ -75,8 +75,9 @@ const Login = (props: any) => {
     >
       <ErrorShow
         message={stateMessage}
-        isClosed={isError}
-        setIsError={setIsError}
+        closed={closed}
+        setClosed={setClosed}
+        isError={!closed}
       />
       <Box p={8} borderWidth={1} borderRadius={8} boxShadow="lg" minW="35vw">
         <Heading textAlign="center" mb={6}>

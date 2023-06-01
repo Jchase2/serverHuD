@@ -27,7 +27,7 @@ const Register = () => {
   });
   const [reveal, setReveal] = useState(false);
   const [secondaryReveal, setSecondaryReveal] = useState(false);
-   const [isError, setIsError] = useState<boolean>(false);
+   const [closed, setClosed] = useState<boolean>(true);
    const [stateMessage, setStateMessage] = useState<string>("");
 
   if (reveal) {
@@ -63,7 +63,7 @@ const Register = () => {
       history.push("/login");
     } else {
         console.log("error is: ", res)
-        setIsError(true);
+        setClosed(false);
         setStateMessage("Ensure your passwords match and are at least 8 characters long!");
     }
   };
@@ -77,8 +77,9 @@ const Register = () => {
     >
       <ErrorShow
         message={stateMessage}
-        isClosed={isError}
-        setIsError={setIsError}
+        isError={!closed}
+        setClosed={setClosed}
+        closed={closed}
       />
       <Box p={8} borderWidth={1} borderRadius={8} boxShadow="lg" minW="35vw">
         <Heading textAlign="center" mb={6}>

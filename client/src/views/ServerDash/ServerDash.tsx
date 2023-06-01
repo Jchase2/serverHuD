@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { deleteServer } from "../../services/api/api";
+import { useDeleteServer } from "../../services/api/servers";
 
 import {
   Box,
@@ -14,32 +14,39 @@ import { useHistory } from "react-router-dom";
 import ServerStatus from "./ServerStatus";
 import { useGetIndServer, useGetUpData } from "../../services/api/servers";
 import { Loading } from "../../components/Loading/Loading";
-import { socket } from "../../services/socket";
+import { useReactQuerySubscription } from "../../services/socket";
+import { socket } from "../../App";
 
 const ServerDash = (props: any) => {
+
+  const history = useHistory();
   const location = useLocation();
   const parts = location.pathname.split("/");
   const paramStr = parts[parts.length - 1];
+  const deleteServer = useDeleteServer(paramStr);
   const { data, isLoading, isError } = useGetIndServer(paramStr);
   const upData = useGetUpData(paramStr);
 
+  useReactQuerySubscription();
+
+  useEffect(() => {
+    if(!socket.connected) {
+      socket.connect();
+    }
+  }, [])
+
   useEffect(() => {
     if (data) {
+      console.log("EMITTING UPCHECK AND LIVE CHECK")
       socket.emit("upCheck", {
         id: data.id,
         url: data.url,
         status: data.status,
         sslStatus: data.sslStatus,
       });
-      socket.emit("liveUpCheck", {
-        id: data.id,
-        url: data.url,
-      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
-
-  const history = useHistory();
 
   if (isLoading || upData.isLoading)
     return (
@@ -70,7 +77,8 @@ const ServerDash = (props: any) => {
             variant="outline"
             m={2}
             onClick={() => {
-              deleteServer(paramStr);
+              deleteServer.mutate();
+              // TODO: Invalidate data in server.
               history.push("/dashboard");
             }}
           >

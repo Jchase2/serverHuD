@@ -16,6 +16,7 @@ export function sioUpCheck(socket: Socket) {
   let upInterval: ReturnType<typeof setInterval>;
   let intervals: any = {};
   socket.on("upCheck", async (data) => {
+    console.log("UPCHECK RECIEVED")
     let strId = `${data.url}-${data.id}`;
     // Make sure we haven't already started an interval for this.
     if(!intervals[strId]) {
@@ -30,7 +31,7 @@ export function sioUpCheck(socket: Socket) {
   });
 
   socket.on("disconnect", () => {
-    console.log("Clearing interval.");
+    console.log("Disconnect Recieved: Clearing interval.");
     intervals = {};
     clearInterval(upInterval);
   });

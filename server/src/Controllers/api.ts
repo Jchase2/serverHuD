@@ -6,7 +6,12 @@ import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
 import { setupSslCron, setupUrlCron } from "../Utils/cronUtils";
 import { LiveServer } from "../Models/liveServer.model";
-import { SplitTime, getAllCombinedState, getMonitoredUpInfo, getOneCombinedState } from "../Utils/apiUtils";
+import {
+  SplitTime,
+  getAllCombinedState,
+  getMonitoredUpInfo,
+  getOneCombinedState,
+} from "../Utils/apiUtils";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -93,19 +98,18 @@ export const getIndServer = async (ctx: any) => {
 };
 
 export const deleteServer = async (ctx: any) => {
-  Server.destroy({
-    where: {
-      id: ctx.params.id,
-    },
-  })
-    .then((data) => {
-      ctx.body = "Server deleted!";
-      ctx.status = 204;
-    })
-    .catch((error) => {
-      console.log("ERROR DELETING");
-      ctx.status = 404;
+  try {
+    await Server.destroy({
+      where: {
+        id: ctx.params.id,
+      },
     });
+    ctx.body = "Server Deleted!";
+    ctx.status = 202;
+  } catch (err) {
+    console.log("ERROR DELETING");
+    ctx.status = 404;
+  }
 };
 
 const serverSchema = Joi.object({
@@ -189,4 +193,4 @@ export const getTimeseriesUpData = async (ctx: any) => {
   let res = await getMonitoredUpInfo(ctx.params.id);
   ctx.body = res;
   ctx.status = 200;
-}
+};

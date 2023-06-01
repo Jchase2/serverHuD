@@ -15,15 +15,21 @@ import ServerDash from "./views/ServerDash/ServerDash";
 import Upgrades from "./views/ServerDash/Upgrades";
 import { useState } from "react";
 import PrivateRoute from "./components/Private/PrivateRoute";
-import { useReactQuerySubscription } from "./services/socket";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Socket, io } from "socket.io-client";
+import { queryClient } from "./services/socket";
 
-const queryClient = new QueryClient();
+// TODO: Replace localhost with .env backend url.
+export const socket = io("localhost:3001", {
+  auth: {
+    token: localStorage.getItem("accessToken"),
+  },
+  transports: ["websocket"],
+  autoConnect: false
+});
 
 function App() {
-  useReactQuerySubscription(queryClient);
-
   let initialState = "false";
   if (localStorage.getItem("accessToken")) {
     initialState = "true";
@@ -42,6 +48,10 @@ function App() {
     if (localStorage.getItem("accessToken")) {
       localStorage.clear();
       setIsAuthed("false");
+      if (socket.connected) {
+        console.log("DISCONNECTING SOCKET WITH LOG-OUT.");
+        if (socket instanceof Socket) socket.disconnect();
+      }
     }
   };
 

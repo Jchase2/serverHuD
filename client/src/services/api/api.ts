@@ -66,35 +66,3 @@ export const getServers = async () => {
     }
   );
 };
-
-export const getServerUpData = async (id: string) => {
-  return axios({
-    method: "get",
-    url: process.env.REACT_APP_BACKEND_URL + `/servers/updata/${id}`,
-    headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-  }).then(
-    (response) => {
-      return response;
-    },
-    (error) => {
-      return error;
-    }
-  );
-};
-
-
-
-export const deleteServer = async (id: string) => {
-  return axios({
-    method: "put",
-    url: process.env.REACT_APP_BACKEND_URL + `/servers/delete/${id}`,
-    headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-  }).then(
-    (response) => {
-      return response;
-    },
-    (error) => {
-      return error;
-    }
-  );
-};

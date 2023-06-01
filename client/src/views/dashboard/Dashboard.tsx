@@ -1,49 +1,33 @@
 import Server from "./Server";
 import AddServer from "./AddServer";
 import { ErrorShow } from "../../components/Error/ErrorShow";
-import { useState, useEffect } from "react";
-import { getServers, postServer } from "../../services/api/api";
+import { useEffect, useState } from "react";
+import { useAddServer, useGetServers } from "../../services/api/servers";
 import {
+  Container,
   Flex,
   Text,
   Wrap,
   WrapItem,
 } from "@chakra-ui/react";
-
-// import useInterval from "../../services/useInterval";
+import { Loading } from "../../components/Loading/Loading";
+import { useReactQuerySubscription } from "../../services/socket";
+import { socket } from "../../App";
 
 const Dashboard = (props: any) => {
-  interface IServer {
-    serverList: string[];
-  }
 
-  const [serverList, setServerList] = useState<IServer[]>([]);
-  const [isError, setIsError] = useState<boolean>(false);
   const [stateMessage, setStateMessage] = useState<string>("");
+  const [closed, setClosed] = useState(true);
+  const { data, isLoading, isError, error } = useGetServers();
+  const addNewServer = useAddServer();
 
   useEffect(() => {
-    getServers().then((e: any) => {
-      if (e.data !== undefined && e.data !== "Error") {
-        let newServerList = [...serverList].concat(e.data);
-        setServerList(newServerList);
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if(!socket.connected) {
+      socket.connect();
+    }
+  }, [])
 
-  const addNewServer = async (newServer: any) => {
-    postServer(newServer).then((e) => {
-      if (e.status !== 201) {
-        setStateMessage(
-          "Soemthing went wrong! Please check your input and try again."
-        );
-        setIsError(true);
-      }
-      getServers().then((e) => {
-        setServerList(e.data);
-      });
-    });
-  };
+  useReactQuerySubscription();
 
   const displayServerList = (serverData: any) => {
     return (
@@ -55,17 +39,27 @@ const Dashboard = (props: any) => {
     );
   };
 
+  if (isLoading)
+    return (
+      <Container centerContent>
+        <Loading />
+      </Container>
+    );
+
+    if(error instanceof Error) setStateMessage(error.message);
+
   return (
     <Flex direction={'column'} align={'center'} justify={'center'}>
       <AddServer addNewServer={addNewServer} />
       <ErrorShow
         message={stateMessage}
-        isClosed={isError}
-        setIsError={setIsError}
+        closed={closed}
+        setClosed={setClosed}
+        isError={isError}
       />
       <Wrap minW={"80vw"} justify={'center'}>
-        {serverList?.length ? (
-          serverList.map((e: any) => displayServerList(e))
+        {data?.length ? (
+          data.map((e: any) => displayServerList(e))
         ) : (
           <Text align="center">
             You are not monitoring any servers, add one to get started!

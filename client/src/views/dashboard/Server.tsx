@@ -1,5 +1,4 @@
 import { useHistory } from "react-router-dom";
-import io from "socket.io-client";
 import {
   Card,
   CardBody,
@@ -8,68 +7,51 @@ import {
   Button,
   Text,
   Box,
+  Container,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { cloneDeep } from "lodash";
+import { useEffect } from "react";
 import { UpStatus } from "../../components/UpStatus/UpStatus";
+import { useGetIndServer } from "../../services/api/servers";
+import { Loading } from "../../components/Loading/Loading";
+import { useReactQuerySubscription } from "../../services/socket";
+import { socket } from "../../App";
 
 const Server = (props: any) => {
-  const [currServerState, setCurrServerState] = useState(props.serverData);
 
-  useEffect(() => {
-    const socket = io("localhost:3001", {
-      auth: {
-        token: localStorage.getItem("accessToken"),
-      },
-      transports: ["websocket"],
-    });
+  const { data, isLoading, isError } = useGetIndServer(props.serverData.id);
 
-    function connectEvent() {
-      console.log(
-        "Connected to " + socket.id,
-        " sending url: ",
-        props.serverData.url,
-        " sending ssl status: ",
-        props.serverData.sslStatus
-      );
-      socket.emit("upCheck", {
-        id: props.serverData.id,
-        url: props.serverData.url,
-        status: props.serverData.status,
-        sslStatus: props.serverData.sslStatus,
-      });
-    }
-
-    function statUpdate(statusUpdate: any, callback: any) {
-      console.log("Status Update: ", statusUpdate);
-      let internalServer = cloneDeep(currServerState);
-      for (const [key, value] of Object.entries(statusUpdate)) {
-        if (internalServer[key] !== value) {
-          internalServer[key] = value;
-        }
-      }
-      setCurrServerState(internalServer);
-      callback({
-        status: internalServer.status,
-        sslStatus: internalServer.sslStatus,
-      });
-    }
-
-    socket.on("connect", connectEvent);
-    socket.on("serverUpdate", statUpdate);
-
-    return () => {
-      socket.disconnect();
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useReactQuerySubscription();
 
   const history = useHistory();
+  useEffect(() => {
+
+    console.log("INSIDE USE EFFECT BUT NO DATA.")
+
+    if (data) {
+      console.log("EMITTING UPCHECK AND LIVE CHECK FROM FRONT END OBVIOUSLY.")
+      socket.emit("upCheck", {
+        id: data.id,
+        url: data.url,
+        status: data.status,
+        sslStatus: data.sslStatus,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  if (isLoading)
+    return (
+      <Container centerContent>
+        <Loading />
+      </Container>
+    );
+
+  // TODO: Replace with error component.
+  if (isError) return <p>Error.</p>;
 
   return (
     <Card align="center" m={2} minW="20vw" display={"flex"}>
-      {currServerState.status === "down" ? (
+      {data.status === "down" ? (
         <CardHeader
           borderRadius="md"
           w={"100%"}
@@ -77,18 +59,18 @@ const Server = (props: any) => {
           backgroundColor="#e40000"
         >
           <Box>
-            <Text display={"flex"}>{currServerState.name}</Text>
+            <Text display={"flex"}>{data.name}</Text>
           </Box>
         </CardHeader>
-      ) : currServerState.status === "up" &&
-        currServerState.sslStatus === "false" ? (
+      ) : data.status === "up" &&
+        data.sslStatus === "false" ? (
         <CardHeader
           borderRadius="md"
           w={"100%"}
           textAlign={"center"}
           backgroundColor="#FF8800"
         >
-          {currServerState.name}
+          {data.name}
         </CardHeader>
       ) : (
         <CardHeader
@@ -98,14 +80,14 @@ const Server = (props: any) => {
           textAlign={"center"}
           backgroundColor="#2f4858"
         >
-          {currServerState.name}
+          {data.name}
         </CardHeader>
       )}
       <CardBody m={2}>
-        <UpStatus serverData={currServerState} />
+        <UpStatus serverData={data} />
       </CardBody>
       <CardFooter>
-        <Button onClick={() => history.push("/server/" + currServerState.id)}>
+        <Button onClick={() => history.push("/server/" + data.id)}>
           More Info
         </Button>
       </CardFooter>

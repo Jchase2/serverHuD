@@ -20,7 +20,7 @@ const AddServer = (props: any) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    props.addNewServer(serverState);
+    props.addNewServer.mutate(serverState);
     setServerState({
       url: "",
       optionalUrl: "",

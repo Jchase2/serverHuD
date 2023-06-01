@@ -1,23 +1,20 @@
-import { cloneDeep } from "lodash";
 import React from "react";
-import io from "socket.io-client";
+import { cloneDeep } from "lodash";
+import { QueryClient } from "@tanstack/react-query";
+import { socket } from "../App";
 
-// TODO: Replace localhost with .env backend url.
-export const socket = io("localhost:3001", {
-  auth: {
-    token: localStorage.getItem("accessToken"),
-  },
-  transports: ["websocket"],
-});
+export const queryClient = new QueryClient();
 
-export const useReactQuerySubscription = (queryClient: any) => {
+export const useReactQuerySubscription = () => {
+
+  socket.connect();
+
   React.useEffect(() => {
     socket.on("connect", () => {
       console.log("Global Socket Connected.");
     });
 
     socket.on("serverUpdate", (data, callback) => {
-      console.log("SERVER UPDATE RECIEVED WITH: ", data);
       const queryKey = [`server-${data.id}`].filter(Boolean);
       queryClient.setQueryData(queryKey, (oldData: any) => {
         let mergedData = cloneDeep(oldData);
@@ -33,11 +30,9 @@ export const useReactQuerySubscription = (queryClient: any) => {
     });
 
     socket.on("liveServerUpdate", (data) => {
-      console.log("GOT LIVESERVER UPDATE WITH DATA: ", data)
       const queryKey = [`live-server-${data.id}`].filter(Boolean);
       queryClient.setQueryData(queryKey, (oldData: any) => {
-        console.log("OLD DATA IS: ", oldData)
-        if(!oldData) return data;
+        if (!oldData) return data;
         let mergedData = cloneDeep(oldData);
         for (const [key, value] of Object.entries(data)) {
           if (mergedData[key] !== value) {
@@ -47,10 +42,9 @@ export const useReactQuerySubscription = (queryClient: any) => {
         return mergedData;
       });
     });
-
     return () => {
       console.log("DISCONNECTING.");
       socket.disconnect();
     };
-  }, [queryClient]);
+  }, []);
 };

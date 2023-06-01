@@ -2,18 +2,20 @@ import { Alert, AlertIcon, AlertTitle, CloseButton } from "@chakra-ui/react";
 
 interface Props {
   message: string;
-  isClosed: boolean;
-  setIsError: Function;
+  setClosed: Function;
+  closed: boolean;
+  isError: boolean;
 }
 
 export const ErrorShow: React.FC<Props> = ({
   message,
-  isClosed,
-  setIsError,
+  closed,
+  setClosed,
+  isError
 }) => {
   return (
     <>
-      {isClosed && (
+      {isError && !closed && (
         <Alert
           status="error"
           mb="10px"
@@ -28,7 +30,7 @@ export const ErrorShow: React.FC<Props> = ({
             position="absolute"
             right="8px"
             top="8px"
-            onClick={() => setIsError(false)}
+            onClick={() => setClosed(true)}
           />
         </Alert>
       )}
