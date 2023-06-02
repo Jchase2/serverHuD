@@ -49,6 +49,12 @@ const Register = () => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
+    if(registerState.password !== registerState.confirmPass) {
+      setClosed(false);
+      setStateMessage("Passwords do not match!");
+      return;
+    }
+
     createUser.mutate({
       email: e.target.email.value,
       password: e.target.password.value,
