@@ -22,7 +22,6 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
       });
 
       if (checkUp !== currStatus?.dataValues.status) {
-        console.log("RUNNING CREATE IN SETUP URL CRON FOR: ", url);
         let resp = await LiveServer.create({
           status: checkUp,
           url: url,
@@ -65,7 +64,6 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
         (checkSsl.valid &&
           checkSsl?.valid?.toString() !== currStatus?.dataValues.sslStatus) // or if result of ssl isn't equal to stored ssl status
       ) {
-        console.log("RUNNING CREATE IN SETUP SSL CRON. ");
         let resp = await LiveServer.create({
           status: currStatus?.dataValues.status,
           url: url,

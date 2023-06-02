@@ -50,7 +50,7 @@ export function useGetUpData(id: string) {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-      })
+      });
       return data;
     },
     // Since we're getting updates with sockets,
@@ -70,14 +70,16 @@ export function useDeleteServer(id: string) {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-      })
+      });
       return data;
     },
     // After deleting the server, we'll want to invalidate that in the cache
     // so the ui updates.
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`server-${id}`] })
-      return queryClient.invalidateQueries({ queryKey: [`server-list-${userId}`] })
+      queryClient.invalidateQueries({ queryKey: [`server-${id}`] });
+      return queryClient.invalidateQueries({
+        queryKey: [`server-list-${userId}`],
+      });
     },
   });
 }
@@ -86,19 +88,36 @@ export function useAddServer() {
   const userId = getUserId();
   return useMutation({
     mutationFn: async (newServer: any) => {
-      console.log("NEW SERVER IS: ", newServer)
       let { data } = await axios({
         method: "post",
         url: process.env.REACT_APP_BACKEND_URL + "/servers",
         data: newServer,
-        headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
       });
       return data;
     },
     // After adding the server, we'll want to invalidate that in the cache
     // so the ui updates.
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`server-list-${userId}`] })
+      queryClient.invalidateQueries({ queryKey: [`server-list-${userId}`] });
     },
+  });
+}
+
+
+// Create a new user.
+export function useCreateUser() {
+  return useMutation({
+    mutationFn: async (registerObj: object) => {
+      let { data } = await axios({
+        method: "post",
+        url: process.env.REACT_APP_BACKEND_URL + "/register",
+        data: registerObj,
+      });
+      return data;
+    },
+    onError: (error: any) => error.response
   });
 }

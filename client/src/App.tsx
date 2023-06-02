@@ -49,7 +49,6 @@ function App() {
       localStorage.clear();
       setIsAuthed("false");
       if (socket.connected) {
-        console.log("DISCONNECTING SOCKET WITH LOG-OUT.");
         if (socket instanceof Socket) socket.disconnect();
       }
     }

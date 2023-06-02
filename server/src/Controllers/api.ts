@@ -87,7 +87,7 @@ export const getUserServers = async (ctx: any) => {
 };
 
 export const getIndServer = async (ctx: any) => {
-  const server = await getOneCombinedState(ctx.params.id);
+  const server = await getOneCombinedState(ctx.params.id, ctx.state.user._id);
   if (server) {
     ctx.body = server;
     ctx.status = 200;
@@ -102,6 +102,7 @@ export const deleteServer = async (ctx: any) => {
     await Server.destroy({
       where: {
         id: ctx.params.id,
+        userid: ctx.state.user._id
       },
     });
     ctx.body = "Server Deleted!";
@@ -190,7 +191,7 @@ export const addServer = async (ctx: any) => {
 };
 
 export const getTimeseriesUpData = async (ctx: any) => {
-  let res = await getMonitoredUpInfo(ctx.params.id);
+  let res = await getMonitoredUpInfo(ctx.params.id, ctx.state.user._id);
   ctx.body = res;
   ctx.status = 200;
 };

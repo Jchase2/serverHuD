@@ -23,12 +23,9 @@ const Server = (props: any) => {
   useReactQuerySubscription();
 
   const history = useHistory();
+  
   useEffect(() => {
-
-    console.log("INSIDE USE EFFECT BUT NO DATA.")
-
     if (data) {
-      console.log("EMITTING UPCHECK AND LIVE CHECK FROM FRONT END OBVIOUSLY.")
       socket.emit("upCheck", {
         id: data.id,
         url: data.url,

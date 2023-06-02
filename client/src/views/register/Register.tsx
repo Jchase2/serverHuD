@@ -11,14 +11,15 @@ import {
 } from "@chakra-ui/react";
 import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
-import { useState } from "react";
-import { registerFunc } from "../../services/api/api";
+import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { useCreateUser } from "../../services/api/servers";
 
 const Register = () => {
   let SwitchIcon: any;
   let SwitchIcon2: any;
   const history = useHistory();
+  const createUser = useCreateUser();
 
   const [registerState, setRegisterState] = useState({
     email: "",
@@ -48,7 +49,7 @@ const Register = () => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    let res = await registerFunc({
+    createUser.mutate({
       email: e.target.email.value,
       password: e.target.password.value,
     });
@@ -58,15 +59,19 @@ const Register = () => {
       password: "",
       confirmPass: "",
     });
-
-    if (res === 201) {
-      history.push("/login");
-    } else {
-        console.log("error is: ", res)
-        setClosed(false);
-        setStateMessage("Ensure your passwords match and are at least 8 characters long!");
-    }
   };
+
+  useEffect(() => {
+    if(createUser.isError) {
+      setClosed(false);
+      setStateMessage(createUser.error.response.data);
+    }
+
+    if (createUser.isSuccess) {
+      history.push("/login");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createUser])
 
   return (
     <Flex
