@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useDeleteServer } from "../../services/api/servers";
+import { useDeleteServer } from "../../services/api/api";
 
 import {
   Box,
@@ -12,7 +12,7 @@ import {
 
 import { useHistory } from "react-router-dom";
 import ServerStatus from "./ServerStatus";
-import { useGetIndServer, useGetUpData } from "../../services/api/servers";
+import { useGetIndServer, useGetUpData } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";

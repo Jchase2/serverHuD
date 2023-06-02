@@ -2,7 +2,7 @@ import Server from "./Server";
 import AddServer from "./AddServer";
 import { ErrorShow } from "../../components/Error/ErrorShow";
 import { useEffect, useState } from "react";
-import { useAddServer, useGetServers } from "../../services/api/servers";
+import { useAddServer, useGetServers } from "../../services/api/api";
 import {
   Container,
   Flex,

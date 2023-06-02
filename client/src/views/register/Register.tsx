@@ -13,7 +13,7 @@ import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { useCreateUser } from "../../services/api/servers";
+import { useCreateUser } from "../../services/api/api";
 
 const Register = () => {
   let SwitchIcon: any;

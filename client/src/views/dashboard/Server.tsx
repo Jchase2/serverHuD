@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { UpStatus } from "../../components/UpStatus/UpStatus";
-import { useGetIndServer } from "../../services/api/servers";
+import { useGetIndServer } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
@@ -23,7 +23,7 @@ const Server = (props: any) => {
   useReactQuerySubscription();
 
   const history = useHistory();
-  
+
   useEffect(() => {
     if (data) {
       socket.emit("upCheck", {

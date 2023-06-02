@@ -1,5 +1,5 @@
 import { ErrorShow } from "../../components/Error/ErrorShow";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Flex,
   Box,
@@ -8,12 +8,13 @@ import {
   Button,
   IconButton,
   Input,
-  Stack
+  Stack,
 } from "@chakra-ui/react";
 import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
-import { loginFunc } from "../../services/api/api";
 import { useHistory } from "react-router-dom";
+import { useLogin } from "../../services/api/api";
+import { Loading } from "../../components/Loading/Loading";
 
 const Login = (props: any) => {
   let SwitchIcon: any;
@@ -27,6 +28,7 @@ const Login = (props: any) => {
   const [reveal, setReveal] = useState(false);
   const [closed, setClosed] = useState<boolean>(true);
   const [stateMessage, setStateMessage] = useState<string>("");
+  const login = useLogin();
 
   if (reveal) {
     SwitchIcon = BiHide;
@@ -42,7 +44,7 @@ const Login = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    let result = await loginFunc({
+    await login.mutate({
       email: e.target.email.value,
       password: e.target.password.value,
     });
@@ -51,20 +53,32 @@ const Login = (props: any) => {
       email: "",
       password: "",
     });
+  };
 
-    if (result?.status === 200) {
-      console.log("Logged in!");
-      localStorage.setItem("accessToken", result.data.accessToken);
-      localStorage.setItem('userId', result.data.userId);
-      // sets authed to true in root component.
-      props.setAuth();
-      history.push("/dashboard");
-    } else {
+  if (login.isSuccess) {
+    console.log("Logged in!");
+    localStorage.setItem("accessToken", login.data.accessToken);
+    localStorage.setItem("userId", login.data.userId);
+    // sets authed to true in root component.
+    props.setAuth();
+    history.push("/dashboard");
+  }
+
+  useEffect(() => {
+    if (login.isError) {
       setClosed(false);
       setStateMessage("Email or Password is incorrect");
       console.log("Error");
     }
-  };
+  }, [login]);
+
+  if (login.isLoading) {
+    return (
+      <Flex align="center" justifyContent="center">
+        <Loading />
+      </Flex>
+    );
+  }
 
   return (
     <Flex
