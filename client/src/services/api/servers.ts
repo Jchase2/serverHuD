@@ -16,6 +16,7 @@ export function useGetIndServer(id: string) {
       });
       return data;
     },
+    onError: (error: any) => error,
     // Since we're getting updates with sockets,
     // no need to mark cache data as stale and refetch it.
     staleTime: Infinity,
@@ -37,6 +38,10 @@ export function useGetServers() {
       });
       return data;
     },
+    onError: (error: any) => {
+      console.log("ERROR RESPONSE: ", error.response)
+      return error;
+    }
   });
 }
 
@@ -53,6 +58,7 @@ export function useGetUpData(id: string) {
       });
       return data;
     },
+    onError: (error: any) => error.response,
     // Since we're getting updates with sockets,
     // no need to mark cache data as stale and refetch it.
     staleTime: Infinity,
@@ -81,6 +87,7 @@ export function useDeleteServer(id: string) {
         queryKey: [`server-list-${userId}`],
       });
     },
+    onError: (error: any) => error.response
   });
 }
 
@@ -103,6 +110,7 @@ export function useAddServer() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`server-list-${userId}`] });
     },
+    onError: (error: any) => error.response
   });
 }
 

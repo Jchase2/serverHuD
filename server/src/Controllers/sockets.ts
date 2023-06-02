@@ -12,23 +12,29 @@ import { getMonitoredUpInfo } from "../Utils/apiUtils";
 // This will check for all updates with different intervals using the same socket.
 // This way we mimize the number of open sockets and setIntervals instances.
 export function sioUpCheck(socket: Socket) {
+  let userid = getUserId(socket.handshake.auth.token);
   console.log("SIO UP CHECK CALLED");
   let upInterval: ReturnType<typeof setInterval>;
   let intervals: any = {};
-  socket.on("upCheck", async (data) => {
-    console.log("UPCHECK RECIEVED");
-    let strId = `${data.url}-${data.id}`;
-    // Make sure we haven't already started an interval for this.
-    if (!intervals[strId]) {
-      intervals[strId] = true;
-      console.log("Setting URL Interval.");
-      upInterval = setInterval(async function () {
-        urlDbChecker(data, socket);
-        sslDbChecker(data, socket);
-        urlLiveCheck(data, socket);
-      }, 10000);
-    }
-  });
+
+  if(userid > 0) {
+    socket.on("upCheck", async (data) => {
+      console.log("UPCHECK RECIEVED");
+      let strId = `${data.url}-${data.id}`;
+      // Make sure we haven't already started an interval for this.
+      if (!intervals[strId]) {
+        intervals[strId] = true;
+        console.log("Setting URL Interval.");
+        upInterval = setInterval(async function () {
+          urlDbChecker(data, socket);
+          sslDbChecker(data, socket);
+          urlLiveCheck(data, socket);
+        }, 10000);
+      }
+    });
+  } else {
+    console.log("Invalid User for UpCheck.")
+  }
 
   socket.on("disconnect", () => {
     console.log("Disconnect Recieved: Clearing interval.");
@@ -39,12 +45,16 @@ export function sioUpCheck(socket: Socket) {
 
 const urlLiveCheck = async (data: any, socket: Socket) => {
   let userid = getUserId(socket.handshake.auth.token);
-  let res = await getMonitoredUpInfo(data.id, userid);
-  socket.emit("liveServerUpdate", {
-    id: data.id,
-    percentageUp: res.percentageUp,
-    percentageDown: res.percentageDown,
-  });
+  try {
+    let res = await getMonitoredUpInfo(data.id, userid);
+    socket.emit("liveServerUpdate", {
+      id: data.id,
+      percentageUp: res.percentageUp,
+      percentageDown: res.percentageDown,
+    });
+  } catch (err) {
+    console.log("LIVE CHECK ERROR: ", err)
+  }
 };
 
 // Check status of url endpoint.

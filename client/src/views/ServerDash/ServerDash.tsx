@@ -24,7 +24,7 @@ const ServerDash = (props: any) => {
   const parts = location.pathname.split("/");
   const paramStr = parts[parts.length - 1];
   const deleteServer = useDeleteServer(paramStr);
-  const { data, isLoading, isError } = useGetIndServer(paramStr);
+  const { data, isLoading, isError, error } = useGetIndServer(paramStr);
   const upData = useGetUpData(paramStr);
 
   useReactQuerySubscription();
@@ -56,7 +56,15 @@ const ServerDash = (props: any) => {
     );
 
   // TODO: Replace with error component.
-  if (isError) return <p>Error.</p>;
+  if (isError) {
+    // If not logged in or token expired,
+    // push to login screen.
+    if(error.response.status === 401) {
+      history.push("/login");
+    }
+    // TODO: Replace with error component.
+    return <p>ERROR</p>
+  }
 
   return (
     <Container centerContent width={'100%'} maxWidth={'100%'}>

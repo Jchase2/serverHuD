@@ -13,6 +13,7 @@ import {
 import { Loading } from "../../components/Loading/Loading";
 import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
+import { useHistory } from "react-router";
 
 const Dashboard = (props: any) => {
 
@@ -20,6 +21,7 @@ const Dashboard = (props: any) => {
   const [closed, setClosed] = useState(true);
   const { data, isLoading, isError, error } = useGetServers();
   const addNewServer = useAddServer();
+  const history = useHistory();
 
   useEffect(() => {
     if(!socket.connected) {
@@ -46,7 +48,18 @@ const Dashboard = (props: any) => {
       </Container>
     );
 
-    if(error instanceof Error) setStateMessage(error.message);
+      // TODO: Replace with error component.
+  if (isError) {
+    // If not logged in or token expired,
+    // push to login screen.
+    if(error.response.status === 401) {
+      history.push("/login");
+    } else {
+      setStateMessage(error.response.data)
+    }
+    // TODO: Replace with error component.
+    return <p>ERROR</p>
+  }
 
   return (
     <Flex direction={'column'} align={'center'} justify={'center'}>
