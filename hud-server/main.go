@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/exec"
 	"time"
@@ -13,8 +14,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
+	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
+	"github.com/shirou/gopsutil/mem"
 )
 
 // GetStatus returns http status of url or ip
@@ -81,6 +84,18 @@ func GetDiskUsage() uint64 {
 	return diskUsage.Free / 1024 / 1024 / 1024
 }
 
+// GetMemUsage gets % of memory used.
+func GetMemUsage() float64 {
+	var memUsage, _ = mem.VirtualMemory()
+	return math.Round(memUsage.UsedPercent*100) / 100
+}
+
+// GetCpuUsage gets % of all cpu's used.
+func GetCpuUsage() float64 {
+	var cpuUsage, _ = cpu.Percent(0, false)
+	return math.Round(cpuUsage[0]*100) / 100
+}
+
 // Struct for Login
 type LoginReq struct {
 	Key string
@@ -132,6 +147,8 @@ func initRouter() *gin.Engine {
 					"uptimeInHours":         GetUptime(),
 					"gbFreeOnCurrPartition": GetDiskUsage(),
 					"upgrades":              GetUpgradeable(),
+					"memUsage":              GetMemUsage(),
+					"cpuUsage":              GetCpuUsage(),
 				})
 			})
 
