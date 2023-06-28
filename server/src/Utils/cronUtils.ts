@@ -1,8 +1,11 @@
 import { LiveServer } from "../Models/liveServer.model";
 import { Cron, scheduledJobs } from "croner";
-import { isUp, getSslDetails } from "./serverDetails";
+import { isUp, getSslDetails, hudServerData } from "./serverDetails";
 import { Server } from "../Models/server.model";
 
+
+// Create a cron job for a given URL, userid and server id.
+// This job monitors the up status of the endpoint.
 export const setupUrlCron = async (url: string, userid: number, id: number) => {
   let server = await Server.findOne({
     where: { id: id },
@@ -17,12 +20,12 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
       let checkUp = await isUp(url);
       let currStatus = await LiveServer.findOne({
         where: { serverid: server?.id },
-        attributes: ["status", "sslStatus"],
+        attributes: ["status", "sslStatus", "diskSpace", "memUsage", "cpuUsage"],
         order: [["time", "DESC"]],
       });
 
       if (checkUp !== currStatus?.dataValues.status) {
-        let resp = await LiveServer.create({
+        await LiveServer.create({
           status: checkUp,
           url: url,
           userid: userid,
@@ -36,6 +39,8 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
   return false;
 };
 
+// Create a cron job for a given SSL URL, userid and server id.
+// This job monitors the SSL status of the endpoint.
 export const setupSslCron = async (url: string, userid: number, id: number) => {
   let server = await Server.findOne({
     where: { id: id },
@@ -46,9 +51,8 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
 
   if (!jobArray.includes(jobName)) {
     console.log("Adding ", `${url}-ssl-${id}`, " to job list.");
-    // TODO: Change this from 60 seconds to 5 minutes.
-    // No need to check SSL every minute.
-    let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
+    // Checking SSL every 5 minutes.
+    let job = Cron("* 5 * * * *", { name: jobName }, async () => {
       let checkSsl: any = await getSslDetails(url);
 
       // First we're going to update liveServer time series data,
@@ -60,9 +64,11 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
       });
 
       if (
-        (checkSsl.errno && currStatus?.dataValues.sslStatus !== "false") || // if no ssl and we're not storing false
+        // if no ssl and we're not storing false
+        (checkSsl.errno && currStatus?.dataValues.sslStatus !== "false") ||
         (checkSsl.valid &&
-          checkSsl?.valid?.toString() !== currStatus?.dataValues.sslStatus) // or if result of ssl isn't equal to stored ssl status
+          // or if result of ssl isn't equal to stored ssl status
+          checkSsl?.valid?.toString() !== currStatus?.dataValues.sslStatus)
       ) {
         let resp = await LiveServer.create({
           status: currStatus?.dataValues.status,
@@ -95,13 +101,66 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
   return false;
 };
 
-// Write util to start all jobs for servers in postgres where
+
+// Create a cron job for a given optional hud-server URL,
+// userid and server id. This job monitors a hud-server endpoint.
+export const setupOptionalCron = async (url: string, userid: number, id: number) => {
+  let server = await Server.findOne({
+    where: { id: id },
+  });
+  if(server?.dataValues.optionalUrl) {
+    let jobName = `${server?.dataValues.optionalUrl}-optional-${server?.dataValues.id}`;
+    let jobArray = scheduledJobs.map((elem) => elem.name);
+
+    if (!jobArray.includes(jobName)) {
+      console.log("Adding ", `${server?.dataValues.optionalUrl}-optional-${id}`, " to job list.");
+
+      // TODO: Review how often we want to get this data for performance.
+      let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
+
+        console.log("SERVER DATAVALS: ", server?.dataValues)
+
+        let optionalServerData = server?.dataValues.optionalUrl ? await hudServerData(server?.dataValues.optionalUrl) : null;
+        let currStatus = await LiveServer.findOne({
+          where: { serverid: server?.id },
+          attributes: ["status", "sslStatus", "diskSpace", "memUsage", "cpuUsage"],
+          order: [["time", "DESC"]],
+        });
+
+        console.log("OPTIONAL SERVER DATA: ", optionalServerData)
+
+        await LiveServer.create({
+          status: currStatus?.status,
+          url: url,
+          userid: userid,
+          serverid: id,
+          sslStatus: currStatus?.dataValues.sslStatus,
+          diskSpace: optionalServerData?.diskSpace ? optionalServerData?.diskSpace : -1,
+          memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : -1,
+          cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : -1
+        });
+
+        await Server.update(
+          {
+            uptime: optionalServerData?.uptimeInHours ? optionalServerData?.uptimeInHours : -1,
+            upgrades: optionalServerData?.upgrades ? optionalServerData?.upgrades : "empty",
+          },
+          { where: { id: id } }
+        );
+
+      });
+      return job.isRunning();
+    }
+  }
+  return false;
+};
+
+// Util to start all jobs for servers in postgres if
 // those servers are not running.
 export const startServerJobs = async () => {
   let servArr = await Server.findAll();
   servArr.map(async (server) => {
-
-    let { url, userid, id } = server;
+    let { url, userid, id, optionalUrl } = server;
 
     // Grab the last status of this server.
     let currStatus = await LiveServer.findOne({
@@ -116,16 +175,24 @@ export const startServerJobs = async () => {
       console.log("Creating first entry.");
       let checkUp = await isUp(url);
       let checkSsl: any = await getSslDetails(url);
+      let optionalData: any = optionalUrl ? await hudServerData(optionalUrl) : null;
+
+      console.log("OPTAIONAL DATA: ", optionalData)
+
       await LiveServer.create({
         status: checkUp,
         url: url,
         userid: userid,
         serverid: id,
         sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
+        diskSpace: optionalData?.diskSpace ? optionalData.diskSpace : -1,
+        memUsage: optionalData?.memUsage ? optionalData.memUsage : -1,
+        cpuUsage: optionalData?.cpuUsage ? optionalData.cpuUsage : -1
       });
     }
 
     setupUrlCron(url, userid, id);
     setupSslCron(url, userid, id);
+    setupOptionalCron(url, userid, id);
   });
 };

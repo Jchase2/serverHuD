@@ -66,6 +66,27 @@ export function useGetUpData(id: string) {
   });
 }
 
+export function useGetServerUsage(id: string) {
+  return useQuery({
+    queryKey: [`server-usage-${id}`],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: "get",
+        url: process.env.REACT_APP_BACKEND_URL + `/servers/usage/${id}`,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      return data;
+    },
+    onError: (error: any) => error.response,
+    // Since we're getting updates with sockets,
+    // no need to mark cache data as stale and refetch it.
+    staleTime: Infinity,
+    cacheTime: Infinity,
+  });
+}
+
 export function useDeleteServer(id: string) {
   const userId = getUserId();
   return useMutation({

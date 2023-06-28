@@ -134,26 +134,26 @@ func initRouter() *gin.Engine {
 	config.AllowAllOrigins = true
 	r.Use(cors.New(config))
 	api := r.Group("/api")
-	{
-		r.POST("/login", Login)
+	api.POST("/login", Login)
 
-		secured := api.Group("/secured").Use(middleware.Auth())
-		{
-			secured.GET("/serverinfo", func(c *gin.Context) {
-				var req GetReq
-				c.BindJSON(&req)
-				c.JSON(200, gin.H{
-					"hostName":              GetHostname(),
-					"uptimeInHours":         GetUptime(),
-					"gbFreeOnCurrPartition": GetDiskUsage(),
-					"upgrades":              GetUpgradeable(),
-					"memUsage":              GetMemUsage(),
-					"cpuUsage":              GetCpuUsage(),
-				})
-			})
+	serverinfo := api.Group("/serverinfo").Use(middleware.Auth())
+	serverinfo.GET("/", func(c *gin.Context) {
+		var req GetReq
 
+		if err := c.Bind(&req); err != nil {
+			println("ERROR WITH BIND: ", err)
 		}
-	}
+
+		c.JSON(200, gin.H{
+			"hostName":      GetHostname(),
+			"uptimeInHours": GetUptime(),
+			"diskSpace":     GetDiskUsage(),
+			"upgrades":      GetUpgradeable(),
+			"memUsage":      GetMemUsage(),
+			"cpuUsage":      GetCpuUsage(),
+		})
+	})
+
 	return r
 }
 

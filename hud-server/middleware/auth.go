@@ -16,6 +16,7 @@ func Auth() gin.HandlerFunc {
 		println("TOKEN STRING IS: ", tokenString)
 
 		if tokenString == "" {
+			println("ERROR IN GO AUTH RUNNING")
 			context.JSON(401, gin.H{"error": "request does not contain an access token"})
 			context.Abort()
 			return
@@ -35,6 +36,7 @@ func Auth() gin.HandlerFunc {
 		}
 
 		if err != nil {
+			println("ERROR IN GO AUTH RUNNING")
 			context.JSON(401, gin.H{"error": err.Error()})
 			context.Abort()
 			return

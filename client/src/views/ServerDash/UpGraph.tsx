@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import { VictoryPie } from "victory";
 
 const UpGraph = (props: any) => {
+  const [graphicData, setGraphicData] = useState({
+    percentageUp: 0,
+    percentageDown: 0,
+  });
 
-  const [graphicData, setGraphicData] = useState({ percentageUp: 0, percentageDown: 0 });
+  console.log("GRAPHIC DATA: ", graphicData)
+
   const [endAngle, setEndAngle] = useState(0);
 
   useEffect(() => {
@@ -23,21 +28,21 @@ const UpGraph = (props: any) => {
   ];
 
   return (
-      <VictoryPie
-        data={data}
-        colorScale={["#003f5c", "#ffa600"]}
-        animate={{
-          duration: 2000,
-        }}
-        endAngle={endAngle}
-        padding={{ right: 100, left: 100, top: 100, bottom: 100 }}
-        labels={(datum) => `${datum.datum.y.toFixed(2)}% ${datum.datum.x}`}
-        // style={{
-        //     labels: {
-        //         fill: "#cccccc"
-        //     }
-        // }}
-      />
+    <VictoryPie
+      data={data}
+      colorScale={["#003f5c", "#ffa600"]}
+      animate={{
+        duration: 2000,
+      }}
+      endAngle={endAngle}
+      padding={{ right: 100, left: 100, top: 0, bottom: 100 }}
+      labels={(datum) => `${datum.datum.y.toFixed(2)}% ${datum.datum.x}`}
+      style={{
+        data: {
+          fillOpacity: 0.7,
+        },
+      }}
+    />
   );
 };
 

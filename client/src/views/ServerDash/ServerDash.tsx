@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useDeleteServer } from "../../services/api/api";
+import { useDeleteServer, useGetServerUsage } from "../../services/api/api";
 
 import {
   Box,
@@ -8,6 +8,7 @@ import {
   Center,
   Container,
   Heading,
+  Wrap,
 } from "@chakra-ui/react";
 
 import { useHistory } from "react-router-dom";
@@ -16,9 +17,9 @@ import { useGetIndServer, useGetUpData } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
+import ResourceUsage from "./ResourceUsage";
 
 const ServerDash = (props: any) => {
-
   const history = useHistory();
   const location = useLocation();
   const parts = location.pathname.split("/");
@@ -27,17 +28,23 @@ const ServerDash = (props: any) => {
   const { data, isLoading, isError, error } = useGetIndServer(paramStr);
   const upData = useGetUpData(paramStr);
 
+  const {
+    isLoading: serverUsageLoading,
+    error: serverUsageError,
+    data: serverUsageData,
+  } = useGetServerUsage(paramStr);
+
   useReactQuerySubscription();
 
   useEffect(() => {
-    if(!socket.connected) {
+    if (!socket.connected) {
       socket.connect();
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (data) {
-      console.log("EMITTING UPCHECK AND LIVE CHECK")
+      console.log("EMITTING UPCHECK AND LIVE CHECK");
       socket.emit("upCheck", {
         id: data.id,
         url: data.url,
@@ -48,28 +55,44 @@ const ServerDash = (props: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
-  if (isLoading || upData.isLoading)
+  if (isLoading || upData.isLoading || serverUsageLoading)
     return (
       <Container centerContent>
         <Loading />
       </Container>
     );
 
+  if (serverUsageError) {
+    console.log("SERVER USAGE ERROR!!!");
+  }
+
   // TODO: Replace with error component.
   if (isError) {
     // If not logged in or token expired,
     // push to login screen.
-    if(error.response.status === 401) {
+    if (error.response.status === 401) {
       history.push("/login");
     }
     // TODO: Replace with error component.
-    return <p>ERROR</p>
+    return <p>ERROR</p>;
   }
 
+  console.log("SERVER USAGE DATA: ", serverUsageData);
+
   return (
-    <Container centerContent width={'100%'} maxWidth={'100%'}>
+    <Container centerContent width={"100%"} maxWidth={"100%"}>
       <Heading size="md">Server: {data.url}</Heading>
-      <ServerStatus serverData={data} upData={upData.data} />
+      <Wrap minW={"80vw"} justify={"center"} mt={2}>
+        <ServerStatus serverData={data} upData={upData.data} />
+        {serverUsageData?.memObj?.length > 1 ||
+        serverUsageData?.cpuObj?.length > 1 ? (
+          <ResourceUsage
+            serverData={data}
+            upData={upData.data}
+            serverUsageData={serverUsageData}
+          />
+        ) : null}
+      </Wrap>
       <Center>
         <Box p={8} m={2}>
           <Button

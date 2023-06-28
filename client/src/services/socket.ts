@@ -42,6 +42,17 @@ export const useReactQuerySubscription = () => {
         return mergedData;
       });
     });
+
+    socket.on("resourcesUpdate", (data) => {
+
+      console.log("RECIEVED RESOURCES UPDATE WITH DATA: ", data)
+
+      const queryKey = [`server-usage-${data.id}`].filter(Boolean);
+      queryClient.setQueryData(queryKey, (oldData: any) => {
+        return data?.resourceObj
+      })
+    });
+
     return () => {
       console.log("DISCONNECTING.");
       socket.disconnect();

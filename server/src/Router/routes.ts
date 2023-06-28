@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import {registerUser, loginUser, getUserServers, addServer, getIndServer, deleteServer, getTimeseriesUpData} from '../Controllers/api';
+import {registerUser, loginUser, getUserServers, addServer, getIndServer, deleteServer, getTimeseriesUpData, getServerUsage} from '../Controllers/api';
 import jwt from 'koa-jwt';
 
 const router = new Router();
@@ -16,6 +16,7 @@ router
   .get('/servers', getUserServers)
   .get('/servers/:id', getIndServer)
   .get('/servers/updata/:id', getTimeseriesUpData)
+  .get('/servers/usage/:id', getServerUsage)
   .put('/servers/delete/:id', deleteServer)
   .post('/servers', addServer)
 

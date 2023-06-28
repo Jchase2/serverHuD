@@ -1,3 +1,4 @@
+import * as React from 'react';
 import jwt_decode from "jwt-decode";
 
 export const getUserId = () => {

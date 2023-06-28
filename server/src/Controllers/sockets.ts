@@ -3,7 +3,7 @@ import { getUserId, verifyToken } from "../Utils/jwt";
 import { Socket } from "socket.io";
 import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
-import { getMonitoredUpInfo } from "../Utils/apiUtils";
+import { getMonitoredUsageData, getMonitoredUpInfo } from "../Utils/apiUtils";
 
 // TODO: Add more checks so this doesn't crash with bad input.
 
@@ -29,6 +29,7 @@ export function sioUpCheck(socket: Socket) {
           urlDbChecker(data, socket);
           sslDbChecker(data, socket);
           urlLiveCheck(data, socket);
+          hudServerData(data, socket);
         }, 10000);
       }
     });
@@ -54,6 +55,26 @@ const urlLiveCheck = async (data: any, socket: Socket) => {
     });
   } catch (err) {
     console.log("LIVE CHECK ERROR: ", err)
+  }
+};
+
+const hudServerData = async (data: any, socket: Socket) => {
+  let userid = getUserId(socket.handshake.auth.token);
+  try {
+    let servInfo = await Server.findOne({
+      where: { id: data.id, userid: userid },
+    });
+
+    if(servInfo?.optionalUrl) {
+      let res = await getMonitoredUsageData(data.id, userid);
+      socket.emit("resourcesUpdate", {
+        id: data.id,
+        resourceObj: res
+      });
+    }
+
+  } catch (err) {
+    console.log("HUD CHECK ERROR: ", err)
   }
 };
 

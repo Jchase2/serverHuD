@@ -17,26 +17,32 @@ import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
 
 const Server = (props: any) => {
+  const {
+    isLoading: indServerLoading,
+    error: indServerError,
+    data: indServerData,
+  } = useGetIndServer(props.serverData.id);
 
-  const { data, isLoading, isError } = useGetIndServer(props.serverData.id);
+  console.log("DATA FROM SERVER REACT COMP: ", indServerData);
 
   useReactQuerySubscription();
 
   const history = useHistory();
 
   useEffect(() => {
-    if (data) {
+    if (indServerData) {
       socket.emit("upCheck", {
-        id: data.id,
-        url: data.url,
-        status: data.status,
-        sslStatus: data.sslStatus,
+        id: indServerData.id,
+        url: indServerData.url,
+        optionalUrl: indServerData.optionalUrl,
+        status: indServerData.status,
+        sslStatus: indServerData.sslStatus,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [indServerData]);
 
-  if (isLoading)
+  if (indServerLoading)
     return (
       <Container centerContent>
         <Loading />
@@ -44,11 +50,11 @@ const Server = (props: any) => {
     );
 
   // TODO: Replace with error component.
-  if (isError) return <p>Error.</p>;
+  if (indServerError) return <p>Error.</p>;
 
   return (
     <Card align="center" m={2} minW="20vw" display={"flex"}>
-      {data.status === "down" ? (
+      {indServerData.status === "down" ? (
         <CardHeader
           borderRadius="md"
           w={"100%"}
@@ -56,18 +62,18 @@ const Server = (props: any) => {
           backgroundColor="#e40000"
         >
           <Box>
-            <Text display={"flex"}>{data.name}</Text>
+            <Text display={"flex"}>{indServerData.name}</Text>
           </Box>
         </CardHeader>
-      ) : data.status === "up" &&
-        data.sslStatus === "false" ? (
+      ) : indServerData.status === "up" &&
+        indServerData.sslStatus === "false" ? (
         <CardHeader
           borderRadius="md"
           w={"100%"}
           textAlign={"center"}
           backgroundColor="#FF8800"
         >
-          {data.name}
+          {indServerData.name}
         </CardHeader>
       ) : (
         <CardHeader
@@ -77,14 +83,14 @@ const Server = (props: any) => {
           textAlign={"center"}
           backgroundColor="#2f4858"
         >
-          {data.name}
+          {indServerData.name}
         </CardHeader>
       )}
       <CardBody m={2}>
-        <UpStatus serverData={data} />
+        <UpStatus serverData={indServerData} />
       </CardBody>
       <CardFooter>
-        <Button onClick={() => history.push("/server/" + data.id)}>
+        <Button onClick={() => history.push("/server/" + indServerData.id)}>
           More Info
         </Button>
       </CardFooter>

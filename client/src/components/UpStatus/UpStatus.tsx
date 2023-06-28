@@ -8,12 +8,11 @@ import { CiServer } from "react-icons/ci";
 
 export const UpStatus = (props: any) => {
   const { serverData } = props;
-
   return (
     <Stack>
       <HStack>
         <Icon as={CiServer} mt={.5} />
-        <Text>Host: {serverData?.url}</Text>
+        <Text m={0}>Host: {serverData?.url}</Text>
       </HStack>
       {serverData?.status === "up" ? (
         <Text>

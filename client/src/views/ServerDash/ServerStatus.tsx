@@ -1,4 +1,11 @@
-import { Card, CardBody, Heading, Stack } from "@chakra-ui/react";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Center,
+  Heading,
+  Stack,
+} from "@chakra-ui/react";
 import UpGraph from "./UpGraph";
 import { UpStatus } from "../../components/UpStatus/UpStatus";
 
@@ -13,23 +20,16 @@ const ServerStatus = (props: any) => {
       m={4}
     >
       <Stack>
-        <CardBody>
-          <UpStatus serverData={serverData} />
-          {serverData?.uptime?.Hours > 0 || serverData?.uptime?.Days > 0 ? (
-            <>
-              Uptime:{" "}
-              {serverData?.uptime.Days +
-                " Days " +
-                serverData.uptime.Hours +
-                " Hours "}
-            </>
-          ) : null}
+        <CardHeader textAlign={'center'}>
+          <Heading size="md">Up Status</Heading>
+        </CardHeader>
+        <CardBody p={0}>
+          <Center>
+            <UpStatus serverData={serverData} />
+          </Center>
+          <UpGraph data={upData} />
         </CardBody>
       </Stack>
-      <CardBody textAlign={"center"} w={"50%"}>
-        <Heading size="md">Tracked Uptime</Heading>
-        <UpGraph data={upData} />
-      </CardBody>
     </Card>
   );
 };

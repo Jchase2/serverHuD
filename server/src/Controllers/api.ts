@@ -4,12 +4,13 @@ import bcrypt from "bcrypt";
 import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
-import { setupSslCron, setupUrlCron } from "../Utils/cronUtils";
+import { setupOptionalCron, setupSslCron, setupUrlCron } from "../Utils/cronUtils";
 import { LiveServer } from "../Models/liveServer.model";
 import {
   SplitTime,
   getAllCombinedState,
   getMonitoredUpInfo,
+  getMonitoredUsageData,
   getOneCombinedState,
 } from "../Utils/apiUtils";
 
@@ -45,6 +46,9 @@ export const registerUser = async (ctx: any) => {
 };
 
 export const loginUser = async (ctx: any) => {
+
+  console.log("LOGIN USER RAN")
+
   try {
     await userSchema.validateAsync({
       email: ctx.request.body.email,
@@ -97,6 +101,20 @@ export const getIndServer = async (ctx: any) => {
   }
 };
 
+export const getServerUsage = async (ctx: any) => {
+  const data = await getMonitoredUsageData(ctx.params.id, ctx.state.user._id);
+
+  console.log("SENDING UP: ", data)
+
+  if(data) {
+    ctx.body = data;
+    ctx.status = 200;
+  } else {
+    ctx.body = "Error retrieving data.";
+    ctx.status = 404;
+  }
+}
+
 export const deleteServer = async (ctx: any) => {
   try {
     await Server.destroy({
@@ -143,6 +161,9 @@ export const addServer = async (ctx: any) => {
 
   let sslInfo: any = await getSslDetails(url);
   if (sslInfo.errno) sslInfo.valid = false;
+
+  console.log("CTX REQUEST BODY: ", ctx.request.body)
+
   const hudData = ctx.request.body.optionalUrl
     ? await hudServerData(ctx.request.body.optionalUrl)
     : null;
@@ -157,7 +178,7 @@ export const addServer = async (ctx: any) => {
       name: ctx.request.body.name,
       sslExpiry: sslInfo.daysRemaining,
       uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
-      upgrades: hudData ? hudData.upgrades : "",
+      upgrades: hudData ? hudData.upgrades : "empty",
     });
 
     if (!user) throw Error("User not found!");
@@ -170,11 +191,14 @@ export const addServer = async (ctx: any) => {
       status: status,
       sslStatus: sslInfo.valid.toString(),
       diskSpace: hudData ? hudData.gbFreeOnCurrPartition : -1,
+      memUsage: hudData ? hudData.memUsage : -1,
+      cpuUsage: hudData ? hudData.cpuUsage : -1
     });
 
     await LiveServer.create(liveValue);
     await setupUrlCron(url, ctx.state.user._id, dbResp?.dataValues.id);
     await setupSslCron(url, ctx.state.user._id, dbResp?.dataValues.id);
+    await setupOptionalCron(url, ctx.state.user._id, dbResp.dataValues.id);
 
     ctx.body = { Status: "Server added.", id: dbResp.id };
     ctx.status = 201;

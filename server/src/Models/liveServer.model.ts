@@ -7,6 +7,7 @@ import {
 } from "sequelize-typescript";
 
 import { User } from "./user.model";
+import { Server } from "./server.model";
 
 @Table({ timestamps: false, tableName: "liveserver" })
 export class LiveServer extends Model {
@@ -17,6 +18,7 @@ export class LiveServer extends Model {
   @Column
   userid!: number;
 
+  @ForeignKey(() => Server)
   @Column
   serverid!: number
 
@@ -31,4 +33,11 @@ export class LiveServer extends Model {
 
   @Column
   diskSpace!: number;
+
+  @Column({ type: DataType.DOUBLE })
+  memUsage!: number;
+
+  @Column({ type: DataType.DOUBLE })
+  cpuUsage!: number;
+
 }
