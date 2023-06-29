@@ -9,7 +9,7 @@ import { getMonitoredUsageData, getMonitoredUpInfo } from "../Utils/apiUtils";
 
 // Register for status checking every 10 seconds..
 // Only take action if current UI status is different than last stored status.
-// This will check for all updates with different jobs using the same socket.
+// This will check for all updates with different intervals using the same socket.
 export function sioUpCheck(socket: Socket) {
   let userid = getUserId(socket.handshake.auth.token);
   console.log("SIO UP CHECK CALLED, SOCKET ID: ", socket.id);

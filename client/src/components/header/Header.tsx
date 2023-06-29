@@ -1,71 +1,89 @@
-import { Header, Box,  ResponsiveContext, Nav, Menu } from "grommet";
-import { Button } from "@chakra-ui/react"
+import {
+  Box,
+  Flex,
+  Button,
+  Menu,
+  useColorModeValue,
+  Stack,
+  useColorMode,
+  HStack,
+  Link,
+} from "@chakra-ui/react";
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom";
 
 const ClientHeader = (props: any) => {
-  const loginAndRegister = () => {
-    return (
-      <Box direction="row" alignContent="between" gap="xsmall">
-        <Button
+  const { colorMode, toggleColorMode } = useColorMode();
 
+  const LoginAndRegister = () => {
+    return (
+      <HStack>
+        <Link
+          px={2}
+          py={1}
+          rounded={"md"}
+          _hover={{
+            textDecoration: "none",
+            bg: useColorModeValue("gray.200", "gray.700"),
+          }}
           onClick={() => history.push("/register")}
         >
           Register
-        </Button>
-        <Button colorScheme="facebook" onClick={() => history.push("/login")}>
+        </Link>
+        <Link
+          px={2}
+          py={1}
+          rounded={"md"}
+          _hover={{
+            textDecoration: "none",
+            bg: useColorModeValue("gray.200", "gray.700"),
+          }}
+          onClick={() => history.push("/login")}
+        >
           Login
-        </Button>
-      </Box>
+        </Link>
+      </HStack>
     );
   };
 
-  const logout = () => {
+  const Logout = () => {
     return (
-      <Button
-        colorScheme="facebook"
+      <Link
+        px={2}
+        py={1}
+        rounded={"md"}
+        _hover={{
+          textDecoration: "none",
+          bg: useColorModeValue("gray.200", "gray.700"),
+        }}
         onClick={() => {
           props.globalLogOut();
           history.push("/");
         }}
       >
         Logout
-      </Button>
+      </Link>
     );
   };
 
   const history = useHistory();
+
   return (
-    <>
-      <Header
-        background="#b8c6db; background-image: linear-gradient(315deg, #b8c6db 0%, #f5f7fa 74%);"
-        pad="10px"
-      >
-        <Box direction="row" align="center" gap="small" pad="10px">
-          {<Button onClick={() => history.push("/")}>ServerHuD</Button>}
-        </Box>
-        <ResponsiveContext.Consumer>
-          {(responsive) =>
-            responsive === "small" ? (
-              <Menu
-                label="Click me"
-                color="grey"
-                items={[
-                  {
-                    label: "Register",
-                    onClick: () => history.push("/register"),
-                  },
-                  { label: "Login", onClick: () => history.push("/login") },
-                ]}
-              />
-            ) : (
-              <Nav direction="row">
-                {props.isAuthed === "false" ? loginAndRegister() : logout()}
-              </Nav>
-            )
-          }
-        </ResponsiveContext.Consumer>
-      </Header>
-    </>
+    <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
+      <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
+        {<Button mr={2} onClick={() => history.push("/")}>ServerHuD</Button>}
+        <Flex alignItems={"center"}>
+          <Stack direction={"row"} spacing={5}>
+            <Button onClick={toggleColorMode}>
+              {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            </Button>
+            <Menu>
+              {props.isAuthed === "false" ? <LoginAndRegister /> : <Logout />}
+            </Menu>
+          </Stack>
+        </Flex>
+      </Flex>
+    </Box>
   );
 };
 
