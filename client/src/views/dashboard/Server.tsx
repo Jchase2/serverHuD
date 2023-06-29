@@ -23,10 +23,7 @@ const Server = (props: any) => {
     data: indServerData,
   } = useGetIndServer(props.serverData.id);
 
-  console.log("DATA FROM SERVER REACT COMP: ", indServerData);
-
   useReactQuerySubscription();
-
   const history = useHistory();
 
   useEffect(() => {

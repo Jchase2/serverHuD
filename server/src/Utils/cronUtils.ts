@@ -14,6 +14,8 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
   let jobName = `${server?.dataValues.url}-status-${server?.dataValues.id}`;
   let jobArray = scheduledJobs.map((elem) => elem.name);
 
+  console.log("JOB ARRAY: ", jobArray)
+
   if (!jobArray.includes(jobName)) {
     console.log("Adding ", `${url}-status-${id}`, " to job list.");
     let job = Cron("*/60 * * * * *", { name: jobName }, async () => {

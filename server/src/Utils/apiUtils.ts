@@ -217,8 +217,6 @@ export const getMonitoredUsageData = async (id: number, userid: number) => {
       for (const elem of timeArr) {
         let res = await fiveMinuteLiveData(new Date(elem), id, userid);
         let avg = averageFiveMinuteData(res);
-
-        console.log("AVG IS: ", avg);
         retArr.push(avg);
       }
 

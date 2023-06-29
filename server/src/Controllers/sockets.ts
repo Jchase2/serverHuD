@@ -4,43 +4,49 @@ import { Socket } from "socket.io";
 import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
 import { getMonitoredUsageData, getMonitoredUpInfo } from "../Utils/apiUtils";
+import { Cron, scheduledJobs } from "croner";
 
 // TODO: Add more checks so this doesn't crash with bad input.
 
 // Register for status checking every 10 seconds..
 // Only take action if current UI status is different than last stored status.
-// This will check for all updates with different intervals using the same socket.
-// This way we mimize the number of open sockets and setIntervals instances.
+// This will check for all updates with different jobs using the same socket.
 export function sioUpCheck(socket: Socket) {
   let userid = getUserId(socket.handshake.auth.token);
-  console.log("SIO UP CHECK CALLED");
-  let upInterval: ReturnType<typeof setInterval>;
-  let intervals: any = {};
-
+  console.log("SIO UP CHECK CALLED, SOCKET ID: ", socket.id);
+  let jobArray = scheduledJobs.map((elem) => elem.name);
+  // fix any
+  let localJobArr: any = [];
+  (socket as any).jobArr = [];
   if(userid > 0) {
-    socket.on("upCheck", async (data) => {
+    socket.on("upCheck", async(data) => {
       console.log("UPCHECK RECIEVED");
-      let strId = `${data.url}-${data.id}`;
-      // Make sure we haven't already started an interval for this.
-      if (!intervals[strId]) {
-        intervals[strId] = true;
-        console.log("Setting URL Interval.");
-        upInterval = setInterval(async function () {
+      let jobName = `sio-${data.url}-${data.id}`;
+      if(!jobArray.includes(jobName)){
+        localJobArr.push(jobName)
+        console.log("Adding ", jobName, " to job list.");
+        const job = Cron("*/10 * * * * *", { name: jobName }, async () => {
+          console.log("RUNNING IN CRON...")
           urlDbChecker(data, socket);
           sslDbChecker(data, socket);
           urlLiveCheck(data, socket);
           hudServerData(data, socket);
-        }, 10000);
+        });
+        return job.isRunning();
       }
-    });
+      return false;
+    })
   } else {
     console.log("Invalid User for UpCheck.")
   }
 
   socket.on("disconnect", () => {
-    console.log("Disconnect Recieved: Clearing interval.");
-    intervals = {};
-    clearInterval(upInterval);
+    for(let i = scheduledJobs.length - 1; i > 0; i--) {
+      if(localJobArr.includes(scheduledJobs[i].name)) {
+        scheduledJobs[i].stop();
+      }
+    }
+    return;
   });
 }
 

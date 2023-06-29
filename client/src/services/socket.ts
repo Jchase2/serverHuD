@@ -11,7 +11,7 @@ export const useReactQuerySubscription = () => {
 
   React.useEffect(() => {
     socket.on("connect", () => {
-      console.log("Global Socket Connected.");
+      console.log("Global Socket Connected WITH ID: ", socket.id);
     });
 
     socket.on("serverUpdate", (data, callback) => {
@@ -44,9 +44,6 @@ export const useReactQuerySubscription = () => {
     });
 
     socket.on("resourcesUpdate", (data) => {
-
-      console.log("RECIEVED RESOURCES UPDATE WITH DATA: ", data)
-
       const queryKey = [`server-usage-${data.id}`].filter(Boolean);
       queryClient.setQueryData(queryKey, (oldData: any) => {
         return data?.resourceObj
@@ -54,7 +51,7 @@ export const useReactQuerySubscription = () => {
     });
 
     return () => {
-      console.log("DISCONNECTING.");
+      console.log("DISCONNECTING ID: ", socket.id);
       socket.disconnect();
     };
   }, []);

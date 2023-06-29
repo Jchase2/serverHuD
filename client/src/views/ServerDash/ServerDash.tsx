@@ -63,7 +63,7 @@ const ServerDash = (props: any) => {
     );
 
   if (serverUsageError) {
-    console.log("SERVER USAGE ERROR!!!");
+    console.log("SERVER USAGE ERROR!");
   }
 
   // TODO: Replace with error component.
@@ -76,8 +76,6 @@ const ServerDash = (props: any) => {
     // TODO: Replace with error component.
     return <p>ERROR</p>;
   }
-
-  console.log("SERVER USAGE DATA: ", serverUsageData);
 
   return (
     <Container centerContent width={"100%"} maxWidth={"100%"}>
