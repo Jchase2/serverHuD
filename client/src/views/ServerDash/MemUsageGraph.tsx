@@ -1,3 +1,4 @@
+import { useColorMode } from "@chakra-ui/react";
 import {
   VictoryArea,
   VictoryAxis,
@@ -7,10 +8,11 @@ import {
 } from "victory";
 
 const MemUsageGraph = (props: any) => {
+  const { colorMode } = useColorMode();
 
   return (
     <VictoryChart height={200} width={600} theme={VictoryTheme.material}>
-      <VictoryLabel text="Memory Usage" x={225} y={30} />
+      <VictoryLabel text="Memory Usage" x={225} y={30} style={{ fill: colorMode === 'light' ? '' : 'gray' }} />
       <VictoryArea
         style={{
           data: {

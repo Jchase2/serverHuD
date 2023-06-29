@@ -5,6 +5,8 @@ import { useDeleteServer, useGetServerUsage } from "../../services/api/api";
 import {
   Box,
   Button,
+  Card,
+  CardBody,
   Center,
   Container,
   Heading,
@@ -18,6 +20,7 @@ import { Loading } from "../../components/Loading/Loading";
 import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
 import ResourceUsage from "./ResourceUsage";
+import Upgrades from "./Upgrades";
 
 const ServerDash = (props: any) => {
   const history = useHistory();
@@ -50,15 +53,15 @@ const ServerDash = (props: any) => {
         url: data.url,
         status: data.status,
         sslStatus: data.sslStatus,
-        enableHud: data.optionalUrl ? true : false
+        enableHud: data.optionalUrl ? true : false,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   useEffect(() => {
-    console.log("SERVER USAGE DATA CHANGED: ", serverUsageData)
-  }, [serverUsageData])
+    console.log("SERVER USAGE DATA CHANGED: ", serverUsageData);
+  }, [serverUsageData]);
 
   if (isLoading || upData.isLoading || serverUsageLoading)
     return (
@@ -84,7 +87,11 @@ const ServerDash = (props: any) => {
 
   return (
     <Container centerContent width={"100%"} maxWidth={"100%"}>
-      <Heading size="md">Server: {data.url}</Heading>
+      <Card m={6}>
+        <CardBody>
+          <Heading size="md">Server: {data.url}</Heading>
+        </CardBody>
+      </Card>
       <Wrap minW={"80vw"} justify={"center"} mt={2}>
         <ServerStatus serverData={data} upData={upData.data} />
         {serverUsageData?.memObj?.length > 1 ||
@@ -94,6 +101,9 @@ const ServerDash = (props: any) => {
             upData={upData.data}
             serverUsageData={serverUsageData}
           />
+        ) : null}
+        {data?.upgrades && data?.upgrades !== "empty" ? (
+          <Upgrades upgrades={data.upgrades} />
         ) : null}
       </Wrap>
       <Center>

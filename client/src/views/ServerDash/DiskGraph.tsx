@@ -1,13 +1,12 @@
-import { useColorMode } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { VictoryLabel, VictoryPie } from "victory";
+import { VictoryPie } from "victory";
 
-const UpGraph = (props: any) => {
+const DiskGraph = (props: any) => {
   const [graphicData, setGraphicData] = useState({
     percentageUp: 0,
     percentageDown: 0,
   });
-  const { colorMode } = useColorMode();
+
   const [endAngle, setEndAngle] = useState(0);
 
   useEffect(() => {
@@ -37,7 +36,6 @@ const UpGraph = (props: any) => {
       endAngle={endAngle}
       padding={{ right: 100, left: 100, top: 0, bottom: 100 }}
       labels={(datum) => `${datum.datum.y.toFixed(2)}% ${datum.datum.x}`}
-      labelComponent={<VictoryLabel style={{ fill: colorMode === 'light' ? '' : 'gray' }}/>}
       style={{
         data: {
           fillOpacity: 0.7,
@@ -47,4 +45,4 @@ const UpGraph = (props: any) => {
   );
 };
 
-export default UpGraph;
+export default DiskGraph;

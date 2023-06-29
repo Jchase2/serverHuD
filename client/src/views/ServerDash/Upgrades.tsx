@@ -1,75 +1,32 @@
-import { useState } from "react";
-import {
-  Main,
-  Box,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Button,
-} from "grommet";
-import { useHistory } from "react-router-dom";
+import { Card, CardBody, CardHeader, Stack, Text } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 
 const Upgrades = (props: any) => {
+  const { upgrades } = props;
+  const [upgradeString, setUpgradeString] = useState(upgrades)
+  useEffect(() => {
+    if(upgrades.includes('Listing...')) {
+      const result = upgrades.replace(/.*?Listing\.\.\./s, "");
+      setUpgradeString(result);
+    }
+  }, [upgrades])
 
-  interface IUptime {
-    Days: number,
-    Hours: number
-  }
-
-  interface IServer {
-    name: string;
-    id: string;
-    sslExpiry: number;
-    sslStatus: string;
-    status: string;
-    url: string;
-    uptime: IUptime;
-    upgrades: string
-  }
-  const [serverData] = useState<IServer>({
-    name: "",
-    id: "",
-    sslExpiry: 0,
-    sslStatus: "",
-    status: "",
-    url: "",
-    uptime: {Days: 0, Hours: 0},
-    upgrades: ''
-  });
-
-  const history = useHistory();
   return (
-    <Main align="center" justify="center">
-      <Card height="large" width="large" background="light-1">
-        {serverData.status === "down" ? (
-          <CardHeader background="status-error" pad="small">
-            {serverData.name}
-          </CardHeader>
-        ) : serverData.status === "up" && serverData.sslStatus === "false" ? (
-          <CardHeader background="status-warning" pad="small">
-            {serverData.name}
-          </CardHeader>
-        ) : (
-          <CardHeader background="dark-1" pad="small">
-            {serverData.name}
-          </CardHeader>
-        )}
-        <CardBody pad="small">
-          <Box>Available Upgrades: {serverData.upgrades}</Box>
+    <Card
+      direction={{ base: "column", sm: "row" }}
+      overflow="hidden"
+      variant="outline"
+      m={4}
+      textAlign={"center"}
+      maxW={["100vw", "75vw", "65vw", "60vw", "53vw"]}
+    >
+      <Stack>
+        <CardHeader>Sever Upgrades</CardHeader>
+        <CardBody>
+          <Text>{upgradeString}</Text>
         </CardBody>
-        <CardFooter
-          pad="small"
-          background="light-2"
-          align="center"
-          justify="center"
-        >
-          <Button plain={false} onClick={() => history.push(`/server/${serverData?.id}`)}>
-            Back to Server
-          </Button>
-        </CardFooter>
-      </Card>
-    </Main>
+      </Stack>
+    </Card>
   );
 };
 
