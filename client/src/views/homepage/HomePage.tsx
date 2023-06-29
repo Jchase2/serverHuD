@@ -1,18 +1,24 @@
-
 import {
   Box,
   Heading,
   Container,
   Text,
   Button,
-  Stack
+  Stack,
+  useColorMode,
 } from "@chakra-ui/react";
-import "animate.css"
+import "animate.css";
 
 const HomePage = () => {
+  const { colorMode } = useColorMode();
+
   return (
     <>
-      <Container maxW={"3xl"} className="animate__animated animate__fadeInUp" paddingTop="100px">
+      <Container
+        maxW={"3xl"}
+        className="animate__animated animate__fadeInUp"
+        paddingTop="10vh"
+      >
         <Stack
           as={Box}
           textAlign={"center"}
@@ -29,7 +35,7 @@ const HomePage = () => {
               serverHuD
             </Text>
           </Heading>
-          <Text color="gray.900">
+          <Text color={colorMode === "dark" ? "white" : "gray.900"}>
             serverHuD is a convenient way to avoid surprise outages and monitor
             the status of your SSL certs, upgrades, and more!
           </Text>

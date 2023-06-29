@@ -1,15 +1,21 @@
-import { Card, CardBody, CardHeader, Stack, Text } from "@chakra-ui/react";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 const Upgrades = (props: any) => {
   const { upgrades } = props;
-  const [upgradeString, setUpgradeString] = useState(upgrades)
+  const [upgradeString, setUpgradeString] = useState(upgrades);
   useEffect(() => {
-    if(upgrades.includes('Listing...')) {
+    if (upgrades.includes("Listing...")) {
       const result = upgrades.replace(/.*?Listing\.\.\./s, "");
       setUpgradeString(result);
     }
-  }, [upgrades])
+  }, [upgrades]);
 
   return (
     <Card
@@ -17,8 +23,8 @@ const Upgrades = (props: any) => {
       overflow="hidden"
       variant="outline"
       m={4}
-      textAlign={"center"}
       maxW={["100vw", "75vw", "65vw", "60vw", "53vw"]}
+      textAlign={"center"}
     >
       <Stack>
         <CardHeader>Sever Upgrades</CardHeader>
