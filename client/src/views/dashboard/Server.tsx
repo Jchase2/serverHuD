@@ -49,6 +49,8 @@ const Server = (props: any) => {
   // TODO: Replace with error component.
   if (indServerError) return <p>Error.</p>;
 
+      console.log("IND SERVER DATA: ", indServerData)
+
   return (
     <Card align="center" m={2} minW="20vw" display={"flex"}>
       {indServerData.status === "down" ? (
