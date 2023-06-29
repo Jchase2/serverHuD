@@ -41,12 +41,6 @@ export const SplitTime = (numberOfHours: number) => {
   return { Days: Days, Hours: Hours };
 };
 
-// Calculate the difference between two
-// Live server timestamps.
-// TODO: Deal with anys
-const calcDiff = (time: any, nextTime: any) =>
-  dayjs(time.time).diff(dayjs(nextTime.time), "seconds");
-
 // Calculates %up and %down from recorded data on a server.
 // TODO: This probably needs refactored a lot.
 export const getMonitoredUpInfo = async (id: number, userid: number) => {

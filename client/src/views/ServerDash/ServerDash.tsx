@@ -44,16 +44,21 @@ const ServerDash = (props: any) => {
 
   useEffect(() => {
     if (data) {
-      console.log("EMITTING UPCHECK AND LIVE CHECK");
+      console.log("EMITTING UPCHECK");
       socket.emit("upCheck", {
         id: data.id,
         url: data.url,
         status: data.status,
         sslStatus: data.sslStatus,
+        enableHud: data.optionalUrl ? true : false
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  useEffect(() => {
+    console.log("SERVER USAGE DATA CHANGED: ", serverUsageData)
+  }, [serverUsageData])
 
   if (isLoading || upData.isLoading || serverUsageLoading)
     return (

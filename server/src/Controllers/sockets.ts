@@ -4,7 +4,6 @@ import { Socket } from "socket.io";
 import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
 import { getMonitoredUsageData, getMonitoredUpInfo } from "../Utils/apiUtils";
-import { Cron, scheduledJobs } from "croner";
 
 // TODO: Add more checks so this doesn't crash with bad input.
 
@@ -14,39 +13,42 @@ import { Cron, scheduledJobs } from "croner";
 export function sioUpCheck(socket: Socket) {
   let userid = getUserId(socket.handshake.auth.token);
   console.log("SIO UP CHECK CALLED, SOCKET ID: ", socket.id);
-  let jobArray = scheduledJobs.map((elem) => elem.name);
   // fix any
-  let localJobArr: any = [];
-  (socket as any).jobArr = [];
-  if(userid > 0) {
-    socket.on("upCheck", async(data) => {
+  let intervalArr: any = [];
+  let intervalObj: any = {};
+  if (userid > 0) {
+    socket.on("upCheck", async (data) => {
       console.log("UPCHECK RECIEVED");
       let jobName = `sio-${data.url}-${data.id}`;
-      if(!jobArray.includes(jobName)){
-        localJobArr.push(jobName)
-        console.log("Adding ", jobName, " to job list.");
-        const job = Cron("*/10 * * * * *", { name: jobName }, async () => {
-          console.log("RUNNING IN CRON...")
+      if (!intervalArr.includes(jobName)) {
+        intervalArr.push(jobName);
+        console.log("Adding ", jobName, " to interval list.");
+        const upInterval = setInterval(async function () {
+          console.log("RUNNING IN INTERVAL...");
           urlDbChecker(data, socket);
           sslDbChecker(data, socket);
           urlLiveCheck(data, socket);
-          hudServerData(data, socket);
-        });
-        return job.isRunning();
+          // If enableHud is true, send resource usage updates.
+          if (data.enableHud) {
+            hudServerData(data, socket);
+          }
+        }, 10000);
+        intervalObj[jobName] = upInterval;
       }
       return false;
-    })
+    });
   } else {
-    console.log("Invalid User for UpCheck.")
+    console.log("Invalid User for UpCheck.");
   }
 
   socket.on("disconnect", () => {
-    for(let i = scheduledJobs.length - 1; i > 0; i--) {
-      if(localJobArr.includes(scheduledJobs[i].name)) {
-        scheduledJobs[i].stop();
+    console.log("DISCONNECTING.")
+    for (const key in intervalObj) {
+      if (intervalObj.hasOwnProperty(key)) {
+        console.log("CLEARING INTERVAL: ", key)
+        clearInterval(intervalObj[key])
       }
     }
-    return;
   });
 }
 
@@ -60,7 +62,7 @@ const urlLiveCheck = async (data: any, socket: Socket) => {
       percentageDown: res.percentageDown,
     });
   } catch (err) {
-    console.log("LIVE CHECK ERROR: ", err)
+    console.log("LIVE CHECK ERROR: ", err);
   }
 };
 
@@ -71,16 +73,16 @@ const hudServerData = async (data: any, socket: Socket) => {
       where: { id: data.id, userid: userid },
     });
 
-    if(servInfo?.optionalUrl) {
+    if (servInfo?.optionalUrl) {
       let res = await getMonitoredUsageData(data.id, userid);
+      console.log("EMITTING RESOURCE UPDATE ON BACKEND");
       socket.emit("resourcesUpdate", {
         id: data.id,
-        resourceObj: res
+        resourceObj: res,
       });
     }
-
   } catch (err) {
-    console.log("HUD CHECK ERROR: ", err)
+    console.log("HUD CHECK ERROR: ", err);
   }
 };
 

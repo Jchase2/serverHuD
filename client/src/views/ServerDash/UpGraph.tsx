@@ -7,11 +7,10 @@ const UpGraph = (props: any) => {
     percentageDown: 0,
   });
 
-  console.log("GRAPHIC DATA: ", graphicData)
-
   const [endAngle, setEndAngle] = useState(0);
 
   useEffect(() => {
+    console.log("GRAPHIC DATA UPDATED: ", props.data)
     setGraphicData(props.data); // Setting the data that we want to display
     setEndAngle(360);
   }, [props.data]);

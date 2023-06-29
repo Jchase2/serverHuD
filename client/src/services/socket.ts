@@ -1,5 +1,5 @@
 import React from "react";
-import { cloneDeep } from "lodash";
+import { cloneDeep, isEqual } from "lodash";
 import { QueryClient } from "@tanstack/react-query";
 import { socket } from "../App";
 
@@ -46,7 +46,7 @@ export const useReactQuerySubscription = () => {
     socket.on("resourcesUpdate", (data) => {
       const queryKey = [`server-usage-${data.id}`].filter(Boolean);
       queryClient.setQueryData(queryKey, (oldData: any) => {
-        return data?.resourceObj
+        if(!isEqual(oldData, data)) return data?.resourceObj
       })
     });
 
