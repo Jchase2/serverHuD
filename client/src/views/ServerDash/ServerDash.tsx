@@ -21,6 +21,7 @@ import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
 import ResourceUsage from "./ResourceUsage";
 import Upgrades from "./Upgrades";
+import DiskStatus from "./DiskStatus";
 
 const ServerDash = (props: any) => {
   const history = useHistory();
@@ -94,6 +95,9 @@ const ServerDash = (props: any) => {
       </Card>
       <Wrap minW={"80vw"} justify={"center"} mt={2}>
         <ServerStatus serverData={data} upData={upData.data} />
+        {data?.diskUsed && data?.diskSize ? (
+          <DiskStatus data={data} />
+        ) : null}
         {serverUsageData?.memObj?.length > 1 ||
         serverUsageData?.cpuObj?.length > 1 ? (
           <ResourceUsage

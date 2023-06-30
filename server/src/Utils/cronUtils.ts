@@ -22,7 +22,7 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
       let checkUp = await isUp(url);
       let currStatus = await LiveServer.findOne({
         where: { serverid: server?.id },
-        attributes: ["status", "sslStatus", "diskSpace", "memUsage", "cpuUsage"],
+        attributes: ["sslStatus"],
         order: [["time", "DESC"]],
       });
 
@@ -125,7 +125,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
         let optionalServerData = server?.dataValues.optionalUrl ? await hudServerData(server?.dataValues.optionalUrl) : null;
         let currStatus = await LiveServer.findOne({
           where: { serverid: server?.id },
-          attributes: ["status", "sslStatus", "diskSpace", "memUsage", "cpuUsage"],
+          attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
           order: [["time", "DESC"]],
         });
 
@@ -137,7 +137,8 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
           userid: userid,
           serverid: id,
           sslStatus: currStatus?.dataValues.sslStatus,
-          diskSpace: optionalServerData?.diskSpace ? optionalServerData?.diskSpace : -1,
+          diskUsed: optionalServerData?.diskUsed ? optionalServerData?.diskUsed : -1,
+          diskSize: optionalServerData?.diskSize ? optionalServerData?.diskSize : -1,
           memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : -1,
           cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : -1
         });
@@ -187,7 +188,8 @@ export const startServerJobs = async () => {
         userid: userid,
         serverid: id,
         sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
-        diskSpace: optionalData?.diskSpace ? optionalData.diskSpace : -1,
+        diskUsed: optionalData?.diskUsed ? optionalData.diskUsed : -1,
+        diskSize: optionalData?.diskSize ? optionalData.diskSize : -1,
         memUsage: optionalData?.memUsage ? optionalData.memUsage : -1,
         cpuUsage: optionalData?.cpuUsage ? optionalData.cpuUsage : -1
       });

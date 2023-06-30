@@ -35,7 +35,7 @@ const UpGraph = (props: any) => {
         duration: 2000,
       }}
       endAngle={endAngle}
-      padding={{ right: 100, left: 100, top: 0, bottom: 100 }}
+      padding={{ right: 110, left: 125, top: 0, bottom: 100 }}
       labels={(datum) => `${datum.datum.y.toFixed(2)}% ${datum.datum.x}`}
       labelComponent={<VictoryLabel style={{ fill: colorMode === 'light' ? '' : 'gray' }}/>}
       style={{

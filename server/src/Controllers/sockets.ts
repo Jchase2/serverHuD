@@ -60,6 +60,8 @@ const urlLiveCheck = async (data: any, socket: Socket) => {
       id: data.id,
       percentageUp: res.percentageUp,
       percentageDown: res.percentageDown,
+      diskUsed: res.diskUsed,
+      diskSize: res.diskSize
     });
   } catch (err) {
     console.log("LIVE CHECK ERROR: ", err);

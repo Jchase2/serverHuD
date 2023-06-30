@@ -1,28 +1,31 @@
+import { useColorMode } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { VictoryPie } from "victory";
+import { VictoryLabel, VictoryPie } from "victory";
 
 const DiskGraph = (props: any) => {
+  const { colorMode } = useColorMode();
+
   const [graphicData, setGraphicData] = useState({
-    percentageUp: 0,
-    percentageDown: 0,
+    diskSize: 0,
+    diskUsed: 0,
   });
 
   const [endAngle, setEndAngle] = useState(0);
 
   useEffect(() => {
-    console.log("GRAPHIC DATA UPDATED: ", props.data)
+    console.log("GRAPHIC DATA UPDATED: ", props.data);
     setGraphicData(props.data); // Setting the data that we want to display
     setEndAngle(360);
   }, [props.data]);
 
   const data = [
     {
-      x: `Up`,
-      y: Number(graphicData.percentageUp),
+      x: `Used`,
+      y: Number(graphicData.diskUsed),
     },
     {
-      x: `Down`,
-      y: Number(graphicData.percentageDown),
+      x: `Available`,
+      y: Number(graphicData.diskSize - graphicData.diskUsed),
     },
   ];
 
@@ -34,8 +37,11 @@ const DiskGraph = (props: any) => {
         duration: 2000,
       }}
       endAngle={endAngle}
-      padding={{ right: 100, left: 100, top: 0, bottom: 100 }}
-      labels={(datum) => `${datum.datum.y.toFixed(2)}% ${datum.datum.x}`}
+      padding={{ right: 110, left: 125, top: 0, bottom: 100 }}
+      labels={(datum) => `${datum.datum.y.toFixed(1)}gb ${datum.datum.x}`}
+      labelComponent={
+        <VictoryLabel style={{ fill: colorMode === "light" ? "" : "gray" }} />
+      }
       style={{
         data: {
           fillOpacity: 0.7,

@@ -84,6 +84,13 @@ func GetDiskUsage() uint64 {
 	return diskUsage.Free / 1024 / 1024 / 1024
 }
 
+// Get Disk Size gets total disk space.
+func GetDiskSize() uint64 {
+	var diskSize, _ = disk.Usage("./")
+	println("DISK SIZE RETURNING: ", diskSize.Total/1024/1024/1024)
+	return diskSize.Total / 1024 / 1024 / 1024
+}
+
 // GetMemUsage gets % of memory used.
 func GetMemUsage() float64 {
 	var memUsage, _ = mem.VirtualMemory()
@@ -147,7 +154,8 @@ func initRouter() *gin.Engine {
 		c.JSON(200, gin.H{
 			"hostName":      GetHostname(),
 			"uptimeInHours": GetUptime(),
-			"diskSpace":     GetDiskUsage(),
+			"diskUsed":      GetDiskUsage(),
+			"diskSize":      GetDiskSize(),
 			"upgrades":      GetUpgradeable(),
 			"memUsage":      GetMemUsage(),
 			"cpuUsage":      GetCpuUsage(),

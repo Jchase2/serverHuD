@@ -14,13 +14,15 @@ const ServerStatus = (props: any) => {
 
   return (
     <Card
-      direction={{ base: "column", sm: "row" }}
       overflow="hidden"
       variant="outline"
       m={4}
+      textAlign={"center"}
+      align={"center"}
+      minW={["100vw", "50vw", "35vw", "25vw"]}
     >
       <Stack>
-        <CardHeader textAlign={'center'}>
+        <CardHeader textAlign={"center"}>
           <Heading size="md">Up Status</Heading>
         </CardHeader>
         <CardBody p={0}>

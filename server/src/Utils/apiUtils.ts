@@ -11,7 +11,7 @@ export const getAllCombinedState = async (userid: any) => {
   let combinedData = serverList.map(async (server) => {
     let res = await LiveServer.findOne({
       where: { serverid: server.id, userid: userid },
-      attributes: ["status", "sslStatus", "diskSpace", "memUsage", "cpuUsage"],
+      attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
       order: [["time", "DESC"]],
     });
     Object.assign(server.dataValues, res?.dataValues);
@@ -27,7 +27,7 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
   });
   let res = await LiveServer.findOne({
     where: { serverid: serverid, userid: userid },
-    attributes: ["status", "sslStatus", "diskSpace", "memUsage", "cpuUsage"],
+    attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
     order: [["time", "DESC"]],
   });
   Object.assign(server?.dataValues, res?.dataValues);
@@ -52,9 +52,12 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
       userid: userid,
     },
     order: [["time", "ASC"]],
-    attributes: ["time", "status"],
+    attributes: ["time", "status", "diskSize", "diskUsed"],
     raw: true,
   });
+
+  const latestDiskSize = res[res.length - 1]?.diskSize;
+  const latestDiskUsed = res[res.length - 1]?.diskUsed;
 
   // TODO: Again, fix the any's.
   let currStatus: any = null;
@@ -120,6 +123,8 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     downtime: totalDowntime,
     percentageUp: percentageUp,
     percentageDown: percentageDown,
+    diskSize: latestDiskSize,
+    diskUsed: latestDiskUsed
   };
 };
 
@@ -143,7 +148,7 @@ const fiveMinuteLiveData = async (
           [Op.between]: [endTime, beginTime],
         },
       },
-      attributes: ["time", "diskSpace", "memUsage", "cpuUsage"],
+      attributes: ["time", "memUsage", "cpuUsage"],
       raw: true,
     });
 

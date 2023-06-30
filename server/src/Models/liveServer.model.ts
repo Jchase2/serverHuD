@@ -32,7 +32,10 @@ export class LiveServer extends Model {
   sslStatus!: string;
 
   @Column
-  diskSpace!: number;
+  diskUsed!: number;
+
+  @Column
+  diskSize!: number;
 
   @Column({ type: DataType.DOUBLE })
   memUsage!: number;
