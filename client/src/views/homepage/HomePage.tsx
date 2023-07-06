@@ -8,12 +8,11 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import "animate.css";
-import { useHistory } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
   const { colorMode } = useColorMode();
-  const history = useHistory();
+  let navigate = useNavigate();
 
   return (
     <>
@@ -57,7 +56,7 @@ const HomePage = () => {
               _hover={{
                 bg: "blue.600",
               }}
-              onClick={() => history.push("/register")}
+              onClick={() => navigate("/register")}
             >
               Sign Up
             </Button>

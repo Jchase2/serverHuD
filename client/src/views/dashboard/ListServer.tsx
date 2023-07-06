@@ -14,9 +14,10 @@ import { useGetIndServer } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ListServer = (props: any) => {
+    let navigate = useNavigate();
   const {
     isLoading: indServerLoading,
     error: indServerError,
@@ -24,7 +25,6 @@ const ListServer = (props: any) => {
   } = useGetIndServer(props.serverData.id);
 
   useReactQuerySubscription();
-  const history = useHistory();
 
   useEffect(() => {
     if (indServerData) {
@@ -55,7 +55,7 @@ const ListServer = (props: any) => {
     <LinkBox>
       <LinkOverlay
         cursor={"pointer"}
-        onClick={() => history.push("/server/" + indServerData.id)}
+        onClick={() => navigate("/server/" + indServerData.id)}
       >
         <Card
           m={2}

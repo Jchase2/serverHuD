@@ -12,13 +12,13 @@ import {
 import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
 import { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCreateUser } from "../../services/api/api";
 
 const Register = () => {
   let SwitchIcon: any;
   let SwitchIcon2: any;
-  const history = useHistory();
+  let navigate = useNavigate();
   const createUser = useCreateUser();
 
   const [registerState, setRegisterState] = useState({
@@ -74,7 +74,7 @@ const Register = () => {
     }
 
     if (createUser.isSuccess) {
-      history.push("/login");
+      navigate("/login");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createUser])

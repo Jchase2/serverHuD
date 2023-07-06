@@ -91,6 +91,9 @@ export const getUserServers = async (ctx: any) => {
 };
 
 export const getIndServer = async (ctx: any) => {
+
+  console.log("CTX PARAMS: ", ctx.params)
+
   const server = await getOneCombinedState(ctx.params.id, ctx.state.user._id);
   if (server) {
     ctx.body = server;

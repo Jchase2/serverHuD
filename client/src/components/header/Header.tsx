@@ -10,7 +10,7 @@ import {
   Link,
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const ClientHeader = (props: any) => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -26,7 +26,7 @@ const ClientHeader = (props: any) => {
             textDecoration: "none",
             bg: useColorModeValue("gray.200", "gray.700"),
           }}
-          onClick={() => history.push("/register")}
+          onClick={() => navigate("/register")}
         >
           Register
         </Link>
@@ -38,7 +38,7 @@ const ClientHeader = (props: any) => {
             textDecoration: "none",
             bg: useColorModeValue("gray.200", "gray.700"),
           }}
-          onClick={() => history.push("/login")}
+          onClick={() => navigate("/login")}
         >
           Login
         </Link>
@@ -58,7 +58,7 @@ const ClientHeader = (props: any) => {
         }}
         onClick={() => {
           props.globalLogOut();
-          history.push("/");
+          navigate("/");
         }}
       >
         Logout
@@ -66,12 +66,12 @@ const ClientHeader = (props: any) => {
     );
   };
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   return (
     <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
       <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-        {<Button mr={2} onClick={() => history.push("/")}>ServerHuD</Button>}
+        {<Button mr={2} onClick={() => navigate("/")}>ServerHuD</Button>}
         <Flex alignItems={"center"}>
           <Stack direction={"row"} spacing={5}>
             <Button onClick={toggleColorMode}>

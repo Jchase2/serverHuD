@@ -2,22 +2,16 @@ import AddServer from "./AddServer";
 import { ErrorShow } from "../../components/Error/ErrorShow";
 import { useEffect, useState } from "react";
 import { useAddServer, useGetServers } from "../../services/api/api";
-import {
-  Box,
-  Container,
-  Flex,
-  Divider,
-  Button,
-} from "@chakra-ui/react";
+import { Box, Container, Flex, Divider, Button } from "@chakra-ui/react";
 import { CiViewList } from "react-icons/ci";
 import { IoGridOutline } from "react-icons/io5";
 import { Loading } from "../../components/Loading/Loading";
 import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import DisplayServerList from "./DisplayServerList";
 
-const Dashboard = (props: any) => {
+const Dashboard = () => {
   const [isListView, setIsListView] = useState(
     localStorage.getItem("isListView")
       ? localStorage.getItem("isListView")
@@ -27,7 +21,7 @@ const Dashboard = (props: any) => {
   const [closed, setClosed] = useState(true);
   const { data, isLoading, isError, error } = useGetServers();
   const addNewServer = useAddServer();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!socket.connected) {
@@ -57,7 +51,7 @@ const Dashboard = (props: any) => {
     // If not logged in or token expired,
     // push to login screen.
     if (error.response.status === 401) {
-      history.push("/login");
+      navigate("/login");
     } else {
       setStateMessage(error.response.data);
     }

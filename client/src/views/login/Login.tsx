@@ -12,13 +12,13 @@ import {
 } from "@chakra-ui/react";
 import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useLogin } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 
 const Login = (props: any) => {
   let SwitchIcon: any;
-  const history = useHistory();
+  let navigate = useNavigate();
 
   const [loginState, setLoginState] = useState({
     email: "",
@@ -61,7 +61,7 @@ const Login = (props: any) => {
     localStorage.setItem("userId", login.data.userId);
     // sets authed to true in root component.
     props.setAuth();
-    history.push("/dashboard");
+    navigate("/dashboard");
   }
 
   useEffect(() => {

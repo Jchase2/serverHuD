@@ -1,4 +1,4 @@
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardBody,
@@ -24,7 +24,7 @@ const Server = (props: any) => {
   } = useGetIndServer(props.serverData.id);
 
   useReactQuerySubscription();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (indServerData) {
@@ -89,7 +89,7 @@ const Server = (props: any) => {
         <UpStatus serverData={indServerData} />
       </CardBody>
       <CardFooter>
-        <Button onClick={() => history.push("/server/" + indServerData.id)}>
+        <Button onClick={() =>navigate("/server/" + indServerData.id)}>
           More Info
         </Button>
       </CardFooter>

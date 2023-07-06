@@ -2,9 +2,9 @@ import "./App.css";
 import "@fontsource/roboto";
 import {
   BrowserRouter as Router,
-  Switch,
   Route,
-  Redirect,
+  Routes,
+  Navigate,
 } from "react-router-dom";
 import Header from "./components/Header/Header";
 import Dashboard from "./views/Dashboard/Dashboard";
@@ -12,9 +12,7 @@ import Login from "./views/Login/Login";
 import HomePage from "./views/Homepage/HomePage";
 import Register from "./views/Register/Register";
 import ServerDash from "./views/ServerDash/ServerDash";
-import Upgrades from "./views/ServerDash/Upgrades";
-import { useState } from "react";
-import PrivateRoute from "./components/Private/PrivateRoute";
+import { ReactElement, useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Socket, io } from "socket.io-client";
@@ -26,7 +24,7 @@ export const socket = io("localhost:3001", {
     token: localStorage.getItem("accessToken"),
   },
   transports: ["websocket"],
-  autoConnect: false
+  autoConnect: false,
 });
 
 function App() {
@@ -54,31 +52,44 @@ function App() {
     }
   };
 
+  interface ReqProps {
+    children: ReactElement;
+    redirectTo: string;
+  }
+
+  function RequireAuth({ children, redirectTo }: ReqProps) {
+    return isAuthed === "true" ? children : <Navigate to={redirectTo} />;
+  }
+
   return (
     <Router>
       <Header isAuthed={isAuthed} globalLogOut={globalLogOut} />
       <QueryClientProvider client={queryClient}>
-        <Switch>
-          <Route path="/register">
-            <Register />
-          </Route>
-          <Route path="/login">
-            <Login setAuth={setAuth} />
-          </Route>
-          <PrivateRoute isAuthed={isAuthed} path="/dashboard">
-            <Dashboard />
-          </PrivateRoute>
-          <PrivateRoute isAuthed={isAuthed} path="/server/:id/upgrades">
-            <Upgrades />
-          </PrivateRoute>
-          <PrivateRoute isAuthed={isAuthed} path="/server/:id">
-            <ServerDash />
-          </PrivateRoute>
-          <Route path="/">
-            {isAuthed === "true" ? <Redirect to="/dashboard" /> : <HomePage />}
-          </Route>
-          <ReactQueryDevtools initialIsOpen={true} />
-        </Switch>
+        <Routes>
+          <Route
+            path="/"
+            element={isAuthed === "true" ? <Dashboard /> : <HomePage />}
+          />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login setAuth={setAuth} />} />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth redirectTo="/login">
+                <Dashboard />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/server/:id"
+            element={
+              <RequireAuth redirectTo="/login">
+                <ServerDash />
+              </RequireAuth>
+            }
+          />
+          <Route element={<ReactQueryDevtools initialIsOpen={true} />} />
+        </Routes>
       </QueryClientProvider>
     </Router>
   );
