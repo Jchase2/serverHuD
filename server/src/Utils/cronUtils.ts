@@ -182,6 +182,8 @@ export const startServerJobs = async () => {
 
       console.log("OPTAIONAL DATA: ", optionalData)
 
+      console.log("CHECKSSL IS: ", JSON.stringify(checkSsl))
+
       await LiveServer.create({
         status: checkUp,
         url: url,

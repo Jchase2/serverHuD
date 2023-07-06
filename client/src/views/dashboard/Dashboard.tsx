@@ -1,22 +1,28 @@
-import Server from "./Server";
 import AddServer from "./AddServer";
 import { ErrorShow } from "../../components/Error/ErrorShow";
 import { useEffect, useState } from "react";
 import { useAddServer, useGetServers } from "../../services/api/api";
 import {
+  Box,
   Container,
   Flex,
-  Text,
-  Wrap,
-  WrapItem,
+  Divider,
+  Button,
 } from "@chakra-ui/react";
+import { CiViewList } from "react-icons/ci";
+import { IoGridOutline } from "react-icons/io5";
 import { Loading } from "../../components/Loading/Loading";
 import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
 import { useHistory } from "react-router";
+import DisplayServerList from "./DisplayServerList";
 
 const Dashboard = (props: any) => {
-
+  const [isListView, setIsListView] = useState(
+    localStorage.getItem("isListView")
+      ? localStorage.getItem("isListView")
+      : "false"
+  );
   const [stateMessage, setStateMessage] = useState<string>("");
   const [closed, setClosed] = useState(true);
   const { data, isLoading, isError, error } = useGetServers();
@@ -24,21 +30,19 @@ const Dashboard = (props: any) => {
   const history = useHistory();
 
   useEffect(() => {
-    if(!socket.connected) {
+    if (!socket.connected) {
       socket.connect();
     }
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("isListView", isListView ? isListView : "false");
+  }, [isListView]);
 
   useReactQuerySubscription();
 
-  const displayServerList = (serverData: any) => {
-    return (
-      <div key={serverData.url}>
-        <WrapItem>
-          <Server serverData={serverData} />
-        </WrapItem>
-      </div>
-    );
+  const setViewMode = () => {
+    setIsListView(isListView === "false" ? "true" : "false");
   };
 
   if (isLoading)
@@ -48,21 +52,21 @@ const Dashboard = (props: any) => {
       </Container>
     );
 
-      // TODO: Replace with error component.
+  // TODO: Replace with error component.
   if (isError) {
     // If not logged in or token expired,
     // push to login screen.
-    if(error.response.status === 401) {
+    if (error.response.status === 401) {
       history.push("/login");
     } else {
-      setStateMessage(error.response.data)
+      setStateMessage(error.response.data);
     }
     // TODO: Replace with error component.
-    return <p>ERROR</p>
+    return <p>ERROR</p>;
   }
 
   return (
-    <Flex direction={'column'} align={'center'} justify={'center'}>
+    <Flex direction={"column"} align={"center"} justify={"center"}>
       <AddServer addNewServer={addNewServer} />
       <ErrorShow
         message={stateMessage}
@@ -70,15 +74,21 @@ const Dashboard = (props: any) => {
         setClosed={setClosed}
         isError={isError}
       />
-      <Wrap minW={"80vw"} justify={'center'}>
-        {data?.length ? (
-          data.map((e: any) => displayServerList(e))
+      <Box justifyContent={"center"}>
+        {isListView === "true" ? (
+          <>
+            <Button rightIcon={<IoGridOutline />} onClick={setViewMode}>
+              Grid View
+            </Button>
+          </>
         ) : (
-          <Text align="center">
-            You are not monitoring any servers, add one to get started!
-          </Text>
+          <Button rightIcon={<CiViewList />} onClick={setViewMode}>
+            List View
+          </Button>
         )}
-      </Wrap>
+        <Divider mt={"2"} />
+      </Box>
+      <DisplayServerList isListView={isListView} data={data} />
     </Flex>
   );
 };

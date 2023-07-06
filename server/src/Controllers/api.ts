@@ -147,8 +147,10 @@ const liveServerSchema = Joi.object({
   url: Joi.string().uri().required(),
   status: Joi.string().required(),
   sslStatus: Joi.string().required(),
+  memUsage: Joi.number(),
   diskUsed: Joi.number(),
-  diskSize: Joi.number()
+  diskSize: Joi.number(),
+  cpuUsage: Joi.number()
 });
 
 export const addServer = async (ctx: any) => {

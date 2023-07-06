@@ -95,7 +95,7 @@ const ServerDash = (props: any) => {
       </Card>
       <Wrap minW={"80vw"} justify={"center"} mt={2}>
         <ServerStatus serverData={data} upData={upData.data} />
-        {data?.diskUsed && data?.diskSize ? (
+        {data?.diskUsed > -1 && data?.diskSize > -1 ? (
           <DiskStatus data={data} />
         ) : null}
         {serverUsageData?.memObj?.length > 1 ||

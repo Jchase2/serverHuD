@@ -14,8 +14,11 @@ export const getSslDetails = async (hostname: string) => {
   let fixedUrl = hostname.replace(/^https?\:\/\//i, "").replace(/\/$/, "");
   try {
     return await sslChecker(fixedUrl);
-  } catch (err) {
-    return err;
+  } catch (err: any) {
+    // Forcing this to return an error message to avoid crashing
+    // when a string message is returned. We expect errno nad the
+    // current lib (sslChecker) isn't always providing one.
+    return {errno: err.message}
   }
 };
 

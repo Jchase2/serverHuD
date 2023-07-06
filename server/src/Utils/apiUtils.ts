@@ -30,6 +30,13 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
     attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
     order: [["time", "DESC"]],
   });
+  // Make sure we're returning -1 if we don't have these values.
+  if(res && res.dataValues) {
+    res.dataValues.diskSize = res.dataValues.diskSize ? res.dataValues.diskSize : -1;
+    res.dataValues.diskUsed = res.dataValues.diskUsed ? res.dataValues.diskUsed : -1;
+    res.dataValues.memUsage = res.dataValues.memUsage ? res.dataValues.memUsage : -1;
+    res.dataValues.cpuUsage = res.dataValues.cpuUsage ? res.dataValues.cpuUsage : -1;
+  }
   Object.assign(server?.dataValues, res?.dataValues);
   return server;
 };
@@ -56,8 +63,8 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     raw: true,
   });
 
-  const latestDiskSize = res[res.length - 1]?.diskSize;
-  const latestDiskUsed = res[res.length - 1]?.diskUsed;
+  const latestDiskSize = res[res.length - 1]?.diskSize ? res[res.length - 1]?.diskSize : -1;
+  const latestDiskUsed = res[res.length - 1]?.diskSize ? res[res.length - 1]?.diskSize : -1;
 
   // TODO: Again, fix the any's.
   let currStatus: any = null;
@@ -95,7 +102,7 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
       diffArr[ind + 1] &&
       diffArr[ind + 1].status === "up"
     ) {
-      let difference = dayjs(diffArr[ind + 1].time).diff(
+      let difference = dayjs(diffArr[ind + 1]?.time).diff(
         dayjs(curr.time),
         "seconds"
       );

@@ -19,7 +19,7 @@ export class LiveServer extends Model {
   userid!: number;
 
   @ForeignKey(() => Server)
-  @Column
+  @Column({primaryKey: true})
   serverid!: number
 
   @Column
