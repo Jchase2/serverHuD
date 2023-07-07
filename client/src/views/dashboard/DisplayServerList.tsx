@@ -4,7 +4,6 @@ import WrapServers from "./WrapServers";
 
 const DisplayServerList = (props: any) => {
   const { isListView, data } = props;
-
   return (
     <>
       {isListView === "true" ? (
@@ -19,9 +18,9 @@ const DisplayServerList = (props: any) => {
         </HStack>
       ) : null}
       {isListView === "true" ? (
-        <VerticalServers data={data} isListView={isListView} />
+        <VerticalServers data={data} />
       ) : (
-        <WrapServers data={data} isListView={isListView} />
+        <WrapServers data={data} />
       )}
     </>
   );

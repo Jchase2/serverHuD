@@ -4,9 +4,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { socket } from "../App";
 
 export const queryClient = new QueryClient();
-
 export const useReactQuerySubscription = () => {
-
   socket.connect();
 
   React.useEffect(() => {
@@ -46,13 +44,15 @@ export const useReactQuerySubscription = () => {
     socket.on("resourcesUpdate", (data) => {
       const queryKey = [`server-usage-${data.id}`].filter(Boolean);
       queryClient.setQueryData(queryKey, (oldData: any) => {
-        if(!isEqual(oldData, data)) return data?.resourceObj
-      })
+        if (!isEqual(oldData, data)) return data?.resourceObj;
+      });
     });
 
     return () => {
       console.log("DISCONNECTING ID: ", socket.id);
       socket.disconnect();
+      console.log("REMOVING ALL LISTENERS");
+      socket.removeAllListeners();
     };
   }, []);
 };

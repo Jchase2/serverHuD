@@ -6,10 +6,10 @@ import { Box, Container, Flex, Divider, Button } from "@chakra-ui/react";
 import { CiViewList } from "react-icons/ci";
 import { IoGridOutline } from "react-icons/io5";
 import { Loading } from "../../components/Loading/Loading";
-import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
 import { useNavigate } from "react-router-dom";
 import DisplayServerList from "./DisplayServerList";
+import { useReactQuerySubscription } from "../../services/socket";
 
 const Dashboard = () => {
   const [isListView, setIsListView] = useState(
@@ -22,6 +22,7 @@ const Dashboard = () => {
   const { data, isLoading, isError, error } = useGetServers();
   const addNewServer = useAddServer();
   const navigate = useNavigate();
+  useReactQuerySubscription();
 
   useEffect(() => {
     if (!socket.connected) {
@@ -32,8 +33,6 @@ const Dashboard = () => {
   useEffect(() => {
     localStorage.setItem("isListView", isListView ? isListView : "false");
   }, [isListView]);
-
-  useReactQuerySubscription();
 
   const setViewMode = () => {
     setIsListView(isListView === "false" ? "true" : "false");

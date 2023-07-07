@@ -12,19 +12,18 @@ import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import { useEffect } from "react";
 import { useGetIndServer } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
-import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
 import { useNavigate } from "react-router-dom";
 
 const ListServer = (props: any) => {
-    let navigate = useNavigate();
+
   const {
     isLoading: indServerLoading,
     error: indServerError,
     data: indServerData,
   } = useGetIndServer(props.serverData.id);
 
-  useReactQuerySubscription();
+  let navigate = useNavigate();
 
   useEffect(() => {
     if (indServerData) {
@@ -49,8 +48,6 @@ const ListServer = (props: any) => {
   // TODO: Replace with error component.
   if (indServerError) return <p>Error.</p>;
 
-  console.log("IND SERVER DATA: ", indServerData);
-
   return (
     <LinkBox>
       <LinkOverlay
@@ -64,20 +61,20 @@ const ListServer = (props: any) => {
         >
           <CardBody>
             <Flex direction={"row"} justify={"center"}>
-              {props.serverData?.status === "up" ? (
+              {indServerData.status === "up" ? (
                 <Text p={0} m={0} wordBreak={"break-all"}>
-                  <TriangleUpIcon color="green.500" /> {props.serverData.url}
+                  <TriangleUpIcon color="green.500" /> {indServerData.url}
                 </Text>
               ) : (
                 <Text p={0} m={0}>
-                  <TriangleDownIcon color="red.500" /> {props.serverData.url}
+                  <TriangleDownIcon color="red.500" /> {indServerData.url}
                 </Text>
               )}
               <Spacer />
-              {props.serverData?.sslStatus === "true" ? (
+              {indServerData?.sslStatus === "true" ? (
                 <Text>
                   <TriangleUpIcon color="green.500" /> Expires in{" "}
-                  {props.serverData?.sslExpiry} Days
+                  {indServerData?.sslExpiry} Days
                 </Text>
               ) : (
                 <Text>

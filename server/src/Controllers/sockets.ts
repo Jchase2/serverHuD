@@ -18,7 +18,7 @@ export function sioUpCheck(socket: Socket) {
   let intervalObj: any = {};
   if (userid > 0) {
     socket.on("upCheck", async (data) => {
-      console.log("UPCHECK RECIEVED");
+      console.log("UPCHECK RECIEVED WITH ID: ", data.id);
       let jobName = `sio-${data.url}-${data.id}`;
       if (!intervalArr.includes(jobName)) {
         intervalArr.push(jobName);

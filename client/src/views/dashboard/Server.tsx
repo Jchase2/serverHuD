@@ -13,17 +13,16 @@ import { useEffect } from "react";
 import { UpStatus } from "../../components/UpStatus/UpStatus";
 import { useGetIndServer } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
-import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
 
 const Server = (props: any) => {
+
   const {
     isLoading: indServerLoading,
     error: indServerError,
     data: indServerData,
   } = useGetIndServer(props.serverData.id);
 
-  useReactQuerySubscription();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,9 +47,7 @@ const Server = (props: any) => {
 
   // TODO: Replace with error component.
   if (indServerError) return <p>Error.</p>;
-
-      console.log("IND SERVER DATA: ", indServerData)
-
+  
   return (
     <Card align="center" m={2} minW="20vw" display={"flex"}>
       {indServerData.status === "down" ? (

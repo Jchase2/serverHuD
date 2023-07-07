@@ -24,8 +24,6 @@ import DiskStatus from "./DiskStatus";
 
 const ServerDash = (props: any) => {
 
-  console.log("SERVER DASH IS RUNNING FOR SOME GODDAMN FUCKING REASON")
-
   const location = useLocation();
   const parts = location.pathname.split("/");
   const paramStr = parts[parts.length - 1];
