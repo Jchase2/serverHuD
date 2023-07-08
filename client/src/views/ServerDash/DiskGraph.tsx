@@ -32,7 +32,7 @@ const DiskGraph = (props: any) => {
   return (
     <VictoryPie
       data={data}
-      colorScale={["#003f5c", "#ffa600"]}
+      colorScale={["#ffa600", "#003f5c"]}
       animate={{
         duration: 2000,
       }}
