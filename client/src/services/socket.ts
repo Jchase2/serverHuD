@@ -4,6 +4,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { socket } from "../App";
 
 export const queryClient = new QueryClient();
+
 export const useReactQuerySubscription = () => {
   socket.connect();
 

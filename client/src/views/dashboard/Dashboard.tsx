@@ -56,12 +56,15 @@ const Dashboard = () => {
 
   // TODO: Replace with error component.
   if (isError) {
+
+    console.log("ERROR IS: ", error)
+
     // If not logged in or token expired,
     // push to login screen.
-    if (error.response.status === 401) {
+    if (error?.response.status === 401) {
       navigate("/login");
     } else {
-      setStateMessage(error.response.data);
+      setStateMessage(error.response.data || error.message);
     }
     // TODO: Replace with error component.
     return <p>ERROR</p>;
@@ -80,14 +83,14 @@ const Dashboard = () => {
         {isListView === "true" ? (
           <HStack>
             <ServerSearch data={data} setSearchData={setSearchData} />
-            <Button rightIcon={<IoGridOutline />} onClick={setViewMode}>
+            <Button p={6} rightIcon={<IoGridOutline />} onClick={setViewMode}>
               Grid View
             </Button>
           </HStack>
         ) : (
           <HStack>
             <ServerSearch data={data} setSearchData={setSearchData} />
-            <Button rightIcon={<CiViewList />} onClick={setViewMode}>
+            <Button p={6} rightIcon={<CiViewList />} onClick={setViewMode}>
               List View
             </Button>
           </HStack>

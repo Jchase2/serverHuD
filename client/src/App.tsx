@@ -12,43 +12,51 @@ import Login from "./views/Login/Login";
 import HomePage from "./views/Homepage/HomePage";
 import Register from "./views/Register/Register";
 import ServerDash from "./views/ServerDash/ServerDash";
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Socket, io } from "socket.io-client";
 import { queryClient } from "./services/socket";
+import { verifyUser, userLogout } from "./services/api/api";
 
 // TODO: Replace localhost with .env backend url.
 export const socket = io("localhost:3001", {
-  auth: {
-    token: localStorage.getItem("accessToken"),
-  },
+  withCredentials: true,
   transports: ["websocket"],
   autoConnect: false,
 });
 
 function App() {
-  let initialState = "false";
-  if (localStorage.getItem("accessToken")) {
-    initialState = "true";
-  }
+  const [isAuthed, setIsAuthed] = useState(localStorage.getItem("authed"));
 
-  const [isAuthed, setIsAuthed] = useState(initialState);
+  useEffect(() => {
+    const fetchId = async () => {
+      try {
+        const resp = await verifyUser();
+        if (resp?.userId) {
+          setIsAuthed("true");
+          localStorage.setItem("authed", "true");
+        } else {
+          setIsAuthed("false");
+        }
+      } catch (err) {
+        console.log("Err: ", err)
+      }
+    };
 
-  const setAuth = () => {
-    if (localStorage.getItem("accessToken") !== null) {
-      localStorage.setItem("authed", "true");
-      setIsAuthed("true");
-    }
-  };
+    fetchId();
+  }, []);
 
-  const globalLogOut = () => {
-    if (localStorage.getItem("accessToken")) {
-      localStorage.clear();
+  const globalLogOut = async () => {
+    try {
+      await userLogout();
+      localStorage.setItem("authed", "false");
       setIsAuthed("false");
       if (socket.connected) {
         if (socket instanceof Socket) socket.disconnect();
       }
+    } catch (err) {
+      console.log("ERROR LOGGING OUT: ", err);
     }
   };
 
@@ -68,10 +76,10 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={isAuthed === "true" ? <Dashboard /> : <HomePage />}
+            element={localStorage.getItem("authed") === "true" ? <Dashboard /> : <HomePage />}
           />
           <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login setAuth={setAuth} />} />
+          <Route path="/login" element={<Login setIsAuthed={setIsAuthed}/>} />
           <Route
             path="/dashboard"
             element={

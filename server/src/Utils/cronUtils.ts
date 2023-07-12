@@ -122,6 +122,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
 
         console.log("SERVER DATAVALS: ", server?.dataValues)
 
+        // TODO: Make sure optional server data isn't throwing an error
         let optionalServerData = server?.dataValues.optionalUrl ? await hudServerData(server?.dataValues.optionalUrl) : null;
         let currStatus = await LiveServer.findOne({
           where: { serverid: server?.id },

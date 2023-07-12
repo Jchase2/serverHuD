@@ -28,7 +28,7 @@ export const getUserId = (token: string) => {
         let { _id } = jwt.decode(token) as JwtPayload;
         return _id;
     } catch (err) {
-        console.log("JWT ERROR IS: ", err)
+        console.log("JWT ERROR IN GET USER ID IS: ", err)
         return -1;
     }
 };

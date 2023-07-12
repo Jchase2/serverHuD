@@ -13,7 +13,11 @@ import { startServerJobs } from "./Utils/cronUtils";
 
 const app = new Koa();
 app.use(logger());
-app.use(cors());
+// TODO: Use .env
+app.use(cors({
+  credentials: true,
+  origin: 'http://localhost:3000',
+}));
 app.use(koaBody());
 app.use(router.routes());
 
@@ -22,7 +26,7 @@ const server = http.createServer(app.callback());
 // TODO: Probably set origin in env
 const io = new Server(server, {
   cors: {
-    origin: "localhost:3000",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"],
   },
 });

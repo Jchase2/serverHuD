@@ -17,6 +17,7 @@ import { useLogin } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 
 const Login = (props: any) => {
+
   let SwitchIcon: any;
   let navigate = useNavigate();
 
@@ -57,10 +58,9 @@ const Login = (props: any) => {
 
   if (login.isSuccess) {
     console.log("Logged in!");
-    localStorage.setItem("accessToken", login.data.accessToken);
     localStorage.setItem("userId", login.data.userId);
     // sets authed to true in root component.
-    props.setAuth();
+    props.setIsAuthed("true");
     navigate("/dashboard");
   }
 

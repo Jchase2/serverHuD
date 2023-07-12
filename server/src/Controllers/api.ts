@@ -4,7 +4,11 @@ import bcrypt from "bcrypt";
 import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
-import { setupOptionalCron, setupSslCron, setupUrlCron } from "../Utils/cronUtils";
+import {
+  setupOptionalCron,
+  setupSslCron,
+  setupUrlCron,
+} from "../Utils/cronUtils";
 import { LiveServer } from "../Models/liveServer.model";
 import {
   SplitTime,
@@ -13,6 +17,7 @@ import {
   getMonitoredUsageData,
   getOneCombinedState,
 } from "../Utils/apiUtils";
+import { getUserId, verifyToken } from "../Utils/jwt";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -46,9 +51,6 @@ export const registerUser = async (ctx: any) => {
 };
 
 export const loginUser = async (ctx: any) => {
-
-  console.log("LOGIN USER RAN")
-
   try {
     await userSchema.validateAsync({
       email: ctx.request.body.email,
@@ -57,6 +59,7 @@ export const loginUser = async (ctx: any) => {
     const user = await User.findOne({
       where: { email: ctx.request.body.email },
     });
+
     if (user === null) {
       ctx.body = "Issue logging in, please try again!";
       return (ctx.status = 403);
@@ -71,13 +74,41 @@ export const loginUser = async (ctx: any) => {
       process.env.SECRET_KEY || "insecureuY47Qf2xo3M9kKjF67hq",
       { expiresIn: "7d" }
     );
-    ctx.body = { accessToken: accessToken, userId: user.id };
+    ctx.cookies.set("accessToken", accessToken, {httpOnly: true, SameSite: 'Strict'});
+    ctx.body = { userId: user.id };
     ctx.status = 200;
   } catch (e) {
+    console.log("ERROR THROWN IN LOGIN: ", e);
     ctx.body = `${e}`;
     ctx.status = 401;
   }
 };
+
+export const getVerifyUser = async (ctx: any) => {
+  let accessToken = ctx.cookies.get("accessToken");
+  if(accessToken) {
+    let userId = getUserId(accessToken);
+    if(userId === -1) {
+      ctx.status = 401;
+    } else {
+      ctx.body = {userId: userId}
+      ctx.status = 200;
+    }
+  } else {
+    ctx.status = 401;
+  }
+}
+
+export const getUserLogout = async (ctx: any) => {
+  let accessToken = ctx.cookies.get("accessToken");
+  if(verifyToken(accessToken)) {
+    ctx.cookies.set("accessToken");
+    ctx.status = 200;
+  } else {
+    ctx.status = 401;
+  }
+
+}
 
 export const getUserServers = async (ctx: any) => {
   let res = await getAllCombinedState(ctx.state.user._id);
@@ -91,9 +122,6 @@ export const getUserServers = async (ctx: any) => {
 };
 
 export const getIndServer = async (ctx: any) => {
-
-  console.log("CTX PARAMS: ", ctx.params)
-
   const server = await getOneCombinedState(ctx.params.id, ctx.state.user._id);
   if (server) {
     ctx.body = server;
@@ -106,24 +134,21 @@ export const getIndServer = async (ctx: any) => {
 
 export const getServerUsage = async (ctx: any) => {
   const data = await getMonitoredUsageData(ctx.params.id, ctx.state.user._id);
-
-  console.log("SENDING UP: ", data)
-
-  if(data) {
+  if (data) {
     ctx.body = data;
     ctx.status = 200;
   } else {
     ctx.body = "Error retrieving data.";
     ctx.status = 404;
   }
-}
+};
 
 export const deleteServer = async (ctx: any) => {
   try {
     await Server.destroy({
       where: {
         id: ctx.params.id,
-        userid: ctx.state.user._id
+        userid: ctx.state.user._id,
       },
     });
     ctx.body = "Server Deleted!";
@@ -153,7 +178,7 @@ const liveServerSchema = Joi.object({
   memUsage: Joi.number(),
   diskUsed: Joi.number(),
   diskSize: Joi.number(),
-  cpuUsage: Joi.number()
+  cpuUsage: Joi.number(),
 });
 
 export const addServer = async (ctx: any) => {
@@ -167,8 +192,6 @@ export const addServer = async (ctx: any) => {
 
   let sslInfo: any = await getSslDetails(url);
   if (sslInfo.errno) sslInfo.valid = false;
-
-  console.log("CTX REQUEST BODY: ", ctx.request.body)
 
   const hudData = ctx.request.body.optionalUrl
     ? await hudServerData(ctx.request.body.optionalUrl)
@@ -199,7 +222,7 @@ export const addServer = async (ctx: any) => {
       diskUsed: hudData ? hudData.diskUsed : -1,
       diskSize: hudData ? hudData.diskSize : -1,
       memUsage: hudData ? hudData.memUsage : -1,
-      cpuUsage: hudData ? hudData.cpuUsage : -1
+      cpuUsage: hudData ? hudData.cpuUsage : -1,
     });
 
     await LiveServer.create(liveValue);

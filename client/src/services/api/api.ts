@@ -10,9 +10,7 @@ export function useGetIndServer(id: string) {
       const { data } = await axios({
         method: "get",
         url: process.env.REACT_APP_BACKEND_URL + `/servers/${id}`,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
+        withCredentials: true,
       });
       return data;
     },
@@ -32,16 +30,14 @@ export function useGetServers() {
       const { data } = await axios({
         method: "get",
         url: process.env.REACT_APP_BACKEND_URL + "/servers",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
+        withCredentials: true,
       });
       return data;
     },
     onError: (error: any) => {
-      console.log("ERROR RESPONSE: ", error.response)
+      console.log("ERROR RESPONSE: ", error.response);
       return error;
-    }
+    },
   });
 }
 
@@ -52,9 +48,7 @@ export function useGetUpData(id: string) {
       const { data } = await axios({
         method: "get",
         url: process.env.REACT_APP_BACKEND_URL + `/servers/updata/${id}`,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
+        withCredentials: true,
       });
       return data;
     },
@@ -73,9 +67,7 @@ export function useGetServerUsage(id: string) {
       const { data } = await axios({
         method: "get",
         url: process.env.REACT_APP_BACKEND_URL + `/servers/usage/${id}`,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
+        withCredentials: true,
       });
       return data;
     },
@@ -87,6 +79,25 @@ export function useGetServerUsage(id: string) {
   });
 }
 
+export const verifyUser = async () => {
+  const { data } = await axios({
+    method: "get",
+    url: process.env.REACT_APP_BACKEND_URL + `/user/me`,
+    withCredentials: true,
+  });
+
+  return data;
+};
+
+export const userLogout = async () => {
+  const resp = await axios({
+    method: "get",
+    url: process.env.REACT_APP_BACKEND_URL + `/user/logout`,
+    withCredentials: true,
+  });
+  return resp;
+};
+
 export function useDeleteServer(id: string) {
   const userId = getUserId();
   return useMutation({
@@ -94,9 +105,7 @@ export function useDeleteServer(id: string) {
       let { data } = await axios({
         method: "put",
         url: process.env.REACT_APP_BACKEND_URL + `/servers/delete/${id}`,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
+        withCredentials: true,
       });
       return data;
     },
@@ -108,7 +117,7 @@ export function useDeleteServer(id: string) {
         queryKey: [`server-list-${userId}`],
       });
     },
-    onError: (error: any) => error.response
+    onError: (error: any) => error.response,
   });
 }
 
@@ -120,9 +129,7 @@ export function useAddServer() {
         method: "post",
         url: process.env.REACT_APP_BACKEND_URL + "/servers",
         data: newServer,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
+        withCredentials: true,
       });
       return data;
     },
@@ -131,10 +138,9 @@ export function useAddServer() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`server-list-${userId}`] });
     },
-    onError: (error: any) => error.response
+    onError: (error: any) => error.response,
   });
 }
-
 
 // Create a new user.
 export function useCreateUser() {
@@ -144,10 +150,11 @@ export function useCreateUser() {
         method: "post",
         url: process.env.REACT_APP_BACKEND_URL + "/register",
         data: registerObj,
+        withCredentials: true,
       });
       return data;
     },
-    onError: (error: any) => error.response
+    onError: (error: any) => error.response,
   });
 }
 
@@ -158,9 +165,10 @@ export function useLogin() {
         method: "post",
         url: process.env.REACT_APP_BACKEND_URL + "/login",
         data: loginObj,
+        withCredentials: true,
       });
       return data;
     },
-    onError: (error: any) => error.response
+    onError: (error: any) => error.response,
   });
 }

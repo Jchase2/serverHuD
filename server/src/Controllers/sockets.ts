@@ -4,14 +4,18 @@ import { Socket } from "socket.io";
 import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
 import { getMonitoredUsageData, getMonitoredUpInfo } from "../Utils/apiUtils";
-
+import cookie from 'cookie';
 // TODO: Add more checks so this doesn't crash with bad input.
 
 // Register for status checking every 10 seconds..
 // Only take action if current UI status is different than last stored status.
 // This will check for all updates with different intervals using the same socket.
 export function sioUpCheck(socket: Socket) {
-  let userid = getUserId(socket.handshake.auth.token);
+
+  const cookies = cookie.parse(socket.handshake.headers.cookie || "");
+  if(!cookies) console.log("No auth cookie provided.")
+  let userid = getUserId(cookies?.accessToken);
+
   console.log("SIO UP CHECK CALLED, SOCKET ID: ", socket.id);
   // fix any
   let intervalArr: any = [];
@@ -53,7 +57,10 @@ export function sioUpCheck(socket: Socket) {
 }
 
 const urlLiveCheck = async (data: any, socket: Socket) => {
-  let userid = getUserId(socket.handshake.auth.token);
+
+  const cookies = cookie.parse(socket.handshake.headers.cookie || "");
+  let userid = getUserId(cookies?.accessToken);
+
   try {
     let res = await getMonitoredUpInfo(data.id, userid);
     socket.emit("liveServerUpdate", {
@@ -69,7 +76,8 @@ const urlLiveCheck = async (data: any, socket: Socket) => {
 };
 
 const hudServerData = async (data: any, socket: Socket) => {
-  let userid = getUserId(socket.handshake.auth.token);
+  const cookies = cookie.parse(socket.handshake.headers.cookie || "");
+  let userid = getUserId(cookies?.accessToken);
   try {
     let servInfo = await Server.findOne({
       where: { id: data.id, userid: userid },
@@ -91,7 +99,8 @@ const hudServerData = async (data: any, socket: Socket) => {
 // Check status of url endpoint.
 const urlDbChecker = async (data: any, socket: Socket) => {
   // Decode userid, make sure user owns this server.
-  let userid = getUserId(socket.handshake.auth.token);
+  const cookies = cookie.parse(socket.handshake.headers.cookie || "");
+  let userid = getUserId(cookies?.accessToken);
 
   // Check database for previous state
   let serv = await LiveServer.findOne({
@@ -117,7 +126,8 @@ const urlDbChecker = async (data: any, socket: Socket) => {
 // Check status of SSL.
 const sslDbChecker = async (data: any, socket: Socket) => {
   // Decode userid, make sure user owns this server.
-  let userid = getUserId(socket.handshake.auth.token);
+  const cookies = cookie.parse(socket.handshake.headers.cookie || "");
+  let userid = getUserId(cookies?.accessToken);
 
   // Check the LiveServ to see if our ssl is up or down.
   let serv = await LiveServer.findOne({
@@ -156,13 +166,15 @@ const sslDbChecker = async (data: any, socket: Socket) => {
 
 // Verify JWT before allowing additional calls.
 export function sioJwtVerify(socket: Socket) {
-  if (!socket?.handshake?.auth?.token) {
+
+  const cookies = cookie.parse(socket.handshake.headers.cookie || "");
+
+  if (!cookies?.accessToken) {
     console.log("No auth token, can't verify.");
     return;
   }
-
   io.use((socket, next) => {
-    if (verifyToken(socket.handshake.auth.token)) {
+    if (verifyToken(cookies?.accessToken)) {
       next();
     } else {
       next(new Error("Invalid jwt!"));
