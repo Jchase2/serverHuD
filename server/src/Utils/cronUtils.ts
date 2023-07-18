@@ -41,6 +41,31 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
   return false;
 };
 
+// Replaces cron job for server url with new url.
+export const updateUrlCron = async (newUrl: string, userid: number, id: number) => {
+  let server = await Server.findOne({
+    where: { id: id, userid: userid },
+  });
+
+  let oldJobName = `${server?.dataValues.url}-status-${server?.dataValues.id}`;
+
+  let oldJob;
+  for(let obj of scheduledJobs) {
+    if(obj.name === oldJobName) {
+      oldJob = obj;
+    }
+  }
+
+  // Get rid of the old job.
+  if(oldJob) {
+    console.log("Stopping job: ", oldJob?.name);
+    oldJob.stop();
+  }
+
+  let res = await setupUrlCron(newUrl, userid, id);
+  return res;
+}
+
 // Create a cron job for a given SSL URL, userid and server id.
 // This job monitors the SSL status of the endpoint.
 export const setupSslCron = async (url: string, userid: number, id: number) => {
@@ -103,16 +128,43 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
   return false;
 };
 
+// Replaces cron job for ssl with new url.
+export const updateSslCron = async (newUrl: string, userid: number, id: number) => {
+  let server = await Server.findOne({
+    where: { id: id, userid: userid },
+  });
+
+  const oldJobName = `${server?.dataValues.url}-ssl-${server?.dataValues.id}`;
+
+  let oldJob;
+  for(let obj of scheduledJobs) {
+    if(obj.name === oldJobName) {
+      oldJob = obj;
+    }
+  }
+
+  // Get rid of the old job.
+  if(oldJob) {
+    console.log("Stopping job: ", oldJob?.name);
+    oldJob.stop();
+  }
+
+  let res = await setupSslCron(newUrl, userid, id);
+  return res;
+}
 
 // Create a cron job for a given optional hud-server URL,
 // userid and server id. This job monitors a hud-server endpoint.
 export const setupOptionalCron = async (url: string, userid: number, id: number) => {
   let server = await Server.findOne({
-    where: { id: id },
+    where: { id: id, userid: userid  },
   });
   if(server?.dataValues.optionalUrl) {
     let jobName = `${server?.dataValues.optionalUrl}-optional-${server?.dataValues.id}`;
     let jobArray = scheduledJobs.map((elem) => elem.name);
+
+    console.log("SCHEDULED JOBS: ", scheduledJobs);
+    console.log("JOB ARRAY: ", jobArray);
 
     if (!jobArray.includes(jobName)) {
       console.log("Adding ", `${server?.dataValues.optionalUrl}-optional-${id}`, " to job list.");
@@ -158,6 +210,31 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
   }
   return false;
 };
+
+// Replaces cron job for optional url with new url.
+export const updateOptionalCron = async (newUrl: string, userid: number, id: number) => {
+  let server = await Server.findOne({
+    where: { id: id, userid: userid },
+  });
+
+  const oldJobName = `${server?.dataValues.optionalUrl}-optional-${id}`;
+
+  let oldJob;
+  for(let obj of scheduledJobs) {
+    if(obj.name === oldJobName) {
+      oldJob = obj;
+    }
+  }
+
+  // Get rid of the old job.
+  if(oldJob) {
+    console.log("Stopping job: ", oldJob?.name);
+    oldJob.stop();
+  }
+
+  let res = await setupOptionalCron(newUrl, userid, id);
+  return res;
+}
 
 // Util to start all jobs for servers in postgres if
 // those servers are not running.

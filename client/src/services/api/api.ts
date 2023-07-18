@@ -142,6 +142,30 @@ export function useAddServer() {
   });
 }
 
+export function useUpdateServer(id: string) {
+  const userId = getUserId();
+  return useMutation({
+    mutationFn: async (newData: any) => {
+      let { data } = await axios({
+        method: "put",
+        url: process.env.REACT_APP_BACKEND_URL + `/servers/update/${id}`,
+        data: newData,
+        withCredentials: true,
+      });
+      return data;
+    },
+    // After deleting the server, we'll want to invalidate that in the cache
+    // so the ui updates.
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`server-${id}`] });
+      return queryClient.invalidateQueries({
+        queryKey: [`server-list-${userId}`],
+      });
+    },
+    onError: (error: any) => error.response,
+  });
+}
+
 // Create a new user.
 export function useCreateUser() {
   return useMutation({

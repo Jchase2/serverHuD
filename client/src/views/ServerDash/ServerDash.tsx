@@ -5,10 +5,9 @@ import { useDeleteServer, useGetServerUsage } from "../../services/api/api";
 import {
   Box,
   Button,
-  Card,
-  CardBody,
   Center,
   Container,
+  HStack,
   Heading,
   Wrap,
 } from "@chakra-ui/react";
@@ -21,9 +20,9 @@ import { socket } from "../../App";
 import ResourceUsage from "./ResourceUsage";
 import Upgrades from "./Upgrades";
 import DiskStatus from "./DiskStatus";
+import { UpdateServer } from "../../components/UpdateServer/UpdateServer";
 
 const ServerDash = (props: any) => {
-
   const location = useLocation();
   const parts = location.pathname.split("/");
   const paramStr = parts[parts.length - 1];
@@ -88,11 +87,10 @@ const ServerDash = (props: any) => {
 
   return (
     <Container centerContent width={"100%"} maxWidth={"100%"}>
-      <Card m={6}>
-        <CardBody>
-          <Heading size="md">Server: {data.url}</Heading>
-        </CardBody>
-      </Card>
+      <HStack m={3}>
+        <UpdateServer data={data} />
+        <Heading size="md">Server: {data.name}</Heading>
+      </HStack>
       <Wrap minW={"80vw"} justify={"center"} mt={2}>
         <ServerStatus serverData={data} upData={upData.data} />
         {data?.diskUsed > -1 && data?.diskSize > -1 ? (

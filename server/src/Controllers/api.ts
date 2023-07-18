@@ -8,6 +8,9 @@ import {
   setupOptionalCron,
   setupSslCron,
   setupUrlCron,
+  updateOptionalCron,
+  updateSslCron,
+  updateUrlCron,
 } from "../Utils/cronUtils";
 import { LiveServer } from "../Models/liveServer.model";
 import {
@@ -74,7 +77,10 @@ export const loginUser = async (ctx: any) => {
       process.env.SECRET_KEY || "insecureuY47Qf2xo3M9kKjF67hq",
       { expiresIn: "7d" }
     );
-    ctx.cookies.set("accessToken", accessToken, {httpOnly: true, SameSite: 'Strict'});
+    ctx.cookies.set("accessToken", accessToken, {
+      httpOnly: true,
+      SameSite: "Strict",
+    });
     ctx.body = { userId: user.id };
     ctx.status = 200;
   } catch (e) {
@@ -86,29 +92,28 @@ export const loginUser = async (ctx: any) => {
 
 export const getVerifyUser = async (ctx: any) => {
   let accessToken = ctx.cookies.get("accessToken");
-  if(accessToken) {
+  if (accessToken) {
     let userId = getUserId(accessToken);
-    if(userId === -1) {
+    if (userId === -1) {
       ctx.status = 401;
     } else {
-      ctx.body = {userId: userId}
+      ctx.body = { userId: userId };
       ctx.status = 200;
     }
   } else {
     ctx.status = 401;
   }
-}
+};
 
 export const getUserLogout = async (ctx: any) => {
   let accessToken = ctx.cookies.get("accessToken");
-  if(verifyToken(accessToken)) {
+  if (verifyToken(accessToken)) {
     ctx.cookies.set("accessToken");
     ctx.status = 200;
   } else {
     ctx.status = 401;
   }
-
-}
+};
 
 export const getUserServers = async (ctx: any) => {
   let res = await getAllCombinedState(ctx.state.user._id);
@@ -182,7 +187,8 @@ const liveServerSchema = Joi.object({
 });
 
 export const addServer = async (ctx: any) => {
-  const { url } = ctx.request.body;
+  const { url, optionalUrl, name } = ctx.request.body;
+
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
     ctx.body = "URL cannot be empty.";
@@ -193,9 +199,7 @@ export const addServer = async (ctx: any) => {
   let sslInfo: any = await getSslDetails(url);
   if (sslInfo.errno) sslInfo.valid = false;
 
-  const hudData = ctx.request.body.optionalUrl
-    ? await hudServerData(ctx.request.body.optionalUrl)
-    : null;
+  const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
   const user = await User.findByPk(ctx.state.user._id);
   const status = await isUp(url);
 
@@ -203,8 +207,8 @@ export const addServer = async (ctx: any) => {
     const value = await serverSchema.validateAsync({
       userid: ctx.state.user._id,
       url,
-      optionalUrl: ctx.request.body.optionalUrl,
-      name: ctx.request.body.name,
+      optionalUrl: optionalUrl,
+      name: name,
       sslExpiry: sslInfo.daysRemaining,
       uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
       upgrades: hudData ? hudData.upgrades : "empty",
@@ -248,4 +252,76 @@ export const getTimeseriesUpData = async (ctx: any) => {
   let res = await getMonitoredUpInfo(ctx.params.id, ctx.state.user._id);
   ctx.body = res;
   ctx.status = 200;
+};
+
+export const updateServer = async (ctx: any) => {
+
+  const { url, optionalUrl, name } = ctx.request.body;
+
+  // Check if URL is empty
+  if (!url || url === URL_EMPTY_DEFAULT) {
+    ctx.body = "URL cannot be empty.";
+    ctx.status = 422;
+    return;
+  }
+
+  let sslInfo: any = await getSslDetails(url);
+  if (sslInfo.errno) sslInfo.valid = false;
+
+  const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
+
+  const user = await User.findByPk(ctx.state.user._id);
+  const status = await isUp(url);
+
+  try {
+    const value = await serverSchema.validateAsync({
+      userid: ctx.state.user._id,
+      url,
+      optionalUrl: optionalUrl,
+      name: name,
+      sslExpiry: sslInfo.daysRemaining,
+      uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
+      upgrades: hudData ? hudData.upgrades : "empty",
+    });
+
+    if (!user) throw Error("User not found!");
+
+
+    await Server.update(value, {
+      where: {
+        id: ctx.params.id,
+        userid: ctx.state.user._id,
+      }
+    })
+
+    const liveValue = await liveServerSchema.validateAsync({
+      userid: ctx.state.user._id,
+      serverid: ctx.params.id,
+      url,
+      status: status,
+      sslStatus: sslInfo.valid.toString(),
+      diskUsed: hudData ? hudData.diskUsed : -1,
+      diskSize: hudData ? hudData.diskSize : -1,
+      memUsage: hudData ? hudData.memUsage : -1,
+      cpuUsage: hudData ? hudData.cpuUsage : -1,
+    });
+
+    await LiveServer.create(liveValue);
+
+    await updateUrlCron(url, ctx.state.user._id, ctx.params.id);
+    await updateSslCron(url, ctx.state.user._id, ctx.params.id);
+    await updateOptionalCron(url, ctx.state.user._id, ctx.params.id);
+
+    ctx.body = { Status: "Server Updated.", id: ctx.params.id };
+    ctx.status = 201;
+  } catch (error) {
+    console.log("ERROR IS: ", error);
+    if ((error as any)?.isJoi) {
+      ctx.body = "Input validation failed";
+      ctx.status = 422;
+    } else {
+      ctx.body = `${error}`;
+      ctx.status = 400;
+    }
+  }
 };

@@ -14,6 +14,7 @@ import { UpStatus } from "../../components/UpStatus/UpStatus";
 import { useGetIndServer } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 import { socket } from "../../App";
+import { UpdateServer } from "../../components/UpdateServer/UpdateServer";
 
 const Server = (props: any) => {
 
@@ -47,7 +48,7 @@ const Server = (props: any) => {
 
   // TODO: Replace with error component.
   if (indServerError) return <p>Error.</p>;
-  
+
   return (
     <Card align="center" m={2} minW="20vw" display={"flex"}>
       {indServerData.status === "down" ? (
@@ -70,6 +71,7 @@ const Server = (props: any) => {
           backgroundColor="#FF8800"
         >
           {indServerData.name}
+          <UpdateServer data={indServerData}/>
         </CardHeader>
       ) : (
         <CardHeader
@@ -80,6 +82,7 @@ const Server = (props: any) => {
           backgroundColor="#2f4858"
         >
           {indServerData.name}
+          <UpdateServer data={indServerData}/>
         </CardHeader>
       )}
       <CardBody m={2}>
