@@ -12,8 +12,10 @@ import {
   IconButton,
   Input,
 } from "@chakra-ui/react";
-import { useUpdateServer } from "../../services/api/api";
 import { useState } from "react";
+import { Loading } from "../Loading/Loading";
+import { useUpdateServer } from "../../services/api/api";
+import { UpdateServerError } from "./UpdateServerError";
 
 export const UpdateServer = (props: any) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -41,11 +43,25 @@ export const UpdateServer = (props: any) => {
         : data.optionalUrl,
       name: serverState.name ? serverState.name : data.name,
     });
+
     setServerState({
       url: "",
       optionalUrl: "",
       name: "",
     });
+  };
+
+  if (updateServer.isLoading) {
+    return <Loading />;
+  }
+
+  if (updateServer.isError) {
+    return <UpdateServerError updateServer={updateServer} isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
+  }
+
+  if(updateServer.isSuccess) {
+    updateServer.reset();
+    onClose()
   };
 
   return (
@@ -54,6 +70,11 @@ export const UpdateServer = (props: any) => {
         aria-label="Edit Server"
         icon={<EditIcon />}
         onClick={onOpen}
+        ml={2}
+        mr={2}
+        colorScheme="black"
+        variant="outline"
+        size="sm"
       />
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />

@@ -2,32 +2,30 @@ import { Input } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 const ServerSearch = (props: any) => {
+  const { setSearchData, data } = props;
+  const [searchInput, setSearchInput] = useState<string>("");
 
-    const {setSearchData, data } = props;
-    const [searchInput, setSearchInput] = useState<string>("");
-
-    useEffect(() => {
-        if (data) {
-          let res = data.filter((elem: any) => {
-            if (elem.url.includes(searchInput) || elem.name.includes(searchInput)) {
-              return elem;
-            }
-            return false;
-          });
-          setSearchData(res);
+  useEffect(() => {
+    if (data) {
+      let res = data.filter((elem: any) => {
+        if (
+          elem.url.toLowerCase().includes(searchInput.toLocaleLowerCase()) ||
+          elem.name.toLowerCase().includes(searchInput.toLowerCase())
+        ) {
+          return elem;
         }
-      }, [data, searchInput, setSearchData]);
+        return false;
+      });
+      setSearchData(res);
+    }
+  }, [data, searchInput, setSearchData]);
 
+  const handleChange = (e: any) => {
+    e.preventDefault();
+    setSearchInput(e.target.value);
+  };
 
-      const handleChange = (e: any) => {
-        e.preventDefault();
-        setSearchInput(e.target.value);
-      };
-
-      return (
-        <Input placeholder="Server Search" onChange={handleChange} />
-      );
-
-}
+  return <Input placeholder="Server Search" onChange={handleChange} />;
+};
 
 export default ServerSearch;

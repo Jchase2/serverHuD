@@ -144,7 +144,7 @@ export function useAddServer() {
 
 export function useUpdateServer(id: string) {
   const userId = getUserId();
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: async (newData: any) => {
       let { data } = await axios({
         method: "put",
@@ -164,6 +164,8 @@ export function useUpdateServer(id: string) {
     },
     onError: (error: any) => error.response,
   });
+
+  return mutation;
 }
 
 // Create a new user.

@@ -5,8 +5,6 @@ import {
   CardHeader,
   CardFooter,
   Button,
-  Text,
-  Box,
   Container,
 } from "@chakra-ui/react";
 import { useEffect } from "react";
@@ -17,7 +15,6 @@ import { socket } from "../../App";
 import { UpdateServer } from "../../components/UpdateServer/UpdateServer";
 
 const Server = (props: any) => {
-
   const {
     isLoading: indServerLoading,
     error: indServerError,
@@ -58,9 +55,8 @@ const Server = (props: any) => {
           textAlign={"center"}
           backgroundColor="#e40000"
         >
-          <Box>
-            <Text display={"flex"}>{indServerData.name}</Text>
-          </Box>
+          {indServerData.name}
+          <UpdateServer data={indServerData} />
         </CardHeader>
       ) : indServerData.status === "up" &&
         indServerData.sslStatus === "false" ? (
@@ -71,7 +67,7 @@ const Server = (props: any) => {
           backgroundColor="#FF8800"
         >
           {indServerData.name}
-          <UpdateServer data={indServerData}/>
+          <UpdateServer data={indServerData} />
         </CardHeader>
       ) : (
         <CardHeader
@@ -82,14 +78,14 @@ const Server = (props: any) => {
           backgroundColor="#2f4858"
         >
           {indServerData.name}
-          <UpdateServer data={indServerData}/>
+          <UpdateServer data={indServerData} />
         </CardHeader>
       )}
       <CardBody m={2}>
         <UpStatus serverData={indServerData} />
       </CardBody>
       <CardFooter>
-        <Button onClick={() =>navigate("/server/" + indServerData.id)}>
+        <Button onClick={() => navigate("/server/" + indServerData.id)}>
           More Info
         </Button>
       </CardFooter>

@@ -4,26 +4,27 @@ interface Props {
   message: string;
   setClosed: Function;
   closed: boolean;
-  isError: boolean;
+  isSuccess: boolean;
 }
 
-export const ErrorShow: React.FC<Props> = ({
-  message,
+export const Success: React.FC<Props> = ({
   closed,
   setClosed,
-  isError,
+  isSuccess
 }) => {
   return (
     <>
-      {isError && !closed && (
+      {isSuccess && !closed && (
         <Alert
           status="error"
           mb="10px"
           flexDirection="column"
+          minW="35vw"
+          maxW="35vw"
           borderRadius="10px"
         >
           <AlertIcon />
-          <AlertTitle textAlign="center">{message}</AlertTitle>
+          <AlertTitle textAlign="center">Success</AlertTitle>
           <CloseButton
             position="absolute"
             right="8px"
