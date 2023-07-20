@@ -56,9 +56,6 @@ const Dashboard = () => {
 
   // TODO: Replace with error component.
   if (isError) {
-
-    console.log("ERROR IS: ", error)
-
     // If not logged in or token expired,
     // push to login screen.
     if (error?.response.status === 401) {

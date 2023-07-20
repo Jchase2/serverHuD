@@ -31,10 +31,14 @@ const userSchema = Joi.object({
 
 export const registerUser = async (ctx: any) => {
   try {
+
+    // Make sure types are correct.
     await userSchema.validateAsync({
       email: ctx.request.body.email,
       password: ctx.request.body.password,
     });
+
+    // Make sure user doesn't already exist.
     const user = await User.findOne({
       where: { email: ctx.request.body.email },
     });
@@ -42,14 +46,16 @@ export const registerUser = async (ctx: any) => {
       ctx.body = "User already exists!";
       return (ctx.status = 409);
     }
+
+    // Check if pw matches, and create user.
     const hash = await bcrypt.hash(ctx.request.body.password, 10);
     User.create({ email: ctx.request.body.email, password: hash });
     ctx.body = "User Created!";
     ctx.status = 201;
-  } catch (e) {
-    console.log(e);
+  } catch (e: any) {
+    console.log("Registration error: ", e);
+    ctx.body = e.details[0].message,
     ctx.status = 400;
-    ctx.body = `${e}`;
   }
 };
 

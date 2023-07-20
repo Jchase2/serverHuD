@@ -35,7 +35,6 @@ export function useGetServers() {
       return data;
     },
     onError: (error: any) => {
-      console.log("ERROR RESPONSE: ", error.response);
       return error;
     },
   });
@@ -180,7 +179,7 @@ export function useCreateUser() {
       });
       return data;
     },
-    onError: (error: any) => error.response,
+    onError: (error: any) => error
   });
 }
 
