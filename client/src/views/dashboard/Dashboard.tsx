@@ -43,13 +43,26 @@ const Dashboard = () => {
     localStorage.setItem("isListView", isListView ? isListView : "false");
   }, [isListView]);
 
+  useEffect(() => {
+    if (addNewServer.isError) {
+      setClosed(false);
+      setStateMessage("Error: " + addNewServer.error.response.data);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addNewServer]);
+
   const setViewMode = () => {
     setIsListView(isListView === "false" ? "true" : "false");
   };
 
+  const handleClose = () => {
+    addNewServer.reset();
+    setClosed(true);
+  }
+
   if (isLoading)
     return (
-      <Container centerContent>
+      <Container centerContent mt={4}>
         <Loading />
       </Container>
     );
@@ -61,7 +74,7 @@ const Dashboard = () => {
     if (error?.response.status === 401) {
       navigate("/login");
     } else {
-      setStateMessage(error.response.data || error.message);
+      setStateMessage(error?.response.data || error?.message);
     }
     // TODO: Replace with error component.
     return <p>ERROR</p>;
@@ -73,9 +86,11 @@ const Dashboard = () => {
       <ErrorShow
         message={stateMessage}
         closed={closed}
-        setClosed={setClosed}
-        isError={isError}
+        setClosed={handleClose}
+        isError={isError || addNewServer?.isError}
+        maxW={['100vw', '70vw', '50vw', '30vw', '20vw']}
       />
+      {addNewServer?.isLoading ? <Loading /> : null}
       <Box justifyContent={"center"}>
         {isListView === "true" ? (
           <HStack>

@@ -5,6 +5,7 @@ interface Props {
   setClosed: Function;
   closed: boolean;
   isError: boolean;
+  maxW?: string | Array<string>;
 }
 
 export const ErrorShow: React.FC<Props> = ({
@@ -12,6 +13,7 @@ export const ErrorShow: React.FC<Props> = ({
   closed,
   setClosed,
   isError,
+  maxW
 }) => {
   return (
     <>
@@ -21,6 +23,7 @@ export const ErrorShow: React.FC<Props> = ({
           mb="10px"
           flexDirection="column"
           borderRadius="10px"
+          maxW={maxW}
         >
           <AlertIcon />
           <AlertTitle textAlign="center">{message}</AlertTitle>

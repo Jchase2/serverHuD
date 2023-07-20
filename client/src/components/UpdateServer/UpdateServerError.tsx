@@ -6,7 +6,6 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-  ModalCloseButton,
   Button,
   IconButton,
 } from "@chakra-ui/react";
@@ -36,10 +35,9 @@ export const UpdateServerError = (props: any) => {
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Error with request.</ModalHeader>
-          <ModalCloseButton onClick={handleClose} />
           <ModalBody>
             <ErrorShow
-              message={updateServer.error.message}
+              message={"Error: " + updateServer.error.response.data}
               setClosed={handleClose}
               closed={false}
               isError={updateServer.isError}

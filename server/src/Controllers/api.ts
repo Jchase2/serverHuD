@@ -31,7 +31,6 @@ const userSchema = Joi.object({
 
 export const registerUser = async (ctx: any) => {
   try {
-
     // Make sure types are correct.
     await userSchema.validateAsync({
       email: ctx.request.body.email,
@@ -54,8 +53,7 @@ export const registerUser = async (ctx: any) => {
     ctx.status = 201;
   } catch (e: any) {
     console.log("Registration error: ", e);
-    ctx.body = e.details[0].message,
-    ctx.status = 400;
+    (ctx.body = e.details[0].message), (ctx.status = 400);
   }
 };
 
@@ -91,7 +89,6 @@ export const loginUser = async (ctx: any) => {
     ctx.status = 200;
   } catch (e) {
     console.log("ERROR THROWN IN LOGIN: ", e);
-    ctx.body = `${e}`;
     ctx.status = 401;
   }
 };
@@ -202,6 +199,19 @@ export const addServer = async (ctx: any) => {
     return;
   }
 
+  // If hudServer Url is bad, just return error.
+  // This is so we short circuit before we get too far
+  // and it takes forever to return an error.
+  if (optionalUrl) {
+    const hudSchema = Joi.string().uri();
+    const { error } = hudSchema.validate(optionalUrl);
+    if (error) {
+      ctx.body = "Optional backend must have a valid address.";
+      ctx.status = 422;
+      return;
+    }
+  }
+
   let sslInfo: any = await getSslDetails(url);
   if (sslInfo.errno) sslInfo.valid = false;
 
@@ -242,10 +252,10 @@ export const addServer = async (ctx: any) => {
 
     ctx.body = { Status: "Server added.", id: dbResp.id };
     ctx.status = 201;
-  } catch (error) {
+  } catch (error: any) {
     console.log("ERROR IS: ", error);
     if ((error as any)?.isJoi) {
-      ctx.body = "Input validation failed";
+      ctx.body = error?.details[0].message;
       ctx.status = 422;
     } else {
       ctx.body = `${error}`;
@@ -261,7 +271,6 @@ export const getTimeseriesUpData = async (ctx: any) => {
 };
 
 export const updateServer = async (ctx: any) => {
-
   const { url, optionalUrl, name } = ctx.request.body;
 
   // Check if URL is empty
@@ -269,6 +278,19 @@ export const updateServer = async (ctx: any) => {
     ctx.body = "URL cannot be empty.";
     ctx.status = 422;
     return;
+  }
+
+  // If hudServer Url is bad, just return error.
+  // This is so we short circuit before we get too far
+  // and it takes forever to return an error.
+  if (optionalUrl) {
+    const hudSchema = Joi.string().uri();
+    const { error } = hudSchema.validate(optionalUrl);
+    if (error) {
+      ctx.body = "Optional backend must have a valid address.";
+      ctx.status = 422;
+      return;
+    }
   }
 
   let sslInfo: any = await getSslDetails(url);
@@ -292,13 +314,12 @@ export const updateServer = async (ctx: any) => {
 
     if (!user) throw Error("User not found!");
 
-
     await Server.update(value, {
       where: {
         id: ctx.params.id,
         userid: ctx.state.user._id,
-      }
-    })
+      },
+    });
 
     const liveValue = await liveServerSchema.validateAsync({
       userid: ctx.state.user._id,
@@ -320,10 +341,10 @@ export const updateServer = async (ctx: any) => {
 
     ctx.body = { Status: "Server Updated.", id: ctx.params.id };
     ctx.status = 201;
-  } catch (error) {
+  } catch (error: any) {
     console.log("ERROR IS: ", error);
     if ((error as any)?.isJoi) {
-      ctx.body = "Input validation failed";
+      ctx.body = error?.details[0].message;
       ctx.status = 422;
     } else {
       ctx.body = `${error}`;
