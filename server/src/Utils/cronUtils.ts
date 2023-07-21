@@ -27,13 +27,18 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
       });
 
       if (checkUp !== currStatus?.dataValues.status) {
-        await LiveServer.create({
-          status: checkUp,
-          url: url,
-          userid: userid,
-          serverid: id,
-          sslStatus: currStatus?.dataValues.sslStatus,
-        });
+        try {
+          await LiveServer.create({
+            status: checkUp,
+            url: url,
+            userid: userid,
+            serverid: id,
+            sslStatus: currStatus?.dataValues.sslStatus,
+          });
+        } catch (err) {
+          console.log("ERR UPDATING URL IN CRON: ", err)
+          return;
+        }
       }
     });
     return job.isRunning();
@@ -97,13 +102,18 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
           // or if result of ssl isn't equal to stored ssl status
           checkSsl?.valid?.toString() !== currStatus?.dataValues.sslStatus)
       ) {
-        let resp = await LiveServer.create({
-          status: currStatus?.dataValues.status,
-          url: url,
-          userid: userid,
-          serverid: id,
-          sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
-        });
+        try {
+          let resp = await LiveServer.create({
+            status: currStatus?.dataValues.status,
+            url: url,
+            userid: userid,
+            serverid: id,
+            sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
+          });
+        } catch (err) {
+          console.log("ERR UPDATING SSL IN CRON: ", err)
+          return;
+        }
       }
 
       // Next, since SSL expiry isn't time series data, we also
