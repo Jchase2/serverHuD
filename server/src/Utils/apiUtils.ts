@@ -22,23 +22,33 @@ export const getAllCombinedState = async (userid: any) => {
 };
 
 export const getOneCombinedState = async (serverid: number, userid: number) => {
-  const server = await Server.findOne({
-    where: { id: serverid, userid: userid },
-  });
-  let res = await LiveServer.findOne({
-    where: { serverid: serverid, userid: userid },
-    attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
-    order: [["time", "DESC"]],
-  });
-  // Make sure we're returning -1 if we don't have these values.
-  if(res && res.dataValues) {
-    res.dataValues.diskSize = res.dataValues.diskSize ? res.dataValues.diskSize : -1;
-    res.dataValues.diskUsed = res.dataValues.diskUsed ? res.dataValues.diskUsed : -1;
-    res.dataValues.memUsage = res.dataValues.memUsage ? res.dataValues.memUsage : -1;
-    res.dataValues.cpuUsage = res.dataValues.cpuUsage ? res.dataValues.cpuUsage : -1;
+  try {
+    const server = await Server.findOne({
+      where: { id: serverid, userid: userid },
+    });
+
+    if(!server) {
+      return null;
+    }
+
+    let res = await LiveServer.findOne({
+      where: { serverid: serverid, userid: userid },
+      attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
+      order: [["time", "DESC"]],
+    });
+    // Make sure we're returning -1 if we don't have these values.
+    if(res && res.dataValues) {
+      res.dataValues.diskSize = res.dataValues.diskSize ? res.dataValues.diskSize : -1;
+      res.dataValues.diskUsed = res.dataValues.diskUsed ? res.dataValues.diskUsed : -1;
+      res.dataValues.memUsage = res.dataValues.memUsage ? res.dataValues.memUsage : -1;
+      res.dataValues.cpuUsage = res.dataValues.cpuUsage ? res.dataValues.cpuUsage : -1;
+    }
+    Object.assign(server?.dataValues, res?.dataValues);
+    return server;
+  } catch (err) {
+    console.log("Combined State Error: ", err);
+    return err;
   }
-  Object.assign(server?.dataValues, res?.dataValues);
-  return server;
 };
 
 export const SplitTime = (numberOfHours: number) => {

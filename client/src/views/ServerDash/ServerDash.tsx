@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useDeleteServer, useGetServerUsage } from "../../services/api/api";
+import { useGetServerUsage } from "../../services/api/api";
 
 import {
   Box,
@@ -21,12 +21,12 @@ import ResourceUsage from "./ResourceUsage";
 import Upgrades from "./Upgrades";
 import DiskStatus from "./DiskStatus";
 import { UpdateServer } from "../../components/UpdateServer/UpdateServer";
+import { DeleteServer } from "./DeleteServer"
 
 const ServerDash = (props: any) => {
   const location = useLocation();
   const parts = location.pathname.split("/");
   const paramStr = parts[parts.length - 1];
-  const deleteServer = useDeleteServer(paramStr);
   const { data, isLoading, isError, error } = useGetIndServer(paramStr);
   const upData = useGetUpData(paramStr);
   const navigate = useNavigate();
@@ -118,18 +118,7 @@ const ServerDash = (props: any) => {
           >
             Dashboard
           </Button>
-          <Button
-            colorScheme="red"
-            variant="outline"
-            m={2}
-            onClick={() => {
-              deleteServer.mutate();
-              // TODO: Invalidate data in server.
-              navigate("/dashboard");
-            }}
-          >
-            Delete
-          </Button>
+          <DeleteServer paramStr={paramStr} />
         </Box>
       </Center>
     </Container>

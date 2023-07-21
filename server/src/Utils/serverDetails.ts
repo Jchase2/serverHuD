@@ -5,7 +5,6 @@ const isReachable = require("is-reachable");
 
 export const isUp = async (hostname: string) => {
   let fixedUrl = hostname.replace(/^https?\:\/\//i, "").replace(/\/$/, "");
-  console.log("ISUP FIXED: ", fixedUrl);
   let res = await isReachable(fixedUrl);
   if (res) return "up";
   else return "down";
