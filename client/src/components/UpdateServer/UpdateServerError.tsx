@@ -37,7 +37,7 @@ export const UpdateServerError = (props: any) => {
           <ModalHeader>Error with request.</ModalHeader>
           <ModalBody>
             <ErrorShow
-              message={"Error: " + updateServer.error.response.data}
+              message={"Error: " + updateServer?.error?.response?.data}
               setClosed={handleClose}
               closed={false}
               isError={updateServer.isError}

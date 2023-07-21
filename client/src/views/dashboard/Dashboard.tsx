@@ -46,7 +46,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (addNewServer.isError) {
       setClosed(false);
-      setStateMessage("Error: " + addNewServer.error.response.data);
+      setStateMessage("Error: " + (addNewServer.error?.response.data || "Unknown Error"));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addNewServer]);
@@ -68,10 +68,10 @@ const Dashboard = () => {
     );
 
   // TODO: Replace with error component.
-  if (isError) {
+  if (isError && error) {
     // If not logged in or token expired,
     // push to login screen.
-    if (error?.response.status === 401) {
+    if (error.response && error.response.status === 401) {
       navigate("/login");
     } else {
       setStateMessage(error?.response.data || error?.message);

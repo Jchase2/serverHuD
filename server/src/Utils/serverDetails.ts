@@ -5,20 +5,23 @@ const isReachable = require("is-reachable");
 
 export const isUp = async (hostname: string) => {
   let fixedUrl = hostname.replace(/^https?\:\/\//i, "").replace(/\/$/, "");
+  console.log("ISUP FIXED: ", fixedUrl);
   let res = await isReachable(fixedUrl);
   if (res) return "up";
   else return "down";
 };
 
 export const getSslDetails = async (hostname: string) => {
+  // Strip the beginning and end off of a url.
   let fixedUrl = hostname.replace(/^https?\:\/\//i, "").replace(/\/$/, "");
+  fixedUrl = fixedUrl.replace(/\/[^/]*$/, '');
   try {
     return await sslChecker(fixedUrl);
   } catch (err: any) {
     // Forcing this to return an error message to avoid crashing
     // when a string message is returned. We expect errno nad the
     // current lib (sslChecker) isn't always providing one.
-    return {errno: err.message}
+    return { errno: err.message };
   }
 };
 

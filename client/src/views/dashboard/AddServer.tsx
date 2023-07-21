@@ -20,6 +20,12 @@ const AddServer = (props: any) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+
+    // Make sure we have http or https prepended.
+    if (!serverState.url.startsWith("http://") && !serverState.url.startsWith("https://")) {
+      serverState.url = "https://" + serverState.url;
+    }
+
     props.addNewServer.mutate(serverState);
     setServerState({
       url: "",
