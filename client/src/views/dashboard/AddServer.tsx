@@ -1,7 +1,14 @@
 import { Box, Button, Input, Stack, Text } from "@chakra-ui/react";
+import { UseMutationResult } from "@tanstack/react-query";
 import { useState } from "react";
+import { IAddServer } from "../../types";
+import { AxiosError } from "axios";
 
-const AddServer = (props: any) => {
+interface IAddServerProps {
+  addNewServer: UseMutationResult<any, AxiosError<any>, IAddServer, unknown>
+}
+
+const AddServer = (props: IAddServerProps) => {
   const [serverState, setServerState] = useState({
     url: "",
     optionalUrl: "",
@@ -11,14 +18,14 @@ const AddServer = (props: any) => {
     sslExpiry: 0,
   });
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setServerState((currentEvent) => ({
       ...currentEvent,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Make sure we have http or https prepended.

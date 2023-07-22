@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import DisplayServerList from "./DisplayServerList";
 import { useReactQuerySubscription } from "../../services/socket";
 import ServerSearch from "./ServerSearch";
+import { IData } from "../../types";
 
 const Dashboard = () => {
   const [isListView, setIsListView] = useState(
@@ -28,7 +29,7 @@ const Dashboard = () => {
   const [stateMessage, setStateMessage] = useState<string>("");
   const [closed, setClosed] = useState(true);
   const { data, isLoading, isError, error } = useGetServers();
-  const [searchData, setSearchData] = useState<any>();
+  const [searchData, setSearchData] = useState<IData[]>();
   const addNewServer = useAddServer();
   const navigate = useNavigate();
   useReactQuerySubscription();
@@ -46,7 +47,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (addNewServer.isError) {
       setClosed(false);
-      setStateMessage("Error: " + (addNewServer.error?.response.data || "Unknown Error"));
+      setStateMessage("Error: " + (addNewServer.error.response?.data || "Unknown Error"));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addNewServer]);
@@ -74,7 +75,7 @@ const Dashboard = () => {
     if (error.response && error.response.status === 401) {
       navigate("/login");
     } else {
-      setStateMessage(error?.response.data || error?.message);
+      setStateMessage(error.response?.data || error?.message);
     }
     // TODO: Replace with error component.
     return <p>ERROR</p>;

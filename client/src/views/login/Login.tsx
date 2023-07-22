@@ -12,13 +12,19 @@ import {
 } from "@chakra-ui/react";
 import { GrView } from "react-icons/gr";
 import { BiHide } from "react-icons/bi";
+import { IconType } from "react-icons";
 import { useNavigate } from "react-router-dom";
 import { useLogin } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 
-const Login = (props: any) => {
+interface LoginProps {
+  setIsAuthed: React.Dispatch<React.SetStateAction<string>>
+}
 
-  let SwitchIcon: any;
+const Login = (props: LoginProps) => {
+  const { setIsAuthed } = props;
+
+  let SwitchIcon: IconType;
   let navigate = useNavigate();
 
   const [loginState, setLoginState] = useState({
@@ -35,19 +41,19 @@ const Login = (props: any) => {
     SwitchIcon = BiHide;
   } else SwitchIcon = GrView;
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLoginState((currentEvent) => ({
       ...currentEvent,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    await login.mutate({
-      email: e.target.email.value,
-      password: e.target.password.value,
+    login.mutate({
+      email: (e.target as HTMLFormElement).email.value,
+      password: (e.target as HTMLFormElement).password.value,
     });
 
     setLoginState({
@@ -60,7 +66,7 @@ const Login = (props: any) => {
     console.log("Logged in!");
     localStorage.setItem("userId", login.data.userId);
     // sets authed to true in root component.
-    props.setIsAuthed("true");
+    setIsAuthed("true");
     navigate("/dashboard");
   }
 

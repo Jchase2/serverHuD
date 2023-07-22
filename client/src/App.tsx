@@ -27,7 +27,7 @@ export const socket = io("localhost:3001", {
 });
 
 function App() {
-  const [isAuthed, setIsAuthed] = useState(localStorage.getItem("authed"));
+  const [isAuthed, setIsAuthed] = useState(localStorage.getItem("authed") || "false");
 
   useEffect(() => {
     const fetchId = async () => {

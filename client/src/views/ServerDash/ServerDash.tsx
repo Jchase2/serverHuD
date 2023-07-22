@@ -27,7 +27,7 @@ const ServerDash = (props: any) => {
   const location = useLocation();
   const parts = location.pathname.split("/");
   const paramStr = parts[parts.length - 1];
-  const { data, isLoading, isError, error } = useGetIndServer(paramStr);
+  const { data, isLoading, isError, error } = useGetIndServer(Number(paramStr));
   const upData = useGetUpData(paramStr);
   const navigate = useNavigate();
 
@@ -78,7 +78,7 @@ const ServerDash = (props: any) => {
   if (isError) {
     // If not logged in or token expired,
     // push to login screen.
-    if (error.response.status === 401) {
+    if (error.response?.status === 401) {
       navigate("/login");
     }
     // TODO: Replace with error component.

@@ -13,13 +13,19 @@ import { useGetIndServer } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 import { socket } from "../../App";
 import { UpdateServer } from "../../components/UpdateServer/UpdateServer";
+import { IData } from "../../types";
 
-const Server = (props: any) => {
+interface ServerListProps {
+  serverData: IData
+}
+
+const Server = (props: ServerListProps) => {
+  const { serverData } = props;
   const {
     isLoading: indServerLoading,
     error: indServerError,
     data: indServerData,
-  } = useGetIndServer(props.serverData.id);
+  } = useGetIndServer(serverData.id);
 
   const navigate = useNavigate();
 

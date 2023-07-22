@@ -12,8 +12,15 @@ import {
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 
-const ClientHeader = (props: any) => {
+interface IClientHeaderProps {
+  globalLogOut: () => void;
+  isAuthed: string;
+}
+
+const ClientHeader = (props: IClientHeaderProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
+
+  const { globalLogOut, isAuthed } = props;
 
   const LoginAndRegister = () => {
     return (
@@ -57,7 +64,7 @@ const ClientHeader = (props: any) => {
           bg: useColorModeValue("gray.200", "gray.700"),
         }}
         onClick={() => {
-          props.globalLogOut();
+          globalLogOut();
           navigate("/");
         }}
       >
@@ -78,7 +85,7 @@ const ClientHeader = (props: any) => {
               {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
             </Button>
             <Menu>
-              {props.isAuthed === "false" ? <LoginAndRegister /> : <Logout />}
+              {isAuthed === "false" ? <LoginAndRegister /> : <Logout />}
             </Menu>
           </Stack>
         </Flex>

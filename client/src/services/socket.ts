@@ -1,7 +1,8 @@
 import React from "react";
 import { cloneDeep, isEqual } from "lodash";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, Updater } from "@tanstack/react-query";
 import { socket } from "../App";
+import { ILiveData, IResourceData } from "../types";
 
 export const queryClient = new QueryClient();
 
@@ -13,40 +14,54 @@ export const useReactQuerySubscription = () => {
       console.log("Global Socket Connected WITH ID: ", socket.id);
     });
 
-    socket.on("serverUpdate", (data, callback) => {
+    socket.on("serverUpdate", (data: ILiveData, callback) => {
       const queryKey = [`server-${data.id}`].filter(Boolean);
-      queryClient.setQueryData(queryKey, (oldData: any) => {
-        let mergedData = cloneDeep(oldData);
-        for (const [key, value] of Object.entries(data)) {
-          if (mergedData[key] !== value) {
-            mergedData[key] = value;
+      queryClient.setQueryData<ILiveData>(
+        queryKey,
+        (oldData: ILiveData | undefined) => {
+          let mergedData = cloneDeep(oldData);
+          if (mergedData) {
+            for (const [key, value] of Object.entries(data)) {
+              if (mergedData[key as keyof typeof mergedData] !== value) {
+                mergedData[key as keyof typeof mergedData] = value;
+              }
+            }
           }
+          return mergedData;
         }
-        return mergedData;
-      });
+      );
       // Send back that we've got the upate.
       callback(data);
     });
 
-    socket.on("liveServerUpdate", (data) => {
+    socket.on("liveServerUpdate", (data: ILiveData) => {
       const queryKey = [`live-server-${data.id}`].filter(Boolean);
-      queryClient.setQueryData(queryKey, (oldData: any) => {
-        if (!oldData) return data;
-        let mergedData = cloneDeep(oldData);
-        for (const [key, value] of Object.entries(data)) {
-          if (mergedData[key] !== value) {
-            mergedData[key] = value;
+      queryClient.setQueryData<ILiveData>(
+        queryKey,
+        (oldData: ILiveData | undefined) => {
+          console.log("LIVE OLD DATA IS: ", oldData);
+          if (!oldData) return data;
+          let mergedData = cloneDeep(oldData);
+          for (const [key, value] of Object.entries(data)) {
+            if (mergedData[key as keyof typeof mergedData] !== value) {
+              mergedData[key as keyof typeof mergedData] = value;
+            }
           }
+          return mergedData;
         }
-        return mergedData;
-      });
+      );
     });
 
     socket.on("resourcesUpdate", (data) => {
       const queryKey = [`server-usage-${data.id}`].filter(Boolean);
-      queryClient.setQueryData(queryKey, (oldData: any) => {
-        if (!isEqual(oldData, data)) return data?.resourceObj;
-      });
+      queryClient.setQueryData(
+        queryKey,
+        (
+          oldData: Updater<IResourceData | undefined, IResourceData | undefined>
+        ) => {
+          if (!isEqual(oldData, data)) return data?.resourceObj;
+        }
+      );
     });
 
     return () => {

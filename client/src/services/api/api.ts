@@ -1,20 +1,21 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { getUserId } from "../../shared/utils";
 import { queryClient } from "../socket";
+import { IAddServer, IData, IUpdateServer } from "../../types";
 
-export function useGetIndServer(id: string) {
+export function useGetIndServer(id: number) {
   return useQuery({
     queryKey: [`server-${id}`],
     queryFn: async () => {
-      const { data } = await axios({
+      const { data }: { data: IData} = await axios({
         method: "get",
         url: process.env.REACT_APP_BACKEND_URL + `/servers/${id}`,
         withCredentials: true,
       });
       return data;
     },
-    onError: (error: any) => error,
+    onError: (error: AxiosError) => error,
     // Since we're getting updates with sockets,
     // no need to mark cache data as stale and refetch it.
     staleTime: Infinity,
@@ -27,16 +28,14 @@ export function useGetServers() {
   return useQuery({
     queryKey: [`server-list-${userId}`],
     queryFn: async () => {
-      const { data } = await axios({
+      const { data }: { data: IData[] } = await axios({
         method: "get",
         url: process.env.REACT_APP_BACKEND_URL + "/servers",
         withCredentials: true,
       });
       return data;
     },
-    onError: (error: any) => {
-      return error;
-    },
+    onError: (error: AxiosError) => error,
   });
 }
 
@@ -51,7 +50,7 @@ export function useGetUpData(id: string) {
       });
       return data;
     },
-    onError: (error: any) => error.response,
+    onError: (error: AxiosError) => error,
     // Since we're getting updates with sockets,
     // no need to mark cache data as stale and refetch it.
     staleTime: Infinity,
@@ -70,7 +69,7 @@ export function useGetServerUsage(id: string) {
       });
       return data;
     },
-    onError: (error: any) => error.response,
+    onError: (error: AxiosError) => error,
     // Since we're getting updates with sockets,
     // no need to mark cache data as stale and refetch it.
     staleTime: Infinity,
@@ -116,14 +115,14 @@ export function useDeleteServer(id: string) {
         queryKey: [`server-list-${userId}`],
       });
     },
-    onError: (error: any) => error.response,
+    onError: (error: AxiosError) => error,
   });
 }
 
 export function useAddServer() {
   const userId = getUserId();
   return useMutation({
-    mutationFn: async (newServer: any) => {
+    mutationFn: async (newServer: IAddServer) => {
       let { data } = await axios({
         method: "post",
         url: process.env.REACT_APP_BACKEND_URL + "/servers",
@@ -137,15 +136,15 @@ export function useAddServer() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`server-list-${userId}`] });
     },
-    onError: (error: any) => error.response,
+    onError: (error: AxiosError) => error,
   });
 }
 
-export function useUpdateServer(id: string) {
+export function useUpdateServer(id: number) {
   const userId = getUserId();
   const mutation = useMutation({
-    mutationFn: async (newData: any) => {
-      let { data } = await axios({
+    mutationFn: async (newData: IUpdateServer) => {
+      const data: AxiosResponse<IData> = await axios({
         method: "put",
         url: process.env.REACT_APP_BACKEND_URL + `/servers/update/${id}`,
         data: newData,
@@ -161,7 +160,10 @@ export function useUpdateServer(id: string) {
         queryKey: [`server-list-${userId}`],
       });
     },
-    onError: (error: any) => error.response,
+    onError: (error: AxiosError) => {
+      console.log("ERROR IS: ", JSON.stringify(error));
+      return error;
+    },
   });
 
   return mutation;
@@ -179,7 +181,7 @@ export function useCreateUser() {
       });
       return data;
     },
-    onError: (error: any) => error
+    onError: (error: AxiosError) => error,
   });
 }
 
@@ -194,6 +196,6 @@ export function useLogin() {
       });
       return data;
     },
-    onError: (error: any) => error.response,
+    onError: (error: AxiosError) => error,
   });
 }

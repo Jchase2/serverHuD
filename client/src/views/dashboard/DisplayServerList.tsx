@@ -1,8 +1,14 @@
 import { Text, HStack } from "@chakra-ui/react";
 import VerticalServers from "./VerticalServers";
 import WrapServers from "./WrapServers";
+import { IData } from "../../types";
 
-const DisplayServerList = (props: any) => {
+interface DisplayServerListProps {
+  isListView: string | null,
+  data: IData[]
+}
+
+const DisplayServerList = (props: DisplayServerListProps) => {
   const { isListView, data } = props;
   return (
     <>

@@ -10,8 +10,19 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { ErrorShow } from "../Error/ErrorShow";
+import { UseMutationResult } from "@tanstack/react-query/build/lib/types";
+import { AxiosError, AxiosResponse } from "axios";
+import { IUpdateServer } from "../../types";
 
-export const UpdateServerError = (props: any) => {
+interface IUpdateServerErrorProps {
+    // TODO: Not sure how to type mutationFn correctly.
+    updateServer:  UseMutationResult<AxiosResponse<IUpdateServer>, AxiosError<any>, IUpdateServer, unknown>,
+    isOpen: boolean,
+    onOpen: () => void,
+    onClose: () => void,
+}
+
+export const UpdateServerError = (props: IUpdateServerErrorProps) => {
   const { updateServer, isOpen, onOpen, onClose } = props;
 
   const handleClose = () => {
@@ -37,7 +48,7 @@ export const UpdateServerError = (props: any) => {
           <ModalHeader>Error with request.</ModalHeader>
           <ModalBody>
             <ErrorShow
-              message={"Error: " + updateServer?.error?.response?.data}
+              message={"Error: " + updateServer.error?.response?.data}
               setClosed={handleClose}
               closed={false}
               isError={updateServer.isError}

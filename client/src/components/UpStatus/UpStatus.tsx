@@ -5,8 +5,13 @@ import {
   TriangleUpIcon,
 } from "@chakra-ui/icons";
 import { CiServer } from "react-icons/ci";
+import { IData } from "../../types";
 
-export const UpStatus = (props: any) => {
+interface IUpStatusProps {
+  serverData: IData
+}
+
+export const UpStatus = (props: IUpStatusProps) => {
   const { serverData } = props;
   return (
     <Stack>

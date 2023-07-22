@@ -15,10 +15,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateUser } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
+import { IconType } from "react-icons";
 
 const Register = () => {
-  let SwitchIcon: any;
-  let SwitchIcon2: any;
+  let SwitchIcon: IconType;
+  let SwitchIcon2: IconType;
   let navigate = useNavigate();
   const createUser = useCreateUser();
 
@@ -40,14 +41,14 @@ const Register = () => {
     SwitchIcon2 = BiHide;
   } else SwitchIcon2 = GrView;
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRegisterState((currentEvent) => ({
       ...currentEvent,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (registerState.password !== registerState.confirmPass) {
@@ -57,8 +58,8 @@ const Register = () => {
     }
 
     createUser.mutate({
-      email: e.target.email.value,
-      password: e.target.password.value,
+      email: (e.target as HTMLFormElement).email.value,
+      password: (e.target as HTMLFormElement).password.value,
     });
 
     setRegisterState({
@@ -76,7 +77,7 @@ const Register = () => {
   useEffect(() => {
     if (createUser.isError) {
       setClosed(false);
-      setStateMessage("Error: " + createUser.error.response.data);
+      setStateMessage("Error: " + createUser.error.response?.data);
     }
 
     if (createUser.isSuccess) {

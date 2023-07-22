@@ -14,8 +14,14 @@ import { useGetIndServer } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 import { socket } from "../../App";
 import { useNavigate } from "react-router-dom";
+import { IData } from "../../types";
 
-const ListServer = (props: any) => {
+
+interface ListServerProps {
+  serverData: IData
+}
+
+const ListServer = (props: ListServerProps) => {
 
   const {
     isLoading: indServerLoading,

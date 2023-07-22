@@ -16,27 +16,32 @@ import { useState } from "react";
 import { Loading } from "../Loading/Loading";
 import { useUpdateServer } from "../../services/api/api";
 import { UpdateServerError } from "./UpdateServerError";
+import { IData } from "../../types";
 
-export const UpdateServer = (props: any) => {
+interface IUpdateServerProps {
+  data: IData;
+}
+
+export const UpdateServer = (props: IUpdateServerProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data } = props;
   const updateServer = useUpdateServer(data.id);
+  const { mutate, reset, isLoading, isError, isSuccess } = updateServer;
   const [serverState, setServerState] = useState({
     url: "",
     optionalUrl: "",
     name: "",
   });
 
-  const handleChange = (e: any) => {
-    setServerState((currentEvent: any) => ({
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setServerState((currentEvent) => ({
       ...currentEvent,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    updateServer.mutate({
+  const handleSubmit = async () => {
+    mutate({
       url: serverState.url ? serverState.url : data.url,
       optionalUrl: serverState.optionalUrl
         ? serverState.optionalUrl
@@ -51,18 +56,25 @@ export const UpdateServer = (props: any) => {
     });
   };
 
-  if (updateServer.isLoading) {
+  if (isLoading) {
     return <Loading />;
   }
 
-  if (updateServer.isError) {
-    return <UpdateServerError updateServer={updateServer} isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
+  if (isError) {
+    return (
+      <UpdateServerError
+        updateServer={updateServer}
+        isOpen={isOpen}
+        onOpen={onOpen}
+        onClose={onClose}
+      />
+    );
   }
 
-  if(updateServer.isSuccess) {
-    updateServer.reset();
-    onClose()
-  };
+  if (isSuccess) {
+    reset();
+    onClose();
+  }
 
   return (
     <>
