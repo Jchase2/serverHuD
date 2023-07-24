@@ -1,8 +1,15 @@
 import { Card, CardHeader, Heading, Stack, Text } from "@chakra-ui/react";
 import MemUsageGraph from "./MemUsageGraph";
 import CpuUsageGraph from "./CpuUsageGraph";
+import { ILiveData, IResourceData } from "../../types";
 
-const ResourceUsage = (props: any) => {
+interface IResourceUsageProps {
+  serverUsageData: IResourceData,
+  upData: ILiveData,
+}
+
+const ResourceUsage = (props: IResourceUsageProps) => {
+
   return (
     <Card
       overflow="hidden"

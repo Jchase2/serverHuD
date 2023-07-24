@@ -9,9 +9,6 @@ interface ServerSearchProps {
 
 const ServerSearch = (props: ServerSearchProps) => {
   const { setSearchData, data } = props;
-
-  console.log("SERVER SEARCH DATA: ", data)
-
   const [searchInput, setSearchInput] = useState<string>("");
 
   useEffect(() => {

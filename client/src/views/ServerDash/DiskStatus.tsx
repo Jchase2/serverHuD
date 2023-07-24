@@ -6,8 +6,13 @@ import {
     Text
   } from "@chakra-ui/react";
 import DiskGraph from "./DiskGraph";
+import { IDisk } from "../../types";
 
-  const ResourceUsage = (props: any) => {
+  interface ResourceUsageProps {
+    data: IDisk
+  }
+
+  const ResourceUsage = (props: ResourceUsageProps) => {
     return (
       <Card
         overflow="hidden"

@@ -1,11 +1,11 @@
 export interface IAddServer {
-    url: string;
-    optionalUrl: string;
-    name: string;
-    status: string;
-    sslStatus: string;
-    sslExpiry: number;
-  }
+  url: string;
+  optionalUrl: string;
+  name: string;
+  status: string;
+  sslStatus: string;
+  sslExpiry: number;
+}
 
 export interface IData extends IAddServer {
   cpuUsage: number;
@@ -36,7 +36,7 @@ export interface ILiveData {
   uptime: number;
 }
 
-interface IXYData {
+export interface IXYData {
   x: number;
   y: number;
 }
@@ -44,4 +44,9 @@ interface IXYData {
 export interface IResourceData {
   memObj: Array<IXYData>;
   cpuObj: Array<IXYData>;
+}
+
+export interface IDisk {
+  diskSize: number;
+  diskUsed: number;
 }

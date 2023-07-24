@@ -8,8 +8,14 @@ import {
 } from "@chakra-ui/react";
 import UpGraph from "./UpGraph";
 import { UpStatus } from "../../components/UpStatus/UpStatus";
+import { IData, ILiveData } from "../../types";
 
-const ServerStatus = (props: any) => {
+interface IServerStatusProps {
+  upData: ILiveData,
+  serverData: IData
+}
+
+const ServerStatus = (props: IServerStatusProps) => {
   let { serverData, upData } = props;
 
   return (

@@ -1,8 +1,13 @@
 import { useColorMode } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { VictoryLabel, VictoryPie } from "victory";
+import { ILiveData } from "../../types";
 
-const UpGraph = (props: any) => {
+interface IUpGraphProps {
+  data: ILiveData
+}
+
+const UpGraph = (props: IUpGraphProps) => {
   const [graphicData, setGraphicData] = useState({
     percentageUp: 0,
     percentageDown: 0,

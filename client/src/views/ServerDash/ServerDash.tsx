@@ -21,9 +21,9 @@ import ResourceUsage from "./ResourceUsage";
 import Upgrades from "./Upgrades";
 import DiskStatus from "./DiskStatus";
 import { UpdateServer } from "../../components/UpdateServer/UpdateServer";
-import { DeleteServer } from "./DeleteServer"
+import { DeleteServer } from "./DeleteServer";
 
-const ServerDash = (props: any) => {
+const ServerDash = () => {
   const location = useLocation();
   const parts = location.pathname.split("/");
   const paramStr = parts[parts.length - 1];
@@ -59,10 +59,6 @@ const ServerDash = (props: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
-  useEffect(() => {
-    console.log("SERVER USAGE DATA CHANGED: ", serverUsageData);
-  }, [serverUsageData]);
-
   if (isLoading || upData.isLoading || serverUsageLoading)
     return (
       <Container centerContent>
@@ -96,12 +92,11 @@ const ServerDash = (props: any) => {
         {data?.diskUsed > -1 && data?.diskSize > -1 ? (
           <DiskStatus data={data} />
         ) : null}
-        {serverUsageData?.memObj?.length > 1 ||
-        serverUsageData?.cpuObj?.length > 1 ? (
+        {(serverUsageData && serverUsageData.memObj.length > 1) ||
+        (serverUsageData && serverUsageData.cpuObj.length > 1) ? (
           <ResourceUsage
-            serverData={data}
-            upData={upData.data}
             serverUsageData={serverUsageData}
+            upData={upData.data}
           />
         ) : null}
         {data?.upgrades && data?.upgrades !== "empty" ? (

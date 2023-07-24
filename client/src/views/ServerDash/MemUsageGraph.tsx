@@ -6,10 +6,15 @@ import {
   VictoryLabel,
   VictoryTheme,
 } from "victory";
+import { IXYData } from "../../types";
 
-const MemUsageGraph = (props: any) => {
+interface MemUsageGraphProps {
+  serverUsageData: IXYData[]
+}
+
+const MemUsageGraph = (props: MemUsageGraphProps) => {
   const { colorMode } = useColorMode();
-
+  const { serverUsageData } = props;
   return (
     <VictoryChart height={200} width={600} theme={VictoryTheme.material}>
       <VictoryLabel text="Memory Usage" x={225} y={30} style={{ fill: colorMode === 'light' ? '' : 'gray' }} />
@@ -24,7 +29,7 @@ const MemUsageGraph = (props: any) => {
         }}
         height={200}
         width={500}
-        data={props.serverUsageData}
+        data={serverUsageData}
         animate={{
           duration: 2000,
           onLoad: { duration: 1000 },

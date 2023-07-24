@@ -39,7 +39,6 @@ export const useReactQuerySubscription = () => {
       queryClient.setQueryData<ILiveData>(
         queryKey,
         (oldData: ILiveData | undefined) => {
-          console.log("LIVE OLD DATA IS: ", oldData);
           if (!oldData) return data;
           let mergedData = cloneDeep(oldData);
           for (const [key, value] of Object.entries(data)) {

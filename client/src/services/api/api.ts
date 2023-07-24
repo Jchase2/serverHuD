@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { getUserId } from "../../shared/utils";
 import { queryClient } from "../socket";
-import { IAddServer, IData, IUpdateServer } from "../../types";
+import { IAddServer, IData, IResourceData, IUpdateServer } from "../../types";
 
 export function useGetIndServer(id: number) {
   return useQuery({
@@ -62,7 +62,7 @@ export function useGetServerUsage(id: string) {
   return useQuery({
     queryKey: [`server-usage-${id}`],
     queryFn: async () => {
-      const { data } = await axios({
+      const { data }: { data: IResourceData} = await axios({
         method: "get",
         url: process.env.REACT_APP_BACKEND_URL + `/servers/usage/${id}`,
         withCredentials: true,

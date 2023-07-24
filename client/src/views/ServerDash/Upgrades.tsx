@@ -7,8 +7,14 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
-const Upgrades = (props: any) => {
+interface IUpgradesProps {
+  upgrades: string
+}
+
+const Upgrades = (props: IUpgradesProps) => {
+
   const { upgrades } = props;
+
   const [upgradeString, setUpgradeString] = useState(upgrades);
   useEffect(() => {
     if (upgrades.includes("Listing...")) {

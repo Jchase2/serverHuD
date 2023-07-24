@@ -1,8 +1,13 @@
 import { useColorMode } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { VictoryLabel, VictoryPie } from "victory";
+import { IDisk } from "../../types";
 
-const DiskGraph = (props: any) => {
+interface IDiskGraphProps {
+  data: IDisk
+}
+
+const DiskGraph = (props: IDiskGraphProps) => {
   const { colorMode } = useColorMode();
 
   const [graphicData, setGraphicData] = useState({

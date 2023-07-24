@@ -16,16 +16,18 @@ import { useNavigate } from "react-router-dom";
 import { ErrorShow } from "../../components/Error/ErrorShow";
 import { useState } from "react";
 
-export const DeleteServer = (props: any) => {
+interface DeleteServerProps {
+  paramStr: string,
+}
+
+export const DeleteServer = (props: DeleteServerProps) => {
   const { paramStr } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const deleteServer = useDeleteServer(paramStr);
   const navigate = useNavigate();
   const [closed, setClosed] = useState(true);
 
-  const handleDelete = (e: any) => {
-    console.log("Handle Delete Ran.")
-    e.preventDefault();
+  const handleDelete = (e: React.MouseEvent) => {
     deleteServer.mutate();
   }
 
