@@ -5,7 +5,21 @@ import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
 import { getMonitoredUsageData, getMonitoredUpInfo } from "../Utils/apiUtils";
 import cookie from 'cookie';
-// TODO: Add more checks so this doesn't crash with bad input.
+
+// TODO: Test with bad input.
+
+interface IIntervalObj {
+  [proporty: string]: ReturnType<typeof setInterval>
+}
+
+interface IUrlLiveData {
+  id: number;
+  url: string;
+  optionalUrl: string;
+  status: string;
+  sslStatus: string;
+  sslExpiry: string | undefined;
+}
 
 // Register for status checking every 10 seconds..
 // Only take action if current UI status is different than last stored status.
@@ -17,9 +31,8 @@ export function sioUpCheck(socket: Socket) {
   let userid = getUserId(cookies?.accessToken);
 
   console.log("SIO UP CHECK CALLED, SOCKET ID: ", socket.id);
-  // fix any
-  let intervalArr: any = [];
-  let intervalObj: any = {};
+  let intervalArr: string[] = [];
+  let intervalObj: IIntervalObj = {};
   if (userid > 0) {
     socket.on("upCheck", async (data) => {
       console.log("UPCHECK RECIEVED WITH ID: ", data.id);
@@ -56,8 +69,7 @@ export function sioUpCheck(socket: Socket) {
   });
 }
 
-const urlLiveCheck = async (data: any, socket: Socket) => {
-
+const urlLiveCheck = async (data: IUrlLiveData, socket: Socket) => {
   const cookies = cookie.parse(socket.handshake.headers.cookie || "");
   let userid = getUserId(cookies?.accessToken);
 
@@ -75,7 +87,7 @@ const urlLiveCheck = async (data: any, socket: Socket) => {
   }
 };
 
-const hudServerData = async (data: any, socket: Socket) => {
+const hudServerData = async (data: IUrlLiveData, socket: Socket) => {
   const cookies = cookie.parse(socket.handshake.headers.cookie || "");
   let userid = getUserId(cookies?.accessToken);
   try {
@@ -97,7 +109,7 @@ const hudServerData = async (data: any, socket: Socket) => {
 };
 
 // Check status of url endpoint.
-const urlDbChecker = async (data: any, socket: Socket) => {
+const urlDbChecker = async (data: IUrlLiveData, socket: Socket) => {
   // Decode userid, make sure user owns this server.
   const cookies = cookie.parse(socket.handshake.headers.cookie || "");
   let userid = getUserId(cookies?.accessToken);
@@ -117,14 +129,14 @@ const urlDbChecker = async (data: any, socket: Socket) => {
   // we will emit. Then we set data.status to resp.status,
   // this way it doesn't re-run.
   if (data.status !== res && serv !== null) {
-    socket.emit("serverUpdate", { status: res, id: data.id }, (resp: any) => {
+    socket.emit("serverUpdate", { status: res, id: data.id }, (resp: {id: number, status: string}) => {
       data.status = resp.status;
     });
   }
 };
 
 // Check status of SSL.
-const sslDbChecker = async (data: any, socket: Socket) => {
+const sslDbChecker = async (data: IUrlLiveData, socket: Socket) => {
   // Decode userid, make sure user owns this server.
   const cookies = cookie.parse(socket.handshake.headers.cookie || "");
   let userid = getUserId(cookies?.accessToken);
@@ -140,7 +152,7 @@ const sslDbChecker = async (data: any, socket: Socket) => {
     socket.emit(
       "serverUpdate",
       { sslStatus: res, id: data.id },
-      (resp: any) => {
+      (resp: { id: number, sslStatus: string}) => {
         data.sslStatus = resp.sslStatus;
       }
     );
@@ -157,7 +169,7 @@ const sslDbChecker = async (data: any, socket: Socket) => {
     socket.emit(
       "serverUpdate",
       { sslExpiry: expiryRes, id: data.id },
-      (resp: any) => {
+      (resp: {sslExpiry: string}) => {
         data.sslExpiry = resp.sslExpiry;
       }
     );

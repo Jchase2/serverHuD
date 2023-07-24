@@ -48,7 +48,6 @@ export const hudServerData = async (url: string) => {
         Authorization: jwt,
       },
     });
-
     return resp.data;
   } catch (err) {
     console.log("HUD SERVER ERROR: ", err);

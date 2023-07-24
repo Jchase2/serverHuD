@@ -2,7 +2,7 @@ import { LiveServer } from "../Models/liveServer.model";
 import { Cron, scheduledJobs } from "croner";
 import { isUp, getSslDetails, hudServerData } from "./serverDetails";
 import { Server } from "../Models/server.model";
-
+import { IHudServerData, IResolvedValues } from "../types";
 
 // Create a cron job for a given URL, userid and server id.
 // This job monitors the up status of the endpoint.
@@ -85,8 +85,7 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
     console.log("Adding ", `${url}-ssl-${id}`, " to job list.");
     // Checking SSL every 5 minutes.
     let job = Cron("* 5 * * * *", { name: jobName }, async () => {
-      let checkSsl: any = await getSslDetails(url);
-
+      let checkSsl: IResolvedValues | any = await getSslDetails(url);
       // First we're going to update liveServer time series data,
       // if there's been changes.
       let currStatus = await LiveServer.findOne({
@@ -172,18 +171,11 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
   if(server?.dataValues.optionalUrl) {
     let jobName = `${server?.dataValues.optionalUrl}-optional-${server?.dataValues.id}`;
     let jobArray = scheduledJobs.map((elem) => elem.name);
-
-    console.log("SCHEDULED JOBS: ", scheduledJobs);
-    console.log("JOB ARRAY: ", jobArray);
-
     if (!jobArray.includes(jobName)) {
       console.log("Adding ", `${server?.dataValues.optionalUrl}-optional-${id}`, " to job list.");
 
       // TODO: Review how often we want to get this data for performance.
       let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
-
-        console.log("SERVER DATAVALS: ", server?.dataValues)
-
         // TODO: Make sure optional server data isn't throwing an error
         let optionalServerData = server?.dataValues.optionalUrl ? await hudServerData(server?.dataValues.optionalUrl) : null;
         let currStatus = await LiveServer.findOne({
@@ -191,9 +183,6 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
           attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
           order: [["time", "DESC"]],
         });
-
-        console.log("OPTIONAL SERVER DATA: ", optionalServerData)
-
         await LiveServer.create({
           status: currStatus?.status,
           url: url,
@@ -265,12 +254,8 @@ export const startServerJobs = async () => {
     if (currStatus === null) {
       console.log("Creating first entry.");
       let checkUp = await isUp(url);
-      let checkSsl: any = await getSslDetails(url);
-      let optionalData: any = optionalUrl ? await hudServerData(optionalUrl) : null;
-
-      console.log("OPTAIONAL DATA: ", optionalData)
-
-      console.log("CHECKSSL IS: ", JSON.stringify(checkSsl))
+      let checkSsl: IResolvedValues | any = await getSslDetails(url);
+      let optionalData: IHudServerData = optionalUrl ? await hudServerData(optionalUrl) : null;
 
       await LiveServer.create({
         status: checkUp,

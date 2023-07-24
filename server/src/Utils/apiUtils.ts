@@ -3,7 +3,12 @@ import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
 import { Op, Sequelize } from "sequelize";
 
-export const getAllCombinedState = async (userid: any) => {
+interface ICombinedData {
+  avgMem: number,
+  avgCpu: number
+}
+
+export const getAllCombinedState = async (userid: number) => {
   const serverList = await Server.findAll({
     where: { userid: userid },
   });
@@ -11,7 +16,14 @@ export const getAllCombinedState = async (userid: any) => {
   let combinedData = serverList.map(async (server) => {
     let res = await LiveServer.findOne({
       where: { serverid: server.id, userid: userid },
-      attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
+      attributes: [
+        "status",
+        "sslStatus",
+        "diskUsed",
+        "diskSize",
+        "memUsage",
+        "cpuUsage",
+      ],
       order: [["time", "DESC"]],
     });
     Object.assign(server.dataValues, res?.dataValues);
@@ -27,21 +39,36 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
       where: { id: serverid, userid: userid },
     });
 
-    if(!server) {
+    if (!server) {
       return null;
     }
 
     let res = await LiveServer.findOne({
       where: { serverid: serverid, userid: userid },
-      attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
+      attributes: [
+        "status",
+        "sslStatus",
+        "diskUsed",
+        "diskSize",
+        "memUsage",
+        "cpuUsage",
+      ],
       order: [["time", "DESC"]],
     });
     // Make sure we're returning -1 if we don't have these values.
-    if(res && res.dataValues) {
-      res.dataValues.diskSize = res.dataValues.diskSize ? res.dataValues.diskSize : -1;
-      res.dataValues.diskUsed = res.dataValues.diskUsed ? res.dataValues.diskUsed : -1;
-      res.dataValues.memUsage = res.dataValues.memUsage ? res.dataValues.memUsage : -1;
-      res.dataValues.cpuUsage = res.dataValues.cpuUsage ? res.dataValues.cpuUsage : -1;
+    if (res && res.dataValues) {
+      res.dataValues.diskSize = res.dataValues.diskSize
+        ? res.dataValues.diskSize
+        : -1;
+      res.dataValues.diskUsed = res.dataValues.diskUsed
+        ? res.dataValues.diskUsed
+        : -1;
+      res.dataValues.memUsage = res.dataValues.memUsage
+        ? res.dataValues.memUsage
+        : -1;
+      res.dataValues.cpuUsage = res.dataValues.cpuUsage
+        ? res.dataValues.cpuUsage
+        : -1;
     }
     Object.assign(server?.dataValues, res?.dataValues);
     return server;
@@ -73,12 +100,15 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     raw: true,
   });
 
-  const latestDiskSize = res[res.length - 1]?.diskSize ? res[res.length - 1]?.diskSize : -1;
-  const latestDiskUsed = res[res.length - 1]?.diskSize ? res[res.length - 1]?.diskSize : -1;
+  const latestDiskSize = res[res.length - 1]?.diskSize
+    ? res[res.length - 1]?.diskSize
+    : -1;
+  const latestDiskUsed = res[res.length - 1]?.diskSize
+    ? res[res.length - 1]?.diskSize
+    : -1;
 
-  // TODO: Again, fix the any's.
-  let currStatus: any = null;
-  let diffArr: any = [];
+  let currStatus: string | null = null;
+  let diffArr: LiveServer[] = [];
   res.forEach((elem) => {
     if (elem.status != currStatus) {
       diffArr.push(elem);
@@ -86,43 +116,50 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     }
   });
 
-  let totalUptime = diffArr.reduce((acc: any, curr: any, ind: number) => {
-    // If current status i up and the next index is down, calculate the difference
-    // and add that to the accumulator.
-    if (
-      curr.status === "up" &&
-      diffArr[ind + 1] &&
-      diffArr[ind + 1].status === "down"
-    ) {
-      let difference = dayjs(diffArr[ind + 1].time).diff(
-        dayjs(curr.time),
-        "seconds"
-      );
-      return acc + difference;
-    } else if (curr.status === "up" && !diffArr[ind + 1]) {
-      let difference = dayjs(Date.now()).diff(dayjs(curr.time), "seconds");
-      return acc + difference;
-    }
-    return acc;
-  }, 0);
+  let totalUptime = diffArr.reduce(
+    (acc: number, curr: LiveServer, ind: number) => {
+      // If current status i up and the next index is down, calculate the difference
+      // and add that to the accumulator.
 
-  let totalDowntime = diffArr.reduce((acc: any, curr: any, ind: number) => {
-    if (
-      curr.status === "down" &&
-      diffArr[ind + 1] &&
-      diffArr[ind + 1].status === "up"
-    ) {
-      let difference = dayjs(diffArr[ind + 1]?.time).diff(
-        dayjs(curr.time),
-        "seconds"
-      );
-      return acc + difference;
-    } else if (curr.status === "down" && !diffArr[ind + 1]) {
-      let difference = dayjs(Date.now()).diff(dayjs(curr.time), "seconds");
-      return acc + difference;
-    }
-    return acc;
-  }, 0);
+      if (
+        curr.status === "up" &&
+        diffArr[ind + 1] &&
+        diffArr[ind + 1].status === "down"
+      ) {
+        let difference = dayjs(diffArr[ind + 1].time).diff(
+          dayjs(curr.time),
+          "seconds"
+        );
+        return acc + difference;
+      } else if (curr.status === "up" && !diffArr[ind + 1]) {
+        let difference = dayjs(Date.now()).diff(dayjs(curr.time), "seconds");
+        return acc + difference;
+      }
+      return acc;
+    },
+    0
+  );
+
+  let totalDowntime = diffArr.reduce(
+    (acc: number, curr: LiveServer, ind: number) => {
+      if (
+        curr.status === "down" &&
+        diffArr[ind + 1] &&
+        diffArr[ind + 1].status === "up"
+      ) {
+        let difference = dayjs(diffArr[ind + 1]?.time).diff(
+          dayjs(curr.time),
+          "seconds"
+        );
+        return acc + difference;
+      } else if (curr.status === "down" && !diffArr[ind + 1]) {
+        let difference = dayjs(Date.now()).diff(dayjs(curr.time), "seconds");
+        return acc + difference;
+      }
+      return acc;
+    },
+    0
+  );
 
   let getTotalMonitoringTime = dayjs(Date.now()).diff(
     dayjs(diffArr[0].time),
@@ -141,7 +178,7 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     percentageUp: percentageUp,
     percentageDown: percentageDown,
     diskSize: latestDiskSize,
-    diskUsed: latestDiskUsed
+    diskUsed: latestDiskUsed,
   };
 };
 
@@ -177,15 +214,18 @@ const fiveMinuteLiveData = async (
 
 // Take an array of LiveServer data and average
 // cpu usage and mem usage over that interval.
-// TODO: Get rid of any's.
-const averageFiveMinuteData = (data: any) => {
+const averageFiveMinuteData = (data: LiveServer[]) => {
   const totalVals = data.length;
   const avgMem =
-    data.reduce((acc: number, curr: any) => acc + Number(curr?.memUsage), 0) /
-    totalVals;
+    data.reduce(
+      (acc: number, curr: LiveServer) => acc + Number(curr?.memUsage),
+      0
+    ) / totalVals;
   const avgCpu =
-    data.reduce((acc: number, curr: any) => acc + Number(curr?.cpuUsage), 0) /
-    totalVals;
+    data.reduce(
+      (acc: number, curr: LiveServer) => acc + Number(curr?.cpuUsage),
+      0
+    ) / totalVals;
   return {
     avgMem: Math.round((avgMem + Number.EPSILON) * 100) / 100,
     avgCpu: Math.round((avgCpu + Number.EPSILON) * 100) / 100,
@@ -193,15 +233,16 @@ const averageFiveMinuteData = (data: any) => {
 };
 
 // Build return object for FE graphing from retArr.
-const buildData = (combinedArr: any, key: string) => {
-  let retArr: any = [];
-  combinedArr.forEach((elem: any, index: number) => {
+const buildData = (combinedArr: ICombinedData[], key: string) => {
+  let retArr: { x: number, y: number}[] = [];
+  combinedArr.forEach((elem: ICombinedData, index: number) => {
+
     let newObj = {
       x: (index + 1) * 5,
-      y: elem[key],
+      y: elem[key as keyof typeof elem],
     };
 
-    if(newObj['y']) {
+    if (newObj["y"]) {
       retArr.push(newObj);
     }
   });
@@ -232,8 +273,10 @@ export const getMonitoredUsageData = async (id: number, userid: number) => {
       let retArr = [];
       for (const elem of timeArr) {
         let res = await fiveMinuteLiveData(new Date(elem), id, userid);
-        let avg = averageFiveMinuteData(res);
-        retArr.push(avg);
+        if (res) {
+          let avg = averageFiveMinuteData(res);
+          retArr.push(avg);
+        }
       }
 
       let memObj = buildData(retArr, "avgMem");

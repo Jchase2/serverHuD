@@ -15,7 +15,6 @@ import { AxiosError, AxiosResponse } from "axios";
 import { IUpdateServer } from "../../types";
 
 interface IUpdateServerErrorProps {
-    // TODO: Not sure how to type mutationFn correctly.
     updateServer:  UseMutationResult<AxiosResponse<IUpdateServer>, AxiosError<any>, IUpdateServer, unknown>,
     isOpen: boolean,
     onOpen: () => void,

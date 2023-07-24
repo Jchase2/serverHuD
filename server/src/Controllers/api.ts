@@ -1,5 +1,6 @@
 import { User } from "../Models/user.model";
 import { Server } from "../Models/server.model";
+import koa  from 'koa';
 import bcrypt from "bcrypt";
 import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
@@ -21,6 +22,7 @@ import {
   getOneCombinedState,
 } from "../Utils/apiUtils";
 import { getUserId, verifyToken } from "../Utils/jwt";
+import { IResolvedValues } from "../types";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -29,7 +31,7 @@ const userSchema = Joi.object({
   password: Joi.string().min(8).alphanum().required(),
 });
 
-export const registerUser = async (ctx: any) => {
+export const registerUser = async (ctx: koa.Context, next: Function) => {
   try {
     // Make sure types are correct.
     await userSchema.validateAsync({
@@ -57,7 +59,7 @@ export const registerUser = async (ctx: any) => {
   }
 };
 
-export const loginUser = async (ctx: any) => {
+export const loginUser = async (ctx: koa.Context, next: Function) => {
   try {
     await userSchema.validateAsync({
       email: ctx.request.body.email,
@@ -83,7 +85,7 @@ export const loginUser = async (ctx: any) => {
     );
     ctx.cookies.set("accessToken", accessToken, {
       httpOnly: true,
-      SameSite: "Strict",
+      sameSite: "strict",
     });
     ctx.body = { userId: user.id };
     ctx.status = 200;
@@ -93,7 +95,7 @@ export const loginUser = async (ctx: any) => {
   }
 };
 
-export const getVerifyUser = async (ctx: any) => {
+export const getVerifyUser = async (ctx: koa.Context, next: Function) => {
   let accessToken = ctx.cookies.get("accessToken");
   if (accessToken) {
     let userId = getUserId(accessToken);
@@ -108,9 +110,9 @@ export const getVerifyUser = async (ctx: any) => {
   }
 };
 
-export const getUserLogout = async (ctx: any) => {
+export const getUserLogout = async (ctx: koa.Context, next: Function) => {
   let accessToken = ctx.cookies.get("accessToken");
-  if (verifyToken(accessToken)) {
+  if (accessToken && verifyToken(accessToken)) {
     ctx.cookies.set("accessToken");
     ctx.status = 200;
   } else {
@@ -118,7 +120,7 @@ export const getUserLogout = async (ctx: any) => {
   }
 };
 
-export const getUserServers = async (ctx: any) => {
+export const getUserServers = async (ctx: koa.Context, next: Function) => {
   let res = await getAllCombinedState(ctx.state.user._id);
   if (res) {
     ctx.body = res;
@@ -129,7 +131,7 @@ export const getUserServers = async (ctx: any) => {
   }
 };
 
-export const getIndServer = async (ctx: any) => {
+export const getIndServer = async (ctx: koa.Context, next: Function) => {
   const server = await getOneCombinedState(ctx.params.id, ctx.state.user._id);
   if (server) {
     ctx.body = server;
@@ -140,7 +142,7 @@ export const getIndServer = async (ctx: any) => {
   }
 };
 
-export const getServerUsage = async (ctx: any) => {
+export const getServerUsage = async (ctx: koa.Context, next: Function) => {
   const data = await getMonitoredUsageData(ctx.params.id, ctx.state.user._id);
   if (data) {
     ctx.body = data;
@@ -151,7 +153,7 @@ export const getServerUsage = async (ctx: any) => {
   }
 };
 
-export const deleteServer = async (ctx: any) => {
+export const deleteServer = async (ctx: koa.Context, next: Function) => {
   try {
     await Server.destroy({
       where: {
@@ -189,7 +191,7 @@ const liveServerSchema = Joi.object({
   cpuUsage: Joi.number(),
 });
 
-export const addServer = async (ctx: any) => {
+export const addServer = async (ctx: koa.Context, next: Function) => {
   const { url, optionalUrl, name } = ctx.request.body;
 
   // Check if URL is empty
@@ -212,7 +214,7 @@ export const addServer = async (ctx: any) => {
     }
   }
 
-  let sslInfo: any = await getSslDetails(url);
+  let sslInfo: IResolvedValues | any = await getSslDetails(url);
   if (sslInfo.errno) sslInfo.valid = false;
 
   const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
@@ -264,13 +266,13 @@ export const addServer = async (ctx: any) => {
   }
 };
 
-export const getTimeseriesUpData = async (ctx: any) => {
+export const getTimeseriesUpData = async (ctx: koa.Context, next: Function) => {
   let res = await getMonitoredUpInfo(ctx.params.id, ctx.state.user._id);
   ctx.body = res;
   ctx.status = 200;
 };
 
-export const updateServer = async (ctx: any) => {
+export const updateServer = async (ctx: koa.Context, next: Function) => {
   const { url, optionalUrl, name } = ctx.request.body;
 
   // Check if URL is empty
@@ -293,7 +295,7 @@ export const updateServer = async (ctx: any) => {
     }
   }
 
-  let sslInfo: any = await getSslDetails(url);
+  let sslInfo: IResolvedValues | any = await getSslDetails(url);
   if (sslInfo.errno) sslInfo.valid = false;
 
   const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
