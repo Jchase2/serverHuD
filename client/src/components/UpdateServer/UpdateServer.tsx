@@ -41,6 +41,11 @@ export const UpdateServer = (props: IUpdateServerProps) => {
   };
 
   const handleSubmit = async () => {
+    // Make sure we have http or https prepended.
+    if (!serverState.url.startsWith("http://") && !serverState.url.startsWith("https://")) {
+      serverState.url = "https://" + serverState.url;
+    }
+
     mutate({
       url: serverState.url ? serverState.url : data.url,
       optionalUrl: serverState.optionalUrl
