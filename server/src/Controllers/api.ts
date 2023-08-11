@@ -154,6 +154,7 @@ export const getServerUsage = async (ctx: koa.Context, next: Function) => {
   }
 };
 
+// TODO: Verify user owns server.
 export const deleteServer = async (ctx: koa.Context, next: Function) => {
   try {
 

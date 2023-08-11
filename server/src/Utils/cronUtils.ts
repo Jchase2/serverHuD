@@ -1,6 +1,6 @@
 import { LiveServer } from "../Models/liveServer.model";
 import { Cron, scheduledJobs } from "croner";
-import { isUp, getSslDetails, hudServerData } from "./serverDetails";
+import { isUp, getSslDetails, hudServerData, getHudSelectedData } from "./serverDetails";
 import { Server } from "../Models/server.model";
 import { IHudServerData, IResolvedValues } from "../types";
 import { HudServer } from "../Models/hudServer.model";
@@ -9,7 +9,7 @@ import { HudServer } from "../Models/hudServer.model";
 // This job monitors the up status of the endpoint.
 export const setupUrlCron = async (url: string, userid: number, id: number) => {
   let server = await Server.findOne({
-    where: { id: id },
+    where: { id: id, userid: userid },
   });
 
   let jobName = `${server?.dataValues.url}-status-${server?.dataValues.id}`;
@@ -22,7 +22,7 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
     let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
       let checkUp = await isUp(url);
       let currStatus = await LiveServer.findOne({
-        where: { serverid: server?.id },
+        where: { serverid: server?.id, userid: userid },
         attributes: ["status"],
         order: [["time", "DESC"]],
       });
@@ -86,7 +86,7 @@ export const updateUrlCron = async (newUrl: string, userid: number, id: number) 
 // This job monitors the SSL status of the endpoint.
 export const setupSslCron = async (url: string, userid: number, id: number) => {
   let server = await Server.findOne({
-    where: { id: id },
+    where: { id: id, userid: userid },
   });
 
   let jobName = `${server?.dataValues.url}-ssl-${server?.dataValues.id}`;
@@ -100,7 +100,7 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
       // First we're going to update liveServer time series data,
       // if there's been changes.
       let currStatus = await LiveServer.findOne({
-        where: { serverid: server?.id },
+        where: { serverid: server?.id, userid: userid },
         attributes: ["status", "sslStatus"],
         order: [["time", "DESC"]],
       });
@@ -193,7 +193,8 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
       // TODO: Review how often we want to get this data for performance.
       let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
         // TODO: Make sure optional server data isn't throwing an error
-        let optionalServerData = hudServerBe?.dataValues.optionalUrl ? await hudServerData(hudServerBe?.dataValues.optionalUrl) : null;
+        let optionalServerData = (hudServerBe?.dataValues.optionalUrl && hudServerBe?.dataValues.trackOptions) ? await getHudSelectedData(hudServerBe?.dataValues.optionalUrl, hudServerBe?.dataValues.trackOptions) : null;
+
         let currStatus = await LiveServer.findOne({
           where: { serverid: server?.id },
           attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
@@ -229,6 +230,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
 
 // Replaces cron job for optional url with new url.
 export const updateOptionalCron = async (newUrl: string, userid: number, id: number) => {
+
   let hudServer = await HudServer.findOne({
     where: { serverid: id },
   });
@@ -278,7 +280,7 @@ export const startServerJobs = async () => {
       console.log("Creating first entry.");
       let checkUp = await isUp(url);
       let checkSsl: IResolvedValues | any = await getSslDetails(url);
-      let optionalData: IHudServerData = optionalUrl ? await hudServerData(optionalUrl) : null;
+      let optionalData: IHudServerData = optionalUrl ? await getHudSelectedData(hudServerBe?.dataValues.optionalUrl, hudServerBe?.dataValues.trackOptions) : null;
 
       await LiveServer.create({
         status: checkUp,

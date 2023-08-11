@@ -165,7 +165,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
               value={serverState.optionalUrl}
               onChange={handleChange}
             />
-            {data?.optionalUrl ? <UpdateOptionalServer checkedItems={checkedItems} setCheckedItems={setCheckedItems}  /> : null}
+            {data?.optionalUrl || serverState?.optionalUrl ? <UpdateOptionalServer checkedItems={checkedItems} setCheckedItems={setCheckedItems}  /> : null}
           </ModalBody>
           <ModalFooter>
             <Button mr={3} onClick={onClose}>
