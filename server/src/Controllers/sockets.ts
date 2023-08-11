@@ -5,6 +5,7 @@ import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
 import { getMonitoredUsageData, getMonitoredUpInfo } from "../Utils/apiUtils";
 import cookie from 'cookie';
+import { HudServer } from "../Models/hudServer.model";
 
 // TODO: Test with bad input.
 
@@ -95,7 +96,13 @@ const hudServerData = async (data: IUrlLiveData, socket: Socket) => {
       where: { id: data.id, userid: userid },
     });
 
-    if (servInfo?.optionalUrl) {
+    // We don't just use data.id here so an arbitrary
+    // id can't be used to get another users info.
+    let hudServerInfo = await HudServer.findOne({
+      where: { serverid: servInfo?.id }
+    })
+
+    if (hudServerInfo?.optionalUrl) {
       let res = await getMonitoredUsageData(data.id, userid);
       console.log("EMITTING RESOURCE UPDATE ON BACKEND");
       socket.emit("resourcesUpdate", {

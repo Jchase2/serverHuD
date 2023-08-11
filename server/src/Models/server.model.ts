@@ -20,19 +20,10 @@ export class Server extends Model {
   url!: string;
 
   @Column
-  optionalUrl!: string;
-
-  @Column
   name!: string;
 
   @Column
   sslExpiry!: number;
-
-  @Column
-  upgrades!: string;
-
-  @Column(DataType.JSON)
-  uptime!: JSON;
 
   @BelongsTo(() => User)
   user!: User

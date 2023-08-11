@@ -16,6 +16,12 @@ const AddServer = (props: IAddServerProps) => {
     status: "",
     sslStatus: "",
     sslExpiry: 0,
+    trackOptions: {
+      trackDisk: true,
+      trackResources: true,
+      trackUpgrades: true,
+      trackSmart: true
+    }
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,8 +35,13 @@ const AddServer = (props: IAddServerProps) => {
     e.preventDefault();
 
     // Make sure we have http or https prepended.
-    if (!serverState.url.startsWith("http://") && !serverState.url.startsWith("https://")) {
+    if (serverState.url && !serverState.url.startsWith("http://") && !serverState.url.startsWith("https://")) {
       serverState.url = "https://" + serverState.url;
+    }
+
+    // Make sure we have http or https prepended.
+    if (serverState.optionalUrl && !serverState.optionalUrl.startsWith("http://") && !serverState.optionalUrl.startsWith("https://")) {
+      serverState.optionalUrl = "http://" + serverState.optionalUrl;
     }
 
     props.addNewServer.mutate(serverState);
@@ -41,6 +52,12 @@ const AddServer = (props: IAddServerProps) => {
       status: "",
       sslStatus: "",
       sslExpiry: 0,
+      trackOptions: {
+        trackDisk: true,
+        trackResources: true,
+        trackUpgrades: true,
+        trackSmart: true
+      }
     });
   };
 

@@ -3,6 +3,7 @@ import { Cron, scheduledJobs } from "croner";
 import { isUp, getSslDetails, hudServerData } from "./serverDetails";
 import { Server } from "../Models/server.model";
 import { IHudServerData, IResolvedValues } from "../types";
+import { HudServer } from "../Models/hudServer.model";
 
 // Create a cron job for a given URL, userid and server id.
 // This job monitors the up status of the endpoint.
@@ -22,18 +23,28 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
       let checkUp = await isUp(url);
       let currStatus = await LiveServer.findOne({
         where: { serverid: server?.id },
-        attributes: ["sslStatus"],
+        attributes: ["status"],
         order: [["time", "DESC"]],
       });
 
       if (checkUp !== currStatus?.dataValues.status) {
+        console.log("Up status has changed.")
         try {
+          let hudServerBe = await HudServer.findOne({
+            where: { serverid: id },
+            attributes: ["optionalUrl"]
+          })
+          let optionalServerData = hudServerBe?.dataValues.optionalUrl ? await hudServerData(hudServerBe?.dataValues.optionalUrl) : null;
           await LiveServer.create({
             status: checkUp,
             url: url,
             userid: userid,
             serverid: id,
             sslStatus: currStatus?.dataValues.sslStatus,
+            diskUsed: optionalServerData?.diskUsed ? optionalServerData?.diskUsed : -1,
+            diskSize: optionalServerData?.diskSize ? optionalServerData?.diskSize : -1,
+            memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : 0,
+            cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : 0
           });
         } catch (err) {
           console.log("ERR UPDATING URL IN CRON: ", err)
@@ -168,21 +179,27 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
   let server = await Server.findOne({
     where: { id: id, userid: userid  },
   });
-  if(server?.dataValues.optionalUrl) {
-    let jobName = `${server?.dataValues.optionalUrl}-optional-${server?.dataValues.id}`;
+
+  let hudServerBe = await HudServer.findOne({
+    where: { serverid: id }
+  })
+
+  if(hudServerBe?.dataValues.optionalUrl) {
+    let jobName = `${hudServerBe?.dataValues.optionalUrl}-optional-${hudServerBe?.dataValues.serverid}`;
     let jobArray = scheduledJobs.map((elem) => elem.name);
     if (!jobArray.includes(jobName)) {
-      console.log("Adding ", `${server?.dataValues.optionalUrl}-optional-${id}`, " to job list.");
+      console.log("Adding ", `${hudServerBe?.dataValues.optionalUrl}-optional-${id}`, " to job list.");
 
       // TODO: Review how often we want to get this data for performance.
       let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
         // TODO: Make sure optional server data isn't throwing an error
-        let optionalServerData = server?.dataValues.optionalUrl ? await hudServerData(server?.dataValues.optionalUrl) : null;
+        let optionalServerData = hudServerBe?.dataValues.optionalUrl ? await hudServerData(hudServerBe?.dataValues.optionalUrl) : null;
         let currStatus = await LiveServer.findOne({
           where: { serverid: server?.id },
           attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
           order: [["time", "DESC"]],
         });
+
         await LiveServer.create({
           status: currStatus?.status,
           url: url,
@@ -191,16 +208,16 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
           sslStatus: currStatus?.dataValues.sslStatus,
           diskUsed: optionalServerData?.diskUsed ? optionalServerData?.diskUsed : -1,
           diskSize: optionalServerData?.diskSize ? optionalServerData?.diskSize : -1,
-          memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : -1,
-          cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : -1
+          memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : 0,
+          cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : 0
         });
 
-        await Server.update(
+        await HudServer.update(
           {
-            uptime: optionalServerData?.uptimeInHours ? optionalServerData?.uptimeInHours : -1,
+            uptime: optionalServerData?.uptimeInHours ? optionalServerData?.uptimeInHours : 0,
             upgrades: optionalServerData?.upgrades ? optionalServerData?.upgrades : "empty",
           },
-          { where: { id: id } }
+          { where: { serverid: id } }
         );
 
       });
@@ -212,11 +229,11 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
 
 // Replaces cron job for optional url with new url.
 export const updateOptionalCron = async (newUrl: string, userid: number, id: number) => {
-  let server = await Server.findOne({
-    where: { id: id, userid: userid },
+  let hudServer = await HudServer.findOne({
+    where: { serverid: id },
   });
 
-  const oldJobName = `${server?.dataValues.optionalUrl}-optional-${id}`;
+  const oldJobName = `${hudServer?.dataValues.optionalUrl}-optional-${id}`;
 
   let oldJob;
   for(let obj of scheduledJobs) {
@@ -240,7 +257,13 @@ export const updateOptionalCron = async (newUrl: string, userid: number, id: num
 export const startServerJobs = async () => {
   let servArr = await Server.findAll();
   servArr.map(async (server) => {
-    let { url, userid, id, optionalUrl } = server;
+    let { url, userid, id } = server;
+
+    let hudServerBe = await HudServer.findOne({
+      where: {serverid: id }
+    });
+
+    let optionalUrl = hudServerBe?.dataValues.optionalUrl;
 
     // Grab the last status of this server.
     let currStatus = await LiveServer.findOne({
@@ -265,8 +288,8 @@ export const startServerJobs = async () => {
         sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
         diskUsed: optionalData?.diskUsed ? optionalData.diskUsed : -1,
         diskSize: optionalData?.diskSize ? optionalData.diskSize : -1,
-        memUsage: optionalData?.memUsage ? optionalData.memUsage : -1,
-        cpuUsage: optionalData?.cpuUsage ? optionalData.cpuUsage : -1
+        memUsage: optionalData?.memUsage ? optionalData.memUsage : 0,
+        cpuUsage: optionalData?.cpuUsage ? optionalData.cpuUsage : 0
       });
     }
 

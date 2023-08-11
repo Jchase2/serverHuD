@@ -4,7 +4,7 @@ import koa  from 'koa';
 import bcrypt from "bcrypt";
 import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
-import { getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
+import { getHudSelectedData, getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
 import {
   setupOptionalCron,
   setupSslCron,
@@ -23,6 +23,7 @@ import {
 } from "../Utils/apiUtils";
 import { getUserId, verifyToken } from "../Utils/jwt";
 import { IResolvedValues } from "../types";
+import { HudServer } from "../Models/hudServer.model";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -155,6 +156,13 @@ export const getServerUsage = async (ctx: koa.Context, next: Function) => {
 
 export const deleteServer = async (ctx: koa.Context, next: Function) => {
   try {
+
+    await HudServer.destroy({
+      where: {
+        serverid: ctx.params.id
+      }
+    })
+
     await Server.destroy({
       where: {
         id: ctx.params.id,
@@ -172,11 +180,8 @@ export const deleteServer = async (ctx: koa.Context, next: Function) => {
 const serverSchema = Joi.object({
   userid: Joi.number().required(),
   url: Joi.string().uri().required(),
-  optionalUrl: Joi.string().uri().allow(""),
   name: Joi.string().required(),
   sslExpiry: Joi.number(),
-  uptime: Joi.object().allow({}),
-  upgrades: Joi.string().allow(""),
 });
 
 const liveServerSchema = Joi.object({
@@ -191,8 +196,48 @@ const liveServerSchema = Joi.object({
   cpuUsage: Joi.number(),
 });
 
+const hudServerSchema = Joi.object({
+  serverid: Joi.number().required(),
+  optionalUrl: Joi.string().uri().allow(""),
+  upgrades: Joi.string(),
+  uptime: {
+    Days: Joi.number(),
+    Hours: Joi.number(),
+  },
+  trackOptions: {
+    trackDisk: Joi.boolean().required(),
+    trackResources: Joi.boolean().required(),
+    trackUpgrades: Joi.boolean().required(),
+    trackSmart: Joi.boolean().required()
+  }
+});
+
+const hudServerUpdateSchema = Joi.object({
+  serverid: Joi.number().required(),
+  optionalUrl: Joi.string().uri().allow(""),
+  trackOptions: {
+    trackDisk: Joi.boolean().required(),
+    trackResources: Joi.boolean().required(),
+    trackUpgrades: Joi.boolean().required(),
+    trackSmart: Joi.boolean().required()
+  }
+});
+
+/*
+  API:
+  url: url for new server to track
+  optionalUrl: hudserver / go server url
+  name: title of the server
+  // Which server information to display.
+  trackOptions: {
+    trackDisk - Boolean
+    trackResources - Boolean
+    trackUpgrades - Boolean
+    trackSmart - Boolean
+  }
+*/
 export const addServer = async (ctx: koa.Context, next: Function) => {
-  const { url, optionalUrl, name } = ctx.request.body;
+  const { url, optionalUrl, name, trackOptions } = ctx.request.body;
 
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
@@ -225,11 +270,8 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
     const value = await serverSchema.validateAsync({
       userid: ctx.state.user._id,
       url,
-      optionalUrl: optionalUrl,
       name: name,
       sslExpiry: sslInfo.daysRemaining,
-      uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
-      upgrades: hudData ? hudData.upgrades : "empty",
     });
 
     if (!user) throw Error("User not found!");
@@ -243,10 +285,19 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       sslStatus: sslInfo.valid.toString(),
       diskUsed: hudData ? hudData.diskUsed : -1,
       diskSize: hudData ? hudData.diskSize : -1,
-      memUsage: hudData ? hudData.memUsage : -1,
-      cpuUsage: hudData ? hudData.cpuUsage : -1,
+      memUsage: hudData ? hudData.memUsage : 0,
+      cpuUsage: hudData ? hudData.cpuUsage : 0,
     });
 
+    const hudValue = await hudServerSchema.validateAsync({
+      serverid: dbResp.dataValues.id,
+      optionalUrl: optionalUrl,
+      upgrades: hudData ? hudData.upgrades : "empty",
+      uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
+      trackOptions: trackOptions
+    })
+
+    await HudServer.create(hudValue);
     await LiveServer.create(liveValue);
     await setupUrlCron(url, ctx.state.user._id, dbResp?.dataValues.id);
     await setupSslCron(url, ctx.state.user._id, dbResp?.dataValues.id);
@@ -273,7 +324,7 @@ export const getTimeseriesUpData = async (ctx: koa.Context, next: Function) => {
 };
 
 export const updateServer = async (ctx: koa.Context, next: Function) => {
-  const { url, optionalUrl, name } = ctx.request.body;
+  const { url, optionalUrl, name, trackOptions } = ctx.request.body;
 
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
@@ -297,8 +348,7 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
 
   let sslInfo: IResolvedValues | any = await getSslDetails(url);
   if (sslInfo.errno) sslInfo.valid = false;
-
-  const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
+  const hudData = optionalUrl ? await getHudSelectedData(optionalUrl, trackOptions) : null;
 
   const user = await User.findByPk(ctx.state.user._id);
   const status = await isUp(url);
@@ -307,11 +357,8 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
     const value = await serverSchema.validateAsync({
       userid: ctx.state.user._id,
       url,
-      optionalUrl: optionalUrl,
       name: name,
       sslExpiry: sslInfo.daysRemaining,
-      uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
-      upgrades: hudData ? hudData.upgrades : "empty",
     });
 
     if (!user) throw Error("User not found!");
@@ -331,12 +378,23 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
       sslStatus: sslInfo.valid.toString(),
       diskUsed: hudData ? hudData.diskUsed : -1,
       diskSize: hudData ? hudData.diskSize : -1,
-      memUsage: hudData ? hudData.memUsage : -1,
-      cpuUsage: hudData ? hudData.cpuUsage : -1,
+      memUsage: hudData ? hudData.memUsage : 0,
+      cpuUsage: hudData ? hudData.cpuUsage : 0,
+    });
+
+    const hudValue = await hudServerUpdateSchema.validateAsync({
+      serverid: ctx.params.id,
+      optionalUrl: optionalUrl,
+      trackOptions: trackOptions
+    })
+
+    let res = await HudServer.update(hudValue, {
+      where: {
+        serverid: ctx.params.id
+      }
     });
 
     await LiveServer.create(liveValue);
-
     await updateUrlCron(url, ctx.state.user._id, ctx.params.id);
     await updateSslCron(url, ctx.state.user._id, ctx.params.id);
     await updateOptionalCron(url, ctx.state.user._id, ctx.params.id);

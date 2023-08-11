@@ -17,20 +17,36 @@ import { Loading } from "../Loading/Loading";
 import { useUpdateServer } from "../../services/api/api";
 import { UpdateServerError } from "./UpdateServerError";
 import { IData } from "../../types";
+import UpdateOptionalServer from "./UpdateOptionalServer";
 
 interface IUpdateServerProps {
   data: IData;
 }
 
 export const UpdateServer = (props: IUpdateServerProps) => {
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data } = props;
   const updateServer = useUpdateServer(data.id);
   const { mutate, reset, isLoading, isError, isSuccess } = updateServer;
+
+  const [checkedItems, setCheckedItems] = useState({
+    trackDisk: data?.trackOptions?.trackDisk,
+    trackResources: data?.trackOptions?.trackResources,
+    trackUpgrades: data?.trackOptions?.trackUpgrades,
+    trackSmart: data?.trackOptions?.trackSmart,
+  });
+
   const [serverState, setServerState] = useState({
     url: "",
     optionalUrl: "",
     name: "",
+    trackOptions: {
+      trackDisk: true,
+      trackResources: true,
+      trackUpgrades: true,
+      trackSmart: true,
+    },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,8 +58,20 @@ export const UpdateServer = (props: IUpdateServerProps) => {
 
   const handleSubmit = async () => {
     // Make sure we have http or https prepended.
-    if (!serverState.url.startsWith("http://") && !serverState.url.startsWith("https://")) {
+    if (
+      serverState.url &&
+      !serverState.url.startsWith("http://") &&
+      !serverState.url.startsWith("https://")
+    ) {
       serverState.url = "https://" + serverState.url;
+    }
+
+    if (
+      serverState.optionalUrl &&
+      !serverState.optionalUrl.startsWith("http://") &&
+      !serverState.optionalUrl.startsWith("https://")
+    ) {
+      serverState.optionalUrl = "http://" + serverState.optionalUrl;
     }
 
     mutate({
@@ -52,12 +80,24 @@ export const UpdateServer = (props: IUpdateServerProps) => {
         ? serverState.optionalUrl
         : data.optionalUrl,
       name: serverState.name ? serverState.name : data.name,
+      trackOptions: {
+        trackDisk: checkedItems.trackDisk,
+        trackResources: checkedItems.trackResources,
+        trackUpgrades: checkedItems.trackUpgrades,
+        trackSmart: checkedItems.trackSmart,
+      },
     });
 
     setServerState({
       url: "",
       optionalUrl: "",
       name: "",
+      trackOptions: {
+        trackDisk: checkedItems.trackDisk,
+        trackResources: checkedItems.trackResources,
+        trackUpgrades: checkedItems.trackUpgrades,
+        trackSmart: checkedItems.trackSmart,
+      },
     });
   };
 
@@ -125,6 +165,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
               value={serverState.optionalUrl}
               onChange={handleChange}
             />
+            {data?.optionalUrl ? <UpdateOptionalServer checkedItems={checkedItems} setCheckedItems={setCheckedItems}  /> : null}
           </ModalBody>
           <ModalFooter>
             <Button mr={3} onClick={onClose}>

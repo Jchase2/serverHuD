@@ -89,17 +89,22 @@ const ServerDash = () => {
       </HStack>
       <Wrap minW={"80vw"} justify={"center"} mt={2}>
         <ServerStatus serverData={data} upData={upData.data} />
-        {data?.diskUsed > -1 && data?.diskSize > -1 ? (
+        {data?.trackOptions?.trackDisk &&
+        data?.diskUsed > -1 &&
+        data?.diskSize > -1 ? (
           <DiskStatus data={data} />
         ) : null}
-        {(serverUsageData && serverUsageData.memObj.length > 1) ||
-        (serverUsageData && serverUsageData.cpuObj.length > 1) ? (
+        {data?.trackOptions?.trackResources &&
+        ((serverUsageData && serverUsageData.memObj.length > 1) ||
+          (serverUsageData && serverUsageData.cpuObj.length > 1)) ? (
           <ResourceUsage
             serverUsageData={serverUsageData}
             upData={upData.data}
           />
         ) : null}
-        {data?.upgrades && data?.upgrades !== "empty" ? (
+        {data?.trackOptions?.trackUpgrades &&
+        data?.upgrades &&
+        data?.upgrades !== "empty" ? (
           <Upgrades upgrades={data.upgrades} />
         ) : null}
       </Wrap>

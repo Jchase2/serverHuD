@@ -18,12 +18,24 @@ export interface IData extends IAddServer {
   upgrades: string;
   uptime: Object;
   userid: number;
+  trackOptions: {
+    trackDisk: boolean,
+    trackResources: boolean,
+    trackUpgrades: boolean,
+    trackSmart: boolean
+  }
 }
 
 export interface IUpdateServer {
   url: string;
   optionalUrl: string;
   name: string;
+  trackOptions: {
+    trackDisk: boolean,
+    trackResources: boolean,
+    trackUpgrades: boolean,
+    trackSmart: boolean,
+  }
 }
 
 export interface ILiveData {

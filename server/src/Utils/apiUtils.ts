@@ -1,36 +1,53 @@
 import dayjs from "dayjs";
 import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
-import { Op, Sequelize } from "sequelize";
+import { Op } from "sequelize";
+import { HudServer } from "../Models/hudServer.model";
 
 interface ICombinedData {
-  avgMem: number,
-  avgCpu: number
+  avgMem: number;
+  avgCpu: number;
 }
 
 export const getAllCombinedState = async (userid: number) => {
-  const serverList = await Server.findAll({
-    where: { userid: userid },
-  });
 
-  let combinedData = serverList.map(async (server) => {
-    let res = await LiveServer.findOne({
-      where: { serverid: server.id, userid: userid },
-      attributes: [
-        "status",
-        "sslStatus",
-        "diskUsed",
-        "diskSize",
-        "memUsage",
-        "cpuUsage",
-      ],
-      order: [["time", "DESC"]],
+  try {
+    const serverList = await Server.findAll({
+      where: { userid: userid },
     });
-    Object.assign(server.dataValues, res?.dataValues);
-    return server;
-  });
 
-  return await Promise.all(combinedData);
+    let combinedData = serverList.map(async (server) => {
+      const hudData = await HudServer.findOne({
+        where: { serverid: server.id },
+        attributes: [
+          "optionalUrl",
+          "upgrades",
+          "uptime",
+          "trackOptions"
+        ],
+      });
+
+      let res = await LiveServer.findOne({
+        where: { serverid: server.id, userid: userid },
+        attributes: [
+          "status",
+          "sslStatus",
+          "diskUsed",
+          "diskSize",
+          "memUsage",
+          "cpuUsage",
+        ],
+        order: [["time", "DESC"]],
+      });
+      Object.assign(server.dataValues, res?.dataValues);
+      if (hudData?.dataValues) Object.assign(server.dataValues, hudData?.dataValues);
+      return server;
+    });
+
+    return await Promise.all(combinedData);
+  } catch (err) {
+    console.log("ERROR FROM GET ALL COMBINED STATES: ", err)
+  }
 };
 
 export const getOneCombinedState = async (serverid: number, userid: number) => {
@@ -38,6 +55,16 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
     const server = await Server.findOne({
       where: { id: serverid, userid: userid },
     });
+
+    const hudServerData = await HudServer.findOne({
+      where: { serverid: serverid },
+      attributes: [
+        "optionalUrl",
+        "upgrades",
+        "uptime",
+        "trackOptions"
+      ]
+    })
 
     if (!server) {
       return null;
@@ -65,12 +92,18 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
         : -1;
       res.dataValues.memUsage = res.dataValues.memUsage
         ? res.dataValues.memUsage
-        : -1;
+        : 0;
       res.dataValues.cpuUsage = res.dataValues.cpuUsage
         ? res.dataValues.cpuUsage
-        : -1;
+        : 0;
     }
+    
     Object.assign(server?.dataValues, res?.dataValues);
+    server.dataValues.trackOptions = hudServerData?.dataValues.trackOptions;
+    server.dataValues.optionalUrl =  hudServerData?.dataValues.optionalUrl;
+    server.dataValues.upgrades = hudServerData?.dataValues.upgrades;
+    server.dataValues.uptime = hudServerData?.dataValues.uptime
+
     return server;
   } catch (err) {
     console.log("Combined State Error: ", err);
@@ -234,9 +267,8 @@ const averageFiveMinuteData = (data: LiveServer[]) => {
 
 // Build return object for FE graphing from retArr.
 const buildData = (combinedArr: ICombinedData[], key: string) => {
-  let retArr: { x: number, y: number}[] = [];
+  let retArr: { x: number; y: number }[] = [];
   combinedArr.forEach((elem: ICombinedData, index: number) => {
-
     let newObj = {
       x: (index + 1) * 5,
       y: elem[key as keyof typeof elem],

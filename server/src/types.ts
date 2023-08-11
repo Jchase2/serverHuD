@@ -24,4 +24,12 @@ export interface IHudServerData {
   memUsage: number,
   upgrades: string,
   uptimeInHours: number
+  trackOptions: ITrackOptions
+}
+
+export interface ITrackOptions {
+  trackDisk: Boolean
+  trackResources: Boolean
+  trackUpgrades: Boolean
+  trackSmart: Boolean
 }

@@ -144,7 +144,58 @@ func initRouter() *gin.Engine {
 	api.POST("/login", Login)
 
 	serverinfo := api.Group("/serverinfo").Use(middleware.Auth())
+
+	serverinfo.GET("/disk", func(c *gin.Context) {
+
+		println("Running /disk")
+
+		var req GetReq
+		if err := c.Bind(&req); err != nil {
+			println("ERROR WITH BIND: ", err)
+		}
+
+		c.JSON(200, gin.H{
+			"hostName": GetHostname(),
+			"diskUsed": GetDiskUsage(),
+			"diskSize": GetDiskSize(),
+		})
+	})
+
+	serverinfo.GET("/resources", func(c *gin.Context) {
+
+		println("Running /resources")
+
+		var req GetReq
+		if err := c.Bind(&req); err != nil {
+			println("ERROR WITH BIND: ", err)
+		}
+
+		c.JSON(200, gin.H{
+			"hostName": GetHostname(),
+			"memUsage": GetMemUsage(),
+			"cpuUsage": GetCpuUsage(),
+		})
+	})
+
+	serverinfo.GET("/upgrades", func(c *gin.Context) {
+
+		println("Running /upgrades")
+
+		var req GetReq
+		if err := c.Bind(&req); err != nil {
+			println("ERROR WITH BIND: ", err)
+		}
+
+		c.JSON(200, gin.H{
+			"hostName": GetHostname(),
+			"upgrades": GetUpgradeable(),
+		})
+	})
+
 	serverinfo.GET("/", func(c *gin.Context) {
+
+		println("Running / (get all)")
+
 		var req GetReq
 
 		if err := c.Bind(&req); err != nil {

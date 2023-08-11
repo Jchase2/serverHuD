@@ -1,6 +1,6 @@
 import sslChecker from "ssl-checker";
 import axios from "axios";
-import prependHttp from "prepend-http";
+import { ITrackOptions } from "../types";
 const isReachable = require("is-reachable");
 
 export const isUp = async (hostname: string) => {
@@ -25,6 +25,9 @@ export const getSslDetails = async (hostname: string) => {
 };
 
 const hudServerLogin = async (url: string) => {
+
+  console.log("HUD SERVER LOGIN URL: ", url)
+
   try {
     let resp = await axios.post(url, {
       Key: process.env.SECRET_KEY,
@@ -36,14 +39,15 @@ const hudServerLogin = async (url: string) => {
 };
 
 export const hudServerData = async (url: string) => {
-  let jwt = await hudServerLogin(
-    prependHttp(`${url}/api/login`, { https: false })
-  );
+
+  console.log("HUD SERVER URL IS: ", url)
+
+  let jwt = await hudServerLogin(`${url}/api/login`);
 
   try {
     let resp = await axios({
       method: "get",
-      url: prependHttp(`${url}/api/serverinfo`, { https: false }),
+      url: `${url}/api/serverinfo`,
       headers: {
         Authorization: jwt,
       },
@@ -54,3 +58,91 @@ export const hudServerData = async (url: string) => {
     return err;
   }
 };
+
+export const hudServerDisk = async (url: string) => {
+  let jwt = await hudServerLogin(
+    `${url}/api/login`
+  );
+
+  try {
+    let resp = await axios({
+      method: "get",
+      url: `${url}/api/serverinfo/disk`,
+      headers: {
+        Authorization: jwt,
+      },
+    });
+    return resp.data;
+  } catch (err) {
+    console.log("HUD SERVER ERROR: ", err);
+    return err;
+  }
+};
+
+export const hudServerResources = async (url: string) => {
+  let jwt = await hudServerLogin(
+    `${url}/api/login`
+  );
+
+  try {
+    let resp = await axios({
+      method: "get",
+      url: `${url}/api/serverinfo/resources`,
+      headers: {
+        Authorization: jwt,
+      },
+    });
+    return resp.data;
+  } catch (err) {
+    console.log("HUD SERVER ERROR: ", err);
+    return err;
+  }
+};
+
+export const hudServerUpgrades = async (url: string) => {
+
+  let jwt = await hudServerLogin(
+    `${url}/api/login`
+  );
+
+  try {
+    let resp = await axios({
+      method: "get",
+      url: `${url}/api/serverinfo/upgrades`,
+      headers: {
+        Authorization: jwt,
+      },
+    });
+    return resp.data;
+  } catch (err) {
+    console.log("HUD SERVER ERROR: ", err);
+    return err;
+  }
+};
+
+export const getHudSelectedData = async (optionalUrl: string, trackOptions: ITrackOptions) => {
+
+  if(trackOptions && trackOptions.trackDisk && trackOptions.trackResources && trackOptions.trackUpgrades) {
+    const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
+    return hudData;
+  }
+
+  let combinedRes = {};
+
+  if(trackOptions && trackOptions.trackDisk) {
+    const diskData = optionalUrl ? await hudServerDisk(optionalUrl) : null;
+    combinedRes = {...combinedRes, ...diskData};
+  }
+
+  if(trackOptions && trackOptions.trackResources) {
+    const resourcesData = optionalUrl ? await hudServerResources(optionalUrl) : null;
+    combinedRes = {...combinedRes, ...resourcesData};
+  }
+
+  if(trackOptions && trackOptions.trackUpgrades) {
+    const upgradeData = optionalUrl ? await hudServerResources(optionalUrl) : null;
+    combinedRes = {...combinedRes, ...upgradeData};
+  }
+
+  return combinedRes;
+}

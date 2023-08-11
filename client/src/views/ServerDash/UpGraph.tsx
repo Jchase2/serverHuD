@@ -16,7 +16,6 @@ const UpGraph = (props: IUpGraphProps) => {
   const [endAngle, setEndAngle] = useState(0);
 
   useEffect(() => {
-    console.log("GRAPHIC DATA UPDATED: ", props.data)
     setGraphicData(props.data); // Setting the data that we want to display
     setEndAngle(360);
   }, [props.data]);
