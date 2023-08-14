@@ -31,7 +31,7 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
         console.log("Up status has changed.")
         try {
           let hudServerBe = await HudServer.findOne({
-            where: { serverid: id },
+            where: { serverid: id, userid: userid },
             attributes: ["optionalUrl"]
           })
           let optionalServerData = hudServerBe?.dataValues.optionalUrl ? await hudServerData(hudServerBe?.dataValues.optionalUrl) : null;
@@ -181,7 +181,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
   });
 
   let hudServerBe = await HudServer.findOne({
-    where: { serverid: id }
+    where: { serverid: id, userid: userid }
   })
 
   if(hudServerBe?.dataValues.optionalUrl) {
@@ -218,7 +218,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
             uptime: optionalServerData?.uptimeInHours ? optionalServerData?.uptimeInHours : 0,
             upgrades: optionalServerData?.upgrades ? optionalServerData?.upgrades : "empty",
           },
-          { where: { serverid: id } }
+          { where: { serverid: id, userid: userid } }
         );
 
       });
@@ -232,7 +232,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
 export const updateOptionalCron = async (newUrl: string, userid: number, id: number) => {
 
   let hudServer = await HudServer.findOne({
-    where: { serverid: id },
+    where: { serverid: id, userid: userid },
   });
 
   const oldJobName = `${hudServer?.dataValues.optionalUrl}-optional-${id}`;
@@ -262,7 +262,7 @@ export const startServerJobs = async () => {
     let { url, userid, id } = server;
 
     let hudServerBe = await HudServer.findOne({
-      where: {serverid: id }
+      where: {serverid: id, userid: userid }
     });
 
     let optionalUrl = hudServerBe?.dataValues.optionalUrl;

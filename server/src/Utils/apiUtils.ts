@@ -18,7 +18,7 @@ export const getAllCombinedState = async (userid: number) => {
 
     let combinedData = serverList.map(async (server) => {
       const hudData = await HudServer.findOne({
-        where: { serverid: server.id },
+        where: { serverid: server.id, userid: userid },
         attributes: [
           "optionalUrl",
           "upgrades",
@@ -57,7 +57,7 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
     });
 
     const hudServerData = await HudServer.findOne({
-      where: { serverid: serverid },
+      where: { serverid: serverid, userid: userid },
       attributes: [
         "optionalUrl",
         "upgrades",
@@ -97,7 +97,7 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
         ? res.dataValues.cpuUsage
         : 0;
     }
-    
+
     Object.assign(server?.dataValues, res?.dataValues);
     server.dataValues.trackOptions = hudServerData?.dataValues.trackOptions;
     server.dataValues.optionalUrl =  hudServerData?.dataValues.optionalUrl;

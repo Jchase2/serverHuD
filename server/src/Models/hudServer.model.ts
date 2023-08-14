@@ -9,6 +9,10 @@ export class HudServer extends Model {
   @Column
   serverid!: number;
 
+  @ForeignKey(() => Server)
+  @Column
+  userid!: number;
+
   @Column
   optionalUrl!: string;
 

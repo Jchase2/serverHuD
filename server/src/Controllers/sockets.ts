@@ -99,7 +99,7 @@ const hudServerData = async (data: IUrlLiveData, socket: Socket) => {
     // We don't just use data.id here so an arbitrary
     // id can't be used to get another users info.
     let hudServerInfo = await HudServer.findOne({
-      where: { serverid: servInfo?.id }
+      where: { serverid: servInfo?.id, userid: userid }
     })
 
     if (hudServerInfo?.optionalUrl) {

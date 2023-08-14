@@ -162,9 +162,19 @@ export const getServerUsage = async (ctx: koa.Context, next: Function) => {
 // TODO: Verify user owns server.
 export const deleteServer = async (ctx: koa.Context, next: Function) => {
   try {
+
+    const user = await User.findByPk(ctx.state.user._id);
+
+    if(!user) {
+      ctx.body = "User not found!"
+      ctx.status = 404;
+      return;
+    }
+
     await HudServer.destroy({
       where: {
         serverid: ctx.params.id,
+        userid: user.id
       },
     });
 
@@ -203,6 +213,7 @@ const liveServerSchema = Joi.object({
 
 const hudServerSchema = Joi.object({
   serverid: Joi.number().required(),
+  userid: Joi.number().required(),
   optionalUrl: Joi.string().uri().allow(""),
   upgrades: Joi.string(),
   uptime: {
@@ -219,6 +230,7 @@ const hudServerSchema = Joi.object({
 
 const hudServerUpdateSchema = Joi.object({
   serverid: Joi.number().required(),
+  userid: Joi.number().required(),
   optionalUrl: Joi.string().uri().allow(""),
   trackOptions: {
     trackDisk: Joi.boolean().required(),
@@ -278,8 +290,14 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
     const user = await User.findByPk(ctx.state.user._id);
     const status = await isUp(url);
 
+    if(!user) {
+      ctx.body = "User not found!"
+      ctx.status = 404;
+      return;
+    }
+
     const value = await serverSchema.validateAsync({
-      userid: ctx.state.user._id,
+      userid: user.id,
       url,
       name: name,
       sslExpiry: sslInfo.daysRemaining,
@@ -302,6 +320,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
 
     const hudValue = await hudServerSchema.validateAsync({
       serverid: dbResp.dataValues.id,
+      userid: user.id,
       optionalUrl: optionalUrl,
       upgrades: hudData ? hudData.upgrades : "empty",
       uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
@@ -360,10 +379,17 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
     if (sslInfo.errno) sslInfo.valid = false;
 
     const user = await User.findByPk(ctx.state.user._id);
+
+    if(!user) {
+      ctx.body = "User not found!"
+      ctx.status = 404;
+      return;
+    }
+
     const status = await isUp(url);
 
     const value = await serverSchema.validateAsync({
-      userid: ctx.state.user._id,
+      userid: user.id,
       url,
       name: name,
       sslExpiry: sslInfo.daysRemaining,
@@ -392,13 +418,15 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
 
     const hudValue = await hudServerUpdateSchema.validateAsync({
       serverid: ctx.params.id,
+      userid: user.id,
       optionalUrl: optionalUrl,
       trackOptions: trackOptions,
     });
 
-    let res = await HudServer.update(hudValue, {
+    await HudServer.update(hudValue, {
       where: {
         serverid: ctx.params.id,
+        userid: user.id
       },
     });
 
