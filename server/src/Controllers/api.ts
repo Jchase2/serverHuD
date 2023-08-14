@@ -1,10 +1,15 @@
 import { User } from "../Models/user.model";
 import { Server } from "../Models/server.model";
-import koa  from 'koa';
+import koa from "koa";
 import bcrypt from "bcrypt";
 import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
-import { getHudSelectedData, getSslDetails, hudServerData, isUp } from "../Utils/serverDetails";
+import {
+  getHudSelectedData,
+  getSslDetails,
+  hudServerData,
+  isUp,
+} from "../Utils/serverDetails";
 import {
   setupOptionalCron,
   setupSslCron,
@@ -157,12 +162,11 @@ export const getServerUsage = async (ctx: koa.Context, next: Function) => {
 // TODO: Verify user owns server.
 export const deleteServer = async (ctx: koa.Context, next: Function) => {
   try {
-
     await HudServer.destroy({
       where: {
-        serverid: ctx.params.id
-      }
-    })
+        serverid: ctx.params.id,
+      },
+    });
 
     await Server.destroy({
       where: {
@@ -209,8 +213,8 @@ const hudServerSchema = Joi.object({
     trackDisk: Joi.boolean().required(),
     trackResources: Joi.boolean().required(),
     trackUpgrades: Joi.boolean().required(),
-    trackSmart: Joi.boolean().required()
-  }
+    trackSmart: Joi.boolean().required(),
+  },
 });
 
 const hudServerUpdateSchema = Joi.object({
@@ -220,8 +224,8 @@ const hudServerUpdateSchema = Joi.object({
     trackDisk: Joi.boolean().required(),
     trackResources: Joi.boolean().required(),
     trackUpgrades: Joi.boolean().required(),
-    trackSmart: Joi.boolean().required()
-  }
+    trackSmart: Joi.boolean().required(),
+  },
 });
 
 /*
@@ -247,27 +251,33 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
     return;
   }
 
-  // If hudServer Url is bad, just return error.
-  // This is so we short circuit before we get too far
-  // and it takes forever to return an error.
-  if (optionalUrl) {
+  try {
+    // If hudServer Url is bad, just return error.
+    // This is so we short circuit before we get too far
+    // and it takes forever to return an error.
     const hudSchema = Joi.string().uri();
-    const { error } = hudSchema.validate(optionalUrl);
-    if (error) {
+    const error = optionalUrl ? hudSchema.validate(optionalUrl) : null;
+    if (error?.error) {
       ctx.body = "Optional backend must have a valid address.";
       ctx.status = 422;
       return;
     }
-  }
 
-  let sslInfo: IResolvedValues | any = await getSslDetails(url);
-  if (sslInfo.errno) sslInfo.valid = false;
+    let sslInfo: IResolvedValues | any = await getSslDetails(url);
+    if (sslInfo.errno) sslInfo.valid = false;
 
-  const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
-  const user = await User.findByPk(ctx.state.user._id);
-  const status = await isUp(url);
+    const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
 
-  try {
+    if (hudData?.code === "ERR_HTTP_INVALID_HEADER_VALUE") {
+      ctx.body =
+        "Error with optional backend header. Check the URL or Address.";
+      ctx.status = 422;
+      return;
+    }
+
+    const user = await User.findByPk(ctx.state.user._id);
+    const status = await isUp(url);
+
     const value = await serverSchema.validateAsync({
       userid: ctx.state.user._id,
       url,
@@ -295,8 +305,8 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       optionalUrl: optionalUrl,
       upgrades: hudData ? hudData.upgrades : "empty",
       uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
-      trackOptions: trackOptions
-    })
+      trackOptions: trackOptions,
+    });
 
     await HudServer.create(hudValue);
     await LiveServer.create(liveValue);
@@ -334,27 +344,24 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
     return;
   }
 
-  // If hudServer Url is bad, just return error.
-  // This is so we short circuit before we get too far
-  // and it takes forever to return an error.
-  if (optionalUrl) {
-    const hudSchema = Joi.string().uri();
-    const { error } = hudSchema.validate(optionalUrl);
-    if (error) {
-      ctx.body = "Optional backend must have a valid address.";
+  try {
+    const hudData = optionalUrl
+      ? await getHudSelectedData(optionalUrl, trackOptions)
+      : null;
+
+    if (hudData?.code === "ERR_HTTP_INVALID_HEADER_VALUE") {
+      ctx.body =
+        "Error with optional backend header. Check the URL or Address.";
       ctx.status = 422;
       return;
     }
-  }
 
-  let sslInfo: IResolvedValues | any = await getSslDetails(url);
-  if (sslInfo.errno) sslInfo.valid = false;
-  const hudData = optionalUrl ? await getHudSelectedData(optionalUrl, trackOptions) : null;
+    let sslInfo: IResolvedValues | any = await getSslDetails(url);
+    if (sslInfo.errno) sslInfo.valid = false;
 
-  const user = await User.findByPk(ctx.state.user._id);
-  const status = await isUp(url);
+    const user = await User.findByPk(ctx.state.user._id);
+    const status = await isUp(url);
 
-  try {
     const value = await serverSchema.validateAsync({
       userid: ctx.state.user._id,
       url,
@@ -386,13 +393,13 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
     const hudValue = await hudServerUpdateSchema.validateAsync({
       serverid: ctx.params.id,
       optionalUrl: optionalUrl,
-      trackOptions: trackOptions
-    })
+      trackOptions: trackOptions,
+    });
 
     let res = await HudServer.update(hudValue, {
       where: {
-        serverid: ctx.params.id
-      }
+        serverid: ctx.params.id,
+      },
     });
 
     await LiveServer.create(liveValue);
