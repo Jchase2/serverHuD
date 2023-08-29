@@ -94,6 +94,7 @@ const Login = (props: LoginProps) => {
       flexDirection="column"
     >
       <ErrorShow
+        maxW={'35vw'}
         message={stateMessage}
         closed={closed}
         setClosed={setClosed}
