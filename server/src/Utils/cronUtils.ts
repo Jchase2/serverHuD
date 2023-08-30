@@ -4,6 +4,7 @@ import { isUp, getSslDetails, hudServerData, getHudSelectedData } from "./server
 import { Server } from "../Models/server.model";
 import { IHudServerData, IResolvedValues } from "../types";
 import { HudServer } from "../Models/hudServer.model";
+import { sendUpdate } from "./nodemailer";
 
 // Create a cron job for a given URL, userid and server id.
 // This job monitors the up status of the endpoint.
@@ -23,7 +24,7 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
       let checkUp = await isUp(url);
       let currStatus = await LiveServer.findOne({
         where: { serverid: server?.id, userid: userid },
-        attributes: ["status"],
+        attributes: ["status", "url"],
         order: [["time", "DESC"]],
       });
 
@@ -46,6 +47,9 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
             memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : 0,
             cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : 0
           });
+
+          sendUpdate(`Status has changed to <b>${checkUp}</b> for domain ${currStatus?.dataValues.url}`);
+
         } catch (err) {
           console.log("ERR UPDATING URL IN CRON: ", err)
           return;
@@ -120,6 +124,9 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
             serverid: id,
             sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
           });
+
+          sendUpdate(`SSL Status has changed to <b>${checkSsl.errno ? 'Down' : checkSsl.valid.toString()}</b> for domain ${url}`);
+
         } catch (err) {
           console.log("ERR UPDATING SSL IN CRON: ", err)
           return;
