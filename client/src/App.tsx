@@ -6,11 +6,11 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import Header from "./components/Header/Header";
-import Dashboard from "./views/Dashboard/Dashboard";
-import Login from "./views/Login/Login";
-import HomePage from "./views/Homepage/HomePage";
-import Register from "./views/Register/Register";
+import Header from "./components/header/Header";
+import Dashboard from "./views/dashboard/Dashboard";
+import Login from "./views/login/Login";
+import HomePage from "./views/homepage/HomePage";
+import Register from "./views/register/Register";
 import ServerDash from "./views/ServerDash/ServerDash";
 import { ReactElement, useEffect, useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
