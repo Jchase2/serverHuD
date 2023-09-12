@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/JChase2/hud-server/middleware"
@@ -91,6 +92,50 @@ func GetDiskSize() uint64 {
 	return diskSize.Total / 1024 / 1024 / 1024
 }
 
+// Get smart result
+func GetSmartInfo() []string {
+
+	// Gets a list of drives
+	smartScan, err := exec.Command("smartctl", "--scan").CombinedOutput()
+	if err != nil {
+		log.Fatalf(err.Error())
+		var errMessage []string
+		errMessage[0] = err.Error()
+		return errMessage
+	}
+
+	// Splits the list of drives by newline
+	smartList := strings.Split(string(smartScan), "\n")
+
+	// Creates an array of arrays containing split up commands
+	// for input into smartctl -H
+	var smartArr = make([][]string, len(smartList))
+	for i := 0; i < len(smartList); i++ {
+		smartArr[i] = strings.Split(smartList[i], " ")
+	}
+
+	// Creates smartResults array and gets the result of smartctl -H
+	// into it for each drive.
+	var smartResults = make([][]byte, len(smartArr))
+	for i := 0; i < len(smartArr)-1; i++ {
+		var currArr = smartArr[i]
+		smartResults[i], err = exec.Command("smartctl", "-H", currArr[0], currArr[1], currArr[2]).CombinedOutput()
+		if err != nil {
+			log.Fatalf(err.Error())
+			var errMessage []string
+			errMessage[0] = err.Error()
+			return errMessage
+		}
+	}
+
+	var smartResultsStringified = make([]string, len(smartArr))
+	for i := 0; i < len(smartArr)-1; i++ {
+		smartResultsStringified[i] = string(smartResults[i])
+	}
+
+	return smartResultsStringified
+}
+
 // GetMemUsage gets % of memory used.
 func GetMemUsage() float64 {
 	var memUsage, _ = mem.VirtualMemory()
@@ -142,7 +187,7 @@ func initRouter() *gin.Engine {
 	r.Use(cors.New(config))
 	api := r.Group("/api")
 	api.POST("/login", Login)
-
+	GetSmartInfo()
 	serverinfo := api.Group("/serverinfo").Use(middleware.Auth())
 
 	serverinfo.GET("/disk", func(c *gin.Context) {
@@ -158,6 +203,17 @@ func initRouter() *gin.Engine {
 			"hostName": GetHostname(),
 			"diskUsed": GetDiskUsage(),
 			"diskSize": GetDiskSize(),
+		})
+	})
+
+	serverinfo.GET("/smart", func(c *gin.Context) {
+		var req GetReq
+		if err := c.Bind(&req); err != nil {
+			println("ERROR WITH BIND: ", err)
+		}
+
+		c.JSON(200, gin.H{
+			"Smart Results: ": GetSmartInfo(),
 		})
 	})
 
