@@ -98,10 +98,7 @@ func GetSmartInfo() []string {
 	// Gets a list of drives
 	smartScan, err := exec.Command("smartctl", "--scan").CombinedOutput()
 	if err != nil {
-		log.Fatalf(err.Error())
-		var errMessage []string
-		errMessage[0] = err.Error()
-		return errMessage
+		fmt.Printf("ERROR FROM SCAN IS: ", err.Error())
 	}
 
 	// Splits the list of drives by newline
@@ -121,10 +118,7 @@ func GetSmartInfo() []string {
 		var currArr = smartArr[i]
 		smartResults[i], err = exec.Command("smartctl", "-H", currArr[0], currArr[1], currArr[2]).CombinedOutput()
 		if err != nil {
-			log.Fatalf(err.Error())
-			var errMessage []string
-			errMessage[0] = err.Error()
-			return errMessage
+			fmt.Printf("ERROR FROM RES IS: ", err.Error())
 		}
 	}
 
@@ -181,13 +175,13 @@ type GetReq struct {
 }
 
 func initRouter() *gin.Engine {
+	fmt.Println("Initalizing Router.")
 	r := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	r.Use(cors.New(config))
 	api := r.Group("/api")
 	api.POST("/login", Login)
-	GetSmartInfo()
 	serverinfo := api.Group("/serverinfo").Use(middleware.Auth())
 
 	serverinfo.GET("/disk", func(c *gin.Context) {
