@@ -34,11 +34,11 @@ const hudServerLogin = async (url: string) => {
     return resp.data;
   } catch (err) {
     console.log("ERROR LOGGING IN: ", err);
+    return err
   }
 };
 
 export const hudServerData = async (url: string) => {
-
   if (process.env.HUD_SSL === "true") {
     // Make sure we have http or https prepended.
     if (!url.startsWith("https://")) {
@@ -57,6 +57,7 @@ export const hudServerData = async (url: string) => {
         Authorization: jwt,
       },
     });
+
     return resp.data;
   } catch (err) {
     console.log("HUD SERVER ERROR: ", err);
@@ -118,40 +119,70 @@ export const hudServerUpgrades = async (url: string) => {
   }
 };
 
+export const hudServerSmart = async (url: string) => {
+  let jwt = await hudServerLogin(`${url}/api/login`);
+
+  try {
+    let resp = await axios({
+      method: "get",
+      url: `${url}/api/serverinfo/smart`,
+      headers: {
+        Authorization: jwt,
+      },
+    });
+    return resp.data;
+  } catch (err) {
+    console.log("HUD SERVER ERROR: ", err);
+    return err;
+  }
+};
+
 export const getHudSelectedData = async (
   optionalUrl: string,
   trackOptions: ITrackOptions
 ) => {
-  if (
-    trackOptions &&
-    trackOptions.trackDisk &&
-    trackOptions.trackResources &&
-    trackOptions.trackUpgrades
-  ) {
-    const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
-    return hudData;
+  try {
+    if (
+      trackOptions &&
+      trackOptions.trackDisk &&
+      trackOptions.trackResources &&
+      trackOptions.trackUpgrades &&
+      trackOptions.trackSmart
+    ) {
+      const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
+      return hudData;
+    }
+
+    let combinedRes = {};
+
+    if (trackOptions && trackOptions.trackDisk) {
+      const diskData = optionalUrl ? await hudServerDisk(optionalUrl) : null;
+      combinedRes = { ...combinedRes, ...diskData };
+    }
+
+    if (trackOptions && trackOptions.trackResources) {
+      const resourcesData = optionalUrl
+        ? await hudServerResources(optionalUrl)
+        : null;
+      combinedRes = { ...combinedRes, ...resourcesData };
+    }
+
+    if (trackOptions && trackOptions.trackUpgrades) {
+      const upgradeData = optionalUrl
+        ? await hudServerUpgrades(optionalUrl)
+        : null;
+      combinedRes = { ...combinedRes, ...upgradeData };
+    }
+
+    if (trackOptions && trackOptions.trackSmart) {
+      const smartData = optionalUrl ? await hudServerSmart(optionalUrl) : null;
+      combinedRes = { ...combinedRes, ...smartData };
+      console.log("SMART DATA IS: ", smartData);
+    }
+
+    return combinedRes;
+  } catch (err) {
+    console.log("ERROR IN getHudSelectedData", err);
+    return err
   }
-
-  let combinedRes = {};
-
-  if (trackOptions && trackOptions.trackDisk) {
-    const diskData = optionalUrl ? await hudServerDisk(optionalUrl) : null;
-    combinedRes = { ...combinedRes, ...diskData };
-  }
-
-  if (trackOptions && trackOptions.trackResources) {
-    const resourcesData = optionalUrl
-      ? await hudServerResources(optionalUrl)
-      : null;
-    combinedRes = { ...combinedRes, ...resourcesData };
-  }
-
-  if (trackOptions && trackOptions.trackUpgrades) {
-    const upgradeData = optionalUrl
-      ? await hudServerResources(optionalUrl)
-      : null;
-    combinedRes = { ...combinedRes, ...upgradeData };
-  }
-
-  return combinedRes;
 };

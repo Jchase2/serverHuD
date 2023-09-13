@@ -21,7 +21,7 @@ const ResourceUsage = (props: IResourceUsageProps) => {
     >
       <Stack>
         <CardHeader textAlign={"center"}>
-          <Heading size="md">Resource Usage</Heading>
+          <Heading size="md">Live Resource Usage</Heading>
         </CardHeader>
         <MemUsageGraph serverUsageData={props.serverUsageData.memObj} />
         <CpuUsageGraph serverUsageData={props.serverUsageData.cpuObj} />

@@ -24,7 +24,7 @@ import { IDisk } from "../../types";
       >
         <Stack>
           <CardHeader textAlign={'center'}>
-            <Heading size="md">Disk Usage</Heading>
+            <Heading size="md">Live Disk Usage</Heading>
           </CardHeader>
             <DiskGraph data={props.data}/>
             <Text as='cite' fontSize='xs'>

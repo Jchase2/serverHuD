@@ -22,6 +22,7 @@ import Upgrades from "./Upgrades";
 import DiskStatus from "./DiskStatus";
 import { UpdateServer } from "../../components/UpdateServer/UpdateServer";
 import { DeleteServer } from "./DeleteServer";
+import SmartDisplay from "./SmartDisplay";
 
 const ServerDash = () => {
   const location = useLocation();
@@ -107,6 +108,7 @@ const ServerDash = () => {
         data?.upgrades !== "empty" ? (
           <Upgrades upgrades={data.upgrades} />
         ) : null}
+        <SmartDisplay serverData={data} />
       </Wrap>
       <Center>
         <Box p={8} m={2}>

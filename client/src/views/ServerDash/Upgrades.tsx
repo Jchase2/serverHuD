@@ -2,17 +2,17 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Heading,
   Stack,
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 interface IUpgradesProps {
-  upgrades: string
+  upgrades: string;
 }
 
 const Upgrades = (props: IUpgradesProps) => {
-
   const { upgrades } = props;
 
   const [upgradeString, setUpgradeString] = useState(upgrades);
@@ -33,7 +33,9 @@ const Upgrades = (props: IUpgradesProps) => {
       textAlign={"center"}
     >
       <Stack>
-        <CardHeader>Sever Upgrades</CardHeader>
+        <CardHeader textAlign={"center"}>
+          <Heading size="md">Server Upgrades</Heading>
+        </CardHeader>
         <CardBody>
           <Text>{upgradeString}</Text>
         </CardBody>

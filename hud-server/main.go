@@ -97,12 +97,20 @@ func GetSmartInfo() []string {
 
 	// Gets a list of drives
 	smartScan, err := exec.Command("smartctl", "--scan").CombinedOutput()
+
 	if err != nil {
 		fmt.Printf("ERROR FROM SCAN IS: ", err.Error())
+		slice := []string{"Error with smartctl, please ensure it is installed and in your path."}
+		return slice
 	}
 
 	// Splits the list of drives by newline
 	smartList := strings.Split(string(smartScan), "\n")
+
+	if smartList[len(smartList)-1] == "" {
+		// Create a new slice without the last element
+		smartList = smartList[:len(smartList)-1]
+	}
 
 	// Creates an array of arrays containing split up commands
 	// for input into smartctl -H
@@ -114,7 +122,7 @@ func GetSmartInfo() []string {
 	// Creates smartResults array and gets the result of smartctl -H
 	// into it for each drive.
 	var smartResults = make([][]byte, len(smartArr))
-	for i := 0; i < len(smartArr)-1; i++ {
+	for i := 0; i < len(smartArr); i++ {
 		var currArr = smartArr[i]
 		smartResults[i], err = exec.Command("smartctl", "-H", currArr[0], currArr[1], currArr[2]).CombinedOutput()
 		if err != nil {
@@ -123,10 +131,27 @@ func GetSmartInfo() []string {
 	}
 
 	var smartResultsStringified = make([]string, len(smartArr))
-	for i := 0; i < len(smartArr)-1; i++ {
-		smartResultsStringified[i] = string(smartResults[i])
+	for i := 0; i < len(smartArr); i++ {
+		colonIndex := strings.Index(string(smartResults[i]), "www.smartmontools.org")
+		if colonIndex != -1 {
+			result := string(smartResults[i])[colonIndex+len("www.smartmontools.org"):]
+			smartResultsStringified[i] = result
+
+		} else {
+			fmt.Println(string(smartResults[i]))
+		}
 	}
 
+	for i := 0; i < len(smartArr); i++ {
+		colonIndex := strings.Index(string(smartResults[i]), "=== START OF READ SMART DATA SECTION ===")
+		if colonIndex != -1 {
+			result := smartArr[i][0] + string(smartResults[i])[colonIndex+len("=== START OF READ SMART DATA SECTION ==="):]
+			smartResultsStringified[i] = result
+
+		} else {
+			fmt.Println(string(smartResults[i]))
+		}
+	}
 	return smartResultsStringified
 }
 
@@ -258,6 +283,7 @@ func initRouter() *gin.Engine {
 			"diskUsed":      GetDiskUsage(),
 			"diskSize":      GetDiskSize(),
 			"upgrades":      GetUpgradeable(),
+			"smart":         GetSmartInfo(),
 			"memUsage":      GetMemUsage(),
 			"cpuUsage":      GetCpuUsage(),
 		})

@@ -61,6 +61,7 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
       attributes: [
         "optionalUrl",
         "upgrades",
+        "smart",
         "uptime",
         "trackOptions"
       ]
@@ -102,6 +103,7 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
     server.dataValues.trackOptions = hudServerData?.dataValues.trackOptions;
     server.dataValues.optionalUrl =  hudServerData?.dataValues.optionalUrl;
     server.dataValues.upgrades = hudServerData?.dataValues.upgrades;
+    server.dataValues.smart = hudServerData?.dataValues.smart;
     server.dataValues.uptime = hudServerData?.dataValues.uptime
 
     return server;

@@ -21,7 +21,7 @@ const AddServer = (props: IAddServerProps) => {
       trackDisk: true,
       trackResources: true,
       trackUpgrades: true,
-      trackSmart: true
+      trackSmart: false
     }
   });
 
@@ -29,7 +29,7 @@ const AddServer = (props: IAddServerProps) => {
     trackDisk: true,
     trackResources: true,
     trackUpgrades: true,
-    trackSmart: true,
+    trackSmart: false,
   });
 
   useEffect(() => {

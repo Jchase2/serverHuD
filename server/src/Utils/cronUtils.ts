@@ -202,6 +202,11 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
         // TODO: Make sure optional server data isn't throwing an error
         let optionalServerData = (hudServerBe?.dataValues.optionalUrl && hudServerBe?.dataValues.trackOptions) ? await getHudSelectedData(hudServerBe?.dataValues.optionalUrl, hudServerBe?.dataValues.trackOptions) : null;
 
+        if(optionalServerData.errno) {
+          console.log("Problem with hud-server, error: ", optionalServerData.code);
+          return;
+        }
+
         let currStatus = await LiveServer.findOne({
           where: { serverid: server?.id },
           attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
@@ -224,6 +229,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
           {
             uptime: optionalServerData?.uptimeInHours ? optionalServerData?.uptimeInHours : 0,
             upgrades: optionalServerData?.upgrades ? optionalServerData?.upgrades : "empty",
+            smart: optionalServerData?.smart ? optionalServerData?.smart : "empty"
           },
           { where: { serverid: id, userid: userid } }
         );

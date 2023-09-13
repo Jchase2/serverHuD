@@ -19,6 +19,9 @@ export class HudServer extends Model {
   @Column
   upgrades!: string;
 
+  @Column(DataType.ARRAY(DataType.STRING))
+  smart!: Array<string>
+
   @Column(DataType.JSONB)
   uptime!: {
     Days: number;

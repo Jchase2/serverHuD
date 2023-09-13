@@ -29,7 +29,7 @@ const ServerStatus = (props: IServerStatusProps) => {
     >
       <Stack>
         <CardHeader textAlign={"center"}>
-          <Heading size="md">Up Status</Heading>
+          <Heading size="md">Live Up Status</Heading>
         </CardHeader>
         <CardBody p={0}>
           <Center>

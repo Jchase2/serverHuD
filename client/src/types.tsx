@@ -16,6 +16,7 @@ export interface IData extends IAddServer {
   memUsage: number;
   updatedAt: string;
   upgrades: string;
+  smart: string[];
   uptime: Object;
   userid: number;
   trackOptions: {

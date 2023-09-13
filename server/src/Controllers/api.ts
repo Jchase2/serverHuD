@@ -216,6 +216,7 @@ const hudServerSchema = Joi.object({
   userid: Joi.number().required(),
   optionalUrl: Joi.string().uri().allow(""),
   upgrades: Joi.string(),
+  smart: Joi.array(),
   uptime: {
     Days: Joi.number(),
     Hours: Joi.number(),
@@ -232,6 +233,7 @@ const hudServerUpdateSchema = Joi.object({
   serverid: Joi.number().required(),
   userid: Joi.number().required(),
   optionalUrl: Joi.string().uri().allow(""),
+  smart: Joi.array(),
   trackOptions: {
     trackDisk: Joi.boolean().required(),
     trackResources: Joi.boolean().required(),
@@ -323,6 +325,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       userid: user.id,
       optionalUrl: optionalUrl,
       upgrades: hudData ? hudData.upgrades : "empty",
+      smart: hudData ? hudData.smart : "empty",
       uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
       trackOptions: trackOptions,
     });
@@ -338,7 +341,11 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
   } catch (error: any) {
     console.log("ERROR IS: ", error);
     if ((error as any)?.isJoi) {
-      ctx.body = error?.details[0].message;
+      console.log("JOI ERROR OCCURED: ", error)
+      if(error?._original?.serverid) {
+        Server.destroy({where: {id: error?._original?.serverid}})
+      }
+      ctx.body = "Ensure ServerHuD servers are running and the input is correct."
       ctx.status = 422;
     } else {
       ctx.body = `${error}`;
