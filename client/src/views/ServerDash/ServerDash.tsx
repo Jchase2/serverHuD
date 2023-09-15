@@ -108,7 +108,10 @@ const ServerDash = () => {
         data?.upgrades !== "empty" ? (
           <Upgrades upgrades={data.upgrades} />
         ) : null}
-        <SmartDisplay serverData={data} />
+
+        {data?.trackOptions?.trackSmart && data?.smart && data?.smart.length ? (
+          <SmartDisplay serverData={data} />
+        ) : null}
       </Wrap>
       <Center>
         <Box p={8} m={2}>

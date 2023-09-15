@@ -45,7 +45,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
       trackDisk: true,
       trackResources: true,
       trackUpgrades: true,
-      trackSmart: true,
+      trackSmart: false,
     },
   });
 

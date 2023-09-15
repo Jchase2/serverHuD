@@ -229,7 +229,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
           {
             uptime: optionalServerData?.uptimeInHours ? optionalServerData?.uptimeInHours : 0,
             upgrades: optionalServerData?.upgrades ? optionalServerData?.upgrades : "empty",
-            smart: optionalServerData?.smart ? optionalServerData?.smart : "empty"
+            smart: optionalServerData?.smart ? optionalServerData?.smart : [""]
           },
           { where: { serverid: id, userid: userid } }
         );
@@ -290,7 +290,7 @@ export const startServerJobs = async () => {
     // If currStatus is null, we'll insert immediately.
     // This way we immediately have some data to work with.
     if (currStatus === null) {
-      console.log("Creating first entry.");
+      console.log("Creating first entry with url: ", url);
       let checkUp = await isUp(url);
       let checkSsl: IResolvedValues | any = await getSslDetails(url);
       let optionalData: IHudServerData = optionalUrl ? await getHudSelectedData(hudServerBe?.dataValues.optionalUrl, hudServerBe?.dataValues.trackOptions) : null;

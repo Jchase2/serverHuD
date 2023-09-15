@@ -126,7 +126,7 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
       userid: userid,
     },
     order: [["time", "ASC"]],
-    attributes: ["diskSize", "diskUsed"],
+    attributes: ["time", "status", "diskSize", "diskUsed"],
     limit: 1,
     raw: true,
   });
@@ -144,7 +144,7 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
   const diffArr = await sequelize.query<LiveServer>(
     `SELECT time, status, "diskSize", "diskUsed"
       FROM
-        (SELECT time, status, url, "diskSize", "diskUsed", LAG(status) OVER (ORDER BY "time")
+        (SELECT time, status, "diskSize", "diskUsed", LAG(status) OVER (ORDER BY "time")
         AS prev_status FROM liveserver WHERE serverid = :id AND userid = :userid)
       AS subquery WHERE status IS NOT NULL AND status <> prev_status;`,
     {
@@ -153,6 +153,12 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
       type: QueryTypes.SELECT,
     }
   );
+
+  // If there's nothing in diffArr, add liveserver stuff
+  // so we can return an initial set of data.
+  if(!diffArr.length) {
+    diffArr.push(res[0])
+  }
 
   let totalUptime = diffArr.reduce(
     (acc: number, curr: LiveServer, ind: number) => {

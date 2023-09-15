@@ -162,11 +162,10 @@ export const getServerUsage = async (ctx: koa.Context, next: Function) => {
 // TODO: Verify user owns server.
 export const deleteServer = async (ctx: koa.Context, next: Function) => {
   try {
-
     const user = await User.findByPk(ctx.state.user._id);
 
-    if(!user) {
-      ctx.body = "User not found!"
+    if (!user) {
+      ctx.body = "User not found!";
       ctx.status = 404;
       return;
     }
@@ -174,7 +173,7 @@ export const deleteServer = async (ctx: koa.Context, next: Function) => {
     await HudServer.destroy({
       where: {
         serverid: ctx.params.id,
-        userid: user.id
+        userid: user.id,
       },
     });
 
@@ -292,8 +291,8 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
     const user = await User.findByPk(ctx.state.user._id);
     const status = await isUp(url);
 
-    if(!user) {
-      ctx.body = "User not found!"
+    if (!user) {
+      ctx.body = "User not found!";
       ctx.status = 404;
       return;
     }
@@ -325,7 +324,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       userid: user.id,
       optionalUrl: optionalUrl,
       upgrades: hudData ? hudData.upgrades : "empty",
-      smart: hudData ? hudData.smart : "empty",
+      smart: hudData ? hudData.smart : [""],
       uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
       trackOptions: trackOptions,
     });
@@ -341,11 +340,12 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
   } catch (error: any) {
     console.log("ERROR IS: ", error);
     if ((error as any)?.isJoi) {
-      console.log("JOI ERROR OCCURED: ", error)
-      if(error?._original?.serverid) {
-        Server.destroy({where: {id: error?._original?.serverid}})
+      console.log("JOI ERROR OCCURED: ", error);
+      if (error?._original?.serverid) {
+        Server.destroy({ where: { id: error?._original?.serverid } });
       }
-      ctx.body = "Ensure ServerHuD servers are running and the input is correct."
+      ctx.body =
+        "Ensure ServerHuD servers are running and the input is correct.";
       ctx.status = 422;
     } else {
       ctx.body = `${error}`;
@@ -387,8 +387,8 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
 
     const user = await User.findByPk(ctx.state.user._id);
 
-    if(!user) {
-      ctx.body = "User not found!"
+    if (!user) {
+      ctx.body = "User not found!";
       ctx.status = 404;
       return;
     }
@@ -433,7 +433,7 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
     await HudServer.update(hudValue, {
       where: {
         serverid: ctx.params.id,
-        userid: user.id
+        userid: user.id,
       },
     });
 

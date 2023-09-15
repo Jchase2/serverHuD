@@ -6,7 +6,7 @@ import {
   Heading,
   Stack,
   VStack,
-  Text
+  Text,
 } from "@chakra-ui/react";
 import { IData } from "../../types";
 
@@ -33,8 +33,10 @@ const SmartDisplay = (props: ISmartDisplayProps) => {
         <CardBody p={0}>
           <Center>
             <VStack>
-              {serverData.smart.map((elem: string) => (
-                <Text>{elem}</Text>
+              {serverData.smart.map((elem: string, index) => (
+                <div key={index}>
+                  <Text>{elem}</Text>
+                </div>
               ))}
             </VStack>
           </Center>
