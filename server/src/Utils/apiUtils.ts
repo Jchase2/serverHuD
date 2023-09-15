@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
 import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
-import { Op } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
 import { HudServer } from "../Models/hudServer.model";
+import { sequelize } from "../Models";
 
 interface ICombinedData {
   avgMem: number;
@@ -10,7 +11,6 @@ interface ICombinedData {
 }
 
 export const getAllCombinedState = async (userid: number) => {
-
   try {
     const serverList = await Server.findAll({
       where: { userid: userid },
@@ -19,12 +19,7 @@ export const getAllCombinedState = async (userid: number) => {
     let combinedData = serverList.map(async (server) => {
       const hudData = await HudServer.findOne({
         where: { serverid: server.id, userid: userid },
-        attributes: [
-          "optionalUrl",
-          "upgrades",
-          "uptime",
-          "trackOptions"
-        ],
+        attributes: ["optionalUrl", "upgrades", "uptime", "trackOptions"],
       });
 
       let res = await LiveServer.findOne({
@@ -40,13 +35,14 @@ export const getAllCombinedState = async (userid: number) => {
         order: [["time", "DESC"]],
       });
       Object.assign(server.dataValues, res?.dataValues);
-      if (hudData?.dataValues) Object.assign(server.dataValues, hudData?.dataValues);
+      if (hudData?.dataValues)
+        Object.assign(server.dataValues, hudData?.dataValues);
       return server;
     });
 
     return await Promise.all(combinedData);
   } catch (err) {
-    console.log("ERROR FROM GET ALL COMBINED STATES: ", err)
+    console.log("ERROR FROM GET ALL COMBINED STATES: ", err);
   }
 };
 
@@ -63,9 +59,9 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
         "upgrades",
         "smart",
         "uptime",
-        "trackOptions"
-      ]
-    })
+        "trackOptions",
+      ],
+    });
 
     if (!server) {
       return null;
@@ -101,10 +97,10 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
 
     Object.assign(server?.dataValues, res?.dataValues);
     server.dataValues.trackOptions = hudServerData?.dataValues.trackOptions;
-    server.dataValues.optionalUrl =  hudServerData?.dataValues.optionalUrl;
+    server.dataValues.optionalUrl = hudServerData?.dataValues.optionalUrl;
     server.dataValues.upgrades = hudServerData?.dataValues.upgrades;
     server.dataValues.smart = hudServerData?.dataValues.smart;
-    server.dataValues.uptime = hudServerData?.dataValues.uptime
+    server.dataValues.uptime = hudServerData?.dataValues.uptime;
 
     return server;
   } catch (err) {
@@ -121,17 +117,17 @@ export const SplitTime = (numberOfHours: number) => {
 };
 
 // Calculates %up and %down from recorded data on a server.
-// TODO: This probably needs refactored a lot.
 export const getMonitoredUpInfo = async (id: number, userid: number) => {
-  // Get all data, oldest first, where serverid and userid
-  // are as specified.
+
+  // Get last diskSize and diskUsed
   let res = await LiveServer.findAll({
     where: {
       serverid: id,
       userid: userid,
     },
     order: [["time", "ASC"]],
-    attributes: ["time", "status", "diskSize", "diskUsed"],
+    attributes: ["diskSize", "diskUsed"],
+    limit: 1,
     raw: true,
   });
 
@@ -142,18 +138,25 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     ? res[res.length - 1]?.diskSize
     : -1;
 
-  let currStatus: string | null = null;
-  let diffArr: LiveServer[] = [];
-  res.forEach((elem) => {
-    if (elem.status != currStatus) {
-      diffArr.push(elem);
-      currStatus = elem.status;
+  // Using raw query here because sequelize doesn't support this
+  // sort of operation as far as I know, and making a db call
+  // should be better for memory management than filtering in JS.
+  const diffArr = await sequelize.query<LiveServer>(
+    `SELECT time, status, "diskSize", "diskUsed"
+      FROM
+        (SELECT time, status, url, "diskSize", "diskUsed", LAG(status) OVER (ORDER BY "time")
+        AS prev_status FROM liveserver WHERE serverid = :id AND userid = :userid)
+      AS subquery WHERE status IS NOT NULL AND status <> prev_status;`,
+    {
+      replacements: { id, userid },
+      raw: true,
+      type: QueryTypes.SELECT,
     }
-  });
+  );
 
   let totalUptime = diffArr.reduce(
     (acc: number, curr: LiveServer, ind: number) => {
-      // If current status i up and the next index is down, calculate the difference
+      // If current status is up and the next index is down, calculate the difference
       // and add that to the accumulator.
 
       if (

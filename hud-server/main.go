@@ -99,7 +99,7 @@ func GetSmartInfo() []string {
 	smartScan, err := exec.Command("smartctl", "--scan").CombinedOutput()
 
 	if err != nil {
-		fmt.Printf("ERROR FROM SCAN IS: ", err.Error())
+		fmt.Print("ERROR FROM SCAN IS: ", err.Error())
 		slice := []string{"Error with smartctl, please ensure it is installed and in your path."}
 		return slice
 	}
@@ -126,7 +126,7 @@ func GetSmartInfo() []string {
 		var currArr = smartArr[i]
 		smartResults[i], err = exec.Command("smartctl", "-H", currArr[0], currArr[1], currArr[2]).CombinedOutput()
 		if err != nil {
-			fmt.Printf("ERROR FROM RES IS: ", err.Error())
+			fmt.Print("ERROR FROM RES IS: ", err.Error())
 		}
 	}
 
