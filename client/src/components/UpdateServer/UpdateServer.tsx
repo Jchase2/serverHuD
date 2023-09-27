@@ -11,6 +11,7 @@ import {
   useDisclosure,
   IconButton,
   Input,
+  Text
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { Loading } from "../Loading/Loading";
@@ -165,6 +166,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
               value={serverState.optionalUrl}
               onChange={handleChange}
             />
+            {data?.optionalUrl ? <Text fontSize='md' mt={4}>Options:</Text> : null}
             {data?.optionalUrl || serverState?.optionalUrl ? <UpdateOptionalServer checkedItems={checkedItems} setCheckedItems={setCheckedItems}  /> : null}
           </ModalBody>
           <ModalFooter>

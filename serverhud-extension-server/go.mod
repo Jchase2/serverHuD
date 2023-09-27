@@ -1,4 +1,4 @@
-module github.com/JChase2/hud-server
+module github.com/JChase2/serverhud-extension-server
 
 go 1.15
 

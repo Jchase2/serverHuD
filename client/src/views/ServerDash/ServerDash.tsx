@@ -54,7 +54,7 @@ const ServerDash = () => {
         url: data.url,
         status: data.status,
         sslStatus: data.sslStatus,
-        enableHud: data.optionalUrl ? true : false,
+        enableExtensionServer: data.optionalUrl ? true : false,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -5,7 +5,7 @@ import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
 import { getMonitoredUsageData, getMonitoredUpInfo } from "../Utils/apiUtils";
 import cookie from 'cookie';
-import { HudServer } from "../Models/hudServer.model";
+import { ExtensionServer } from "../Models/extensionServer.model";
 
 // TODO: Test with bad input.
 
@@ -46,9 +46,9 @@ export function sioUpCheck(socket: Socket) {
           urlDbChecker(data, socket);
           sslDbChecker(data, socket);
           urlLiveCheck(data, socket);
-          // If enableHud is true, send resource usage updates.
-          if (data.enableHud) {
-            hudServerData(data, socket);
+          // If enableExtensionServer is true, send resource usage updates.
+          if (data.enableExtensionServer) {
+            extensionServerData(data, socket);
           }
         }, 10000);
         intervalObj[jobName] = upInterval;
@@ -88,7 +88,7 @@ const urlLiveCheck = async (data: IUrlLiveData, socket: Socket) => {
   }
 };
 
-const hudServerData = async (data: IUrlLiveData, socket: Socket) => {
+const extensionServerData = async (data: IUrlLiveData, socket: Socket) => {
   const cookies = cookie.parse(socket.handshake.headers.cookie || "");
   let userid = getUserId(cookies?.accessToken);
   try {
@@ -98,11 +98,11 @@ const hudServerData = async (data: IUrlLiveData, socket: Socket) => {
 
     // We don't just use data.id here so an arbitrary
     // id can't be used to get another users info.
-    let hudServerInfo = await HudServer.findOne({
+    let extensionServerInfo = await ExtensionServer.findOne({
       where: { serverid: servInfo?.id, userid: userid }
     })
 
-    if (hudServerInfo?.optionalUrl) {
+    if (extensionServerInfo?.optionalUrl) {
       let res = await getMonitoredUsageData(data.id, userid);
       console.log("EMITTING RESOURCE UPDATE ON BACKEND");
       socket.emit("resourcesUpdate", {
@@ -111,7 +111,7 @@ const hudServerData = async (data: IUrlLiveData, socket: Socket) => {
       });
     }
   } catch (err) {
-    console.log("HUD CHECK ERROR: ", err);
+    console.log("EXTENSION SERVER CHECK ERROR: ", err);
   }
 };
 

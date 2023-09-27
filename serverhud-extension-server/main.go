@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JChase2/hud-server/middleware"
+	"github.com/JChase2/serverhud-extension-server/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"

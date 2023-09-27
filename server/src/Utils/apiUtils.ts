@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
 import { Op, QueryTypes } from "sequelize";
-import { HudServer } from "../Models/hudServer.model";
+import { ExtensionServer } from "../Models/extensionServer.model";
 import { sequelize } from "../Models";
 
 interface ICombinedData {
@@ -17,7 +17,7 @@ export const getAllCombinedState = async (userid: number) => {
     });
 
     let combinedData = serverList.map(async (server) => {
-      const hudData = await HudServer.findOne({
+      const extensionData = await ExtensionServer.findOne({
         where: { serverid: server.id, userid: userid },
         attributes: ["optionalUrl", "upgrades", "uptime", "trackOptions"],
       });
@@ -35,8 +35,8 @@ export const getAllCombinedState = async (userid: number) => {
         order: [["time", "DESC"]],
       });
       Object.assign(server.dataValues, res?.dataValues);
-      if (hudData?.dataValues)
-        Object.assign(server.dataValues, hudData?.dataValues);
+      if (extensionData?.dataValues)
+        Object.assign(server.dataValues, extensionData?.dataValues);
       return server;
     });
 
@@ -52,7 +52,7 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
       where: { id: serverid, userid: userid },
     });
 
-    const hudServerData = await HudServer.findOne({
+    const extensionServerData = await ExtensionServer.findOne({
       where: { serverid: serverid, userid: userid },
       attributes: [
         "optionalUrl",
@@ -96,11 +96,11 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
     }
 
     Object.assign(server?.dataValues, res?.dataValues);
-    server.dataValues.trackOptions = hudServerData?.dataValues.trackOptions;
-    server.dataValues.optionalUrl = hudServerData?.dataValues.optionalUrl;
-    server.dataValues.upgrades = hudServerData?.dataValues.upgrades;
-    server.dataValues.smart = hudServerData?.dataValues.smart;
-    server.dataValues.uptime = hudServerData?.dataValues.uptime;
+    server.dataValues.trackOptions = extensionServerData?.dataValues.trackOptions;
+    server.dataValues.optionalUrl = extensionServerData?.dataValues.optionalUrl;
+    server.dataValues.upgrades = extensionServerData?.dataValues.upgrades;
+    server.dataValues.smart = extensionServerData?.dataValues.smart;
+    server.dataValues.uptime = extensionServerData?.dataValues.uptime;
 
     return server;
   } catch (err) {

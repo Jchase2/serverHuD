@@ -1,9 +1,9 @@
 import { LiveServer } from "../Models/liveServer.model";
 import { Cron, scheduledJobs } from "croner";
-import { isUp, getSslDetails, hudServerData, getHudSelectedData } from "./serverDetails";
+import { isUp, getSslDetails, extensionServerData, getExtSelectedData } from "./serverDetails";
 import { Server } from "../Models/server.model";
-import { IHudServerData, IResolvedValues } from "../types";
-import { HudServer } from "../Models/hudServer.model";
+import { IExtensionServerData, IResolvedValues } from "../types";
+import { ExtensionServer } from "../Models/extensionServer.model";
 import { sendUpdate } from "./nodemailer";
 
 // Create a cron job for a given URL, userid and server id.
@@ -31,11 +31,11 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
       if (checkUp !== currStatus?.dataValues.status) {
         console.log("Up status has changed.")
         try {
-          let hudServerBe = await HudServer.findOne({
+          let extensionServerBe = await ExtensionServer.findOne({
             where: { serverid: id, userid: userid },
             attributes: ["optionalUrl"]
           })
-          let optionalServerData = hudServerBe?.dataValues.optionalUrl ? await hudServerData(hudServerBe?.dataValues.optionalUrl) : null;
+          let optionalServerData = extensionServerBe?.dataValues.optionalUrl ? await extensionServerData(extensionServerBe?.dataValues.optionalUrl) : null;
           await LiveServer.create({
             status: checkUp,
             url: url,
@@ -180,30 +180,30 @@ export const updateSslCron = async (newUrl: string, userid: number, id: number) 
   return res;
 }
 
-// Create a cron job for a given optional hud-server URL,
-// userid and server id. This job monitors a hud-server endpoint.
+// Create a cron job for a given optional extension server URL,
+// userid and server id. This job monitors an extension-server endpoint.
 export const setupOptionalCron = async (url: string, userid: number, id: number) => {
   let server = await Server.findOne({
     where: { id: id, userid: userid  },
   });
 
-  let hudServerBe = await HudServer.findOne({
+  let extensionServerBe = await ExtensionServer.findOne({
     where: { serverid: id, userid: userid }
   })
 
-  if(hudServerBe?.dataValues.optionalUrl) {
-    let jobName = `${hudServerBe?.dataValues.optionalUrl}-optional-${hudServerBe?.dataValues.serverid}`;
+  if(extensionServerBe?.dataValues.optionalUrl) {
+    let jobName = `${extensionServerBe?.dataValues.optionalUrl}-optional-${extensionServerBe?.dataValues.serverid}`;
     let jobArray = scheduledJobs.map((elem) => elem.name);
     if (!jobArray.includes(jobName)) {
-      console.log("Adding ", `${hudServerBe?.dataValues.optionalUrl}-optional-${id}`, " to job list.");
+      console.log("Adding ", `${extensionServerBe?.dataValues.optionalUrl}-optional-${id}`, " to job list.");
 
       // TODO: Review how often we want to get this data for performance.
       let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
         // TODO: Make sure optional server data isn't throwing an error
-        let optionalServerData = (hudServerBe?.dataValues.optionalUrl && hudServerBe?.dataValues.trackOptions) ? await getHudSelectedData(hudServerBe?.dataValues.optionalUrl, hudServerBe?.dataValues.trackOptions) : null;
+        let optionalServerData = (extensionServerBe?.dataValues.optionalUrl && extensionServerBe?.dataValues.trackOptions) ? await getExtSelectedData(extensionServerBe?.dataValues.optionalUrl, extensionServerBe?.dataValues.trackOptions) : null;
 
         if(optionalServerData.errno) {
-          console.log("Problem with hud-server, error: ", optionalServerData.code);
+          console.log("Problem with extension server, error: ", optionalServerData.code);
           return;
         }
 
@@ -225,7 +225,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
           cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : 0
         });
 
-        await HudServer.update(
+        await ExtensionServer.update(
           {
             uptime: optionalServerData?.uptimeInHours ? optionalServerData?.uptimeInHours : 0,
             upgrades: optionalServerData?.upgrades ? optionalServerData?.upgrades : "empty",
@@ -244,11 +244,11 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
 // Replaces cron job for optional url with new url.
 export const updateOptionalCron = async (newUrl: string, userid: number, id: number) => {
 
-  let hudServer = await HudServer.findOne({
+  let extensionServer = await ExtensionServer.findOne({
     where: { serverid: id, userid: userid },
   });
 
-  const oldJobName = `${hudServer?.dataValues.optionalUrl}-optional-${id}`;
+  const oldJobName = `${extensionServer?.dataValues.optionalUrl}-optional-${id}`;
 
   let oldJob;
   for(let obj of scheduledJobs) {
@@ -274,11 +274,11 @@ export const startServerJobs = async () => {
   servArr.map(async (server) => {
     let { url, userid, id } = server;
 
-    let hudServerBe = await HudServer.findOne({
+    let extensionServerBe = await ExtensionServer.findOne({
       where: {serverid: id, userid: userid }
     });
 
-    let optionalUrl = hudServerBe?.dataValues.optionalUrl;
+    let optionalUrl = extensionServerBe?.dataValues.optionalUrl;
 
     // Grab the last status of this server.
     let currStatus = await LiveServer.findOne({
@@ -293,7 +293,7 @@ export const startServerJobs = async () => {
       console.log("Creating first entry with url: ", url);
       let checkUp = await isUp(url);
       let checkSsl: IResolvedValues | any = await getSslDetails(url);
-      let optionalData: IHudServerData = optionalUrl ? await getHudSelectedData(hudServerBe?.dataValues.optionalUrl, hudServerBe?.dataValues.trackOptions) : null;
+      let optionalData: IExtensionServerData = optionalUrl ? await getExtSelectedData(extensionServerBe?.dataValues.optionalUrl, extensionServerBe?.dataValues.trackOptions) : null;
 
       await LiveServer.create({
         status: checkUp,

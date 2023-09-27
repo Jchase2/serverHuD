@@ -16,7 +16,7 @@ export interface IUrlLiveData {
   sslExpiry: string | undefined;
 }
 
-export interface IHudServerData {
+export interface IExtensionServerData {
   cpuUsage: number,
   diskSize: number,
   diskUsed: number,

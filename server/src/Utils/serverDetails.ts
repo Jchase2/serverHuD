@@ -24,8 +24,8 @@ export const getSslDetails = async (hostname: string) => {
   }
 };
 
-const hudServerLogin = async (url: string) => {
-  console.log("HUD SERVER LOGIN URL: ", url);
+const extensionServerLogin = async (url: string) => {
+  console.log("EXTENSION SERVER LOGIN URL: ", url);
 
   try {
     let resp = await axios.post(url, {
@@ -38,8 +38,8 @@ const hudServerLogin = async (url: string) => {
   }
 };
 
-export const hudServerData = async (url: string) => {
-  if (process.env.HUD_SSL === "true") {
+export const extensionServerData = async (url: string) => {
+  if (process.env.EXT_SERVER_SSL === "true") {
     // Make sure we have http or https prepended.
     if (!url.startsWith("https://")) {
       url = url.replace(/^https?\:\/\//i, "").replace(/\/$/, "");
@@ -47,7 +47,7 @@ export const hudServerData = async (url: string) => {
     }
   }
 
-  let jwt = await hudServerLogin(`${url}/api/login`);
+  let jwt = await extensionServerLogin(`${url}/api/login`);
 
   try {
     let resp = await axios({
@@ -60,13 +60,13 @@ export const hudServerData = async (url: string) => {
 
     return resp.data;
   } catch (err) {
-    console.log("HUD SERVER ERROR: ", err);
+    console.log("EXTENSION SERVER ERROR: ", err);
     return err;
   }
 };
 
-export const hudServerDisk = async (url: string) => {
-  let jwt = await hudServerLogin(`${url}/api/login`);
+export const extensionServerDisk = async (url: string) => {
+  let jwt = await extensionServerLogin(`${url}/api/login`);
 
   try {
     let resp = await axios({
@@ -78,13 +78,13 @@ export const hudServerDisk = async (url: string) => {
     });
     return resp.data;
   } catch (err) {
-    console.log("HUD SERVER ERROR: ", err);
+    console.log("EXTENSION SERVER ERROR: ", err);
     return err;
   }
 };
 
-export const hudServerResources = async (url: string) => {
-  let jwt = await hudServerLogin(`${url}/api/login`);
+export const extensionServerResources = async (url: string) => {
+  let jwt = await extensionServerLogin(`${url}/api/login`);
 
   try {
     let resp = await axios({
@@ -96,13 +96,13 @@ export const hudServerResources = async (url: string) => {
     });
     return resp.data;
   } catch (err) {
-    console.log("HUD SERVER ERROR: ", err);
+    console.log("EXTENSION SERVER ERROR: ", err);
     return err;
   }
 };
 
-export const hudServerUpgrades = async (url: string) => {
-  let jwt = await hudServerLogin(`${url}/api/login`);
+export const extensionServerUpgrades = async (url: string) => {
+  let jwt = await extensionServerLogin(`${url}/api/login`);
 
   try {
     let resp = await axios({
@@ -114,13 +114,13 @@ export const hudServerUpgrades = async (url: string) => {
     });
     return resp.data;
   } catch (err) {
-    console.log("HUD SERVER ERROR: ", err);
+    console.log("EXTENSION SERVER ERROR: ", err);
     return err;
   }
 };
 
-export const hudServerSmart = async (url: string) => {
-  let jwt = await hudServerLogin(`${url}/api/login`);
+export const extensionServerSmart = async (url: string) => {
+  let jwt = await extensionServerLogin(`${url}/api/login`);
 
   try {
     let resp = await axios({
@@ -132,12 +132,12 @@ export const hudServerSmart = async (url: string) => {
     });
     return resp.data;
   } catch (err) {
-    console.log("HUD SERVER ERROR: ", err);
+    console.log("EXTENSION SERVER ERROR: ", err);
     return err;
   }
 };
 
-export const getHudSelectedData = async (
+export const getExtSelectedData = async (
   optionalUrl: string,
   trackOptions: ITrackOptions
 ) => {
@@ -149,40 +149,40 @@ export const getHudSelectedData = async (
       trackOptions.trackUpgrades &&
       trackOptions.trackSmart
     ) {
-      const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
-      return hudData;
+      const extensionData = optionalUrl ? await extensionServerData(optionalUrl) : null;
+      return extensionData;
     }
 
     let combinedRes = {};
 
     if (trackOptions && trackOptions.trackDisk) {
-      const diskData = optionalUrl ? await hudServerDisk(optionalUrl) : null;
+      const diskData = optionalUrl ? await extensionServerDisk(optionalUrl) : null;
       combinedRes = { ...combinedRes, ...diskData };
     }
 
     if (trackOptions && trackOptions.trackResources) {
       const resourcesData = optionalUrl
-        ? await hudServerResources(optionalUrl)
+        ? await extensionServerResources(optionalUrl)
         : null;
       combinedRes = { ...combinedRes, ...resourcesData };
     }
 
     if (trackOptions && trackOptions.trackUpgrades) {
       const upgradeData = optionalUrl
-        ? await hudServerUpgrades(optionalUrl)
+        ? await extensionServerUpgrades(optionalUrl)
         : null;
       combinedRes = { ...combinedRes, ...upgradeData };
     }
 
     if (trackOptions && trackOptions.trackSmart) {
-      const smartData = optionalUrl ? await hudServerSmart(optionalUrl) : null;
+      const smartData = optionalUrl ? await extensionServerSmart(optionalUrl) : null;
       combinedRes = { ...combinedRes, ...smartData };
       console.log("SMART DATA IS: ", smartData);
     }
 
     return combinedRes;
   } catch (err) {
-    console.log("ERROR IN getHudSelectedData", err);
+    console.log("ERROR IN getExtSelectedData", err);
     return err
   }
 };

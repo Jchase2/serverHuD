@@ -5,9 +5,9 @@ import bcrypt from "bcrypt";
 import Joi, { optional } from "joi";
 import jwt from "jsonwebtoken";
 import {
-  getHudSelectedData,
+  getExtSelectedData,
   getSslDetails,
-  hudServerData,
+  extensionServerData,
   isUp,
 } from "../Utils/serverDetails";
 import {
@@ -28,7 +28,7 @@ import {
 } from "../Utils/apiUtils";
 import { getUserId, verifyToken } from "../Utils/jwt";
 import { IResolvedValues } from "../types";
-import { HudServer } from "../Models/hudServer.model";
+import { ExtensionServer } from "../Models/extensionServer.model";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -170,7 +170,7 @@ export const deleteServer = async (ctx: koa.Context, next: Function) => {
       return;
     }
 
-    await HudServer.destroy({
+    await ExtensionServer.destroy({
       where: {
         serverid: ctx.params.id,
         userid: user.id,
@@ -210,7 +210,7 @@ const liveServerSchema = Joi.object({
   cpuUsage: Joi.number(),
 });
 
-const hudServerSchema = Joi.object({
+const extensionServerSchema = Joi.object({
   serverid: Joi.number().required(),
   userid: Joi.number().required(),
   optionalUrl: Joi.string().uri().allow(""),
@@ -228,7 +228,7 @@ const hudServerSchema = Joi.object({
   },
 });
 
-const hudServerUpdateSchema = Joi.object({
+const extensionServerUpdateSchema = Joi.object({
   serverid: Joi.number().required(),
   userid: Joi.number().required(),
   optionalUrl: Joi.string().uri().allow(""),
@@ -244,7 +244,7 @@ const hudServerUpdateSchema = Joi.object({
 /*
   API:
   url: url for new server to track
-  optionalUrl: hudserver / go server url
+  optionalUrl: extensionServerUrl / go server url
   name: title of the server
   // Which server information to display.
   trackOptions: {
@@ -265,11 +265,11 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
   }
 
   try {
-    // If hudServer Url is bad, just return error.
+    // If extensionServer Url is bad, just return error.
     // This is so we short circuit before we get too far
     // and it takes forever to return an error.
-    const hudSchema = Joi.string().uri();
-    const error = optionalUrl ? hudSchema.validate(optionalUrl) : null;
+    const extensionSchema = Joi.string().uri();
+    const error = optionalUrl ? extensionSchema.validate(optionalUrl) : null;
     if (error?.error) {
       ctx.body = "Optional backend must have a valid address.";
       ctx.status = 422;
@@ -279,9 +279,9 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
     let sslInfo: IResolvedValues | any = await getSslDetails(url);
     if (sslInfo.errno) sslInfo.valid = false;
 
-    const hudData = optionalUrl ? await hudServerData(optionalUrl) : null;
+    const extensionData = optionalUrl ? await extensionServerData(optionalUrl) : null;
 
-    if (hudData?.code === "ERR_HTTP_INVALID_HEADER_VALUE") {
+    if (extensionData?.code === "ERR_HTTP_INVALID_HEADER_VALUE") {
       ctx.body =
         "Error with optional backend header. Check the URL or Address.";
       ctx.status = 422;
@@ -313,23 +313,23 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       url,
       status: status,
       sslStatus: sslInfo.valid.toString(),
-      diskUsed: hudData ? hudData.diskUsed : -1,
-      diskSize: hudData ? hudData.diskSize : -1,
-      memUsage: hudData ? hudData.memUsage : 0,
-      cpuUsage: hudData ? hudData.cpuUsage : 0,
+      diskUsed: extensionData ? extensionData.diskUsed : -1,
+      diskSize: extensionData ? extensionData.diskSize : -1,
+      memUsage: extensionData ? extensionData.memUsage : 0,
+      cpuUsage: extensionData ? extensionData.cpuUsage : 0,
     });
 
-    const hudValue = await hudServerSchema.validateAsync({
+    const extensionValue = await extensionServerSchema.validateAsync({
       serverid: dbResp.dataValues.id,
       userid: user.id,
       optionalUrl: optionalUrl,
-      upgrades: hudData ? hudData.upgrades : "empty",
-      smart: hudData ? hudData.smart : [""],
-      uptime: hudData ? SplitTime(hudData.uptimeInHours) : {},
+      upgrades: extensionData ? extensionData.upgrades : "empty",
+      smart: extensionData ? extensionData.smart : [""],
+      uptime: extensionData ? SplitTime(extensionData.uptimeInHours) : {},
       trackOptions: trackOptions,
     });
 
-    await HudServer.create(hudValue);
+    await ExtensionServer.create(extensionValue);
     await LiveServer.create(liveValue);
     await setupUrlCron(url, ctx.state.user._id, dbResp?.dataValues.id);
     await setupSslCron(url, ctx.state.user._id, dbResp?.dataValues.id);
@@ -371,11 +371,11 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
   }
 
   try {
-    const hudData = optionalUrl
-      ? await getHudSelectedData(optionalUrl, trackOptions)
+    const extensionData = optionalUrl
+      ? await getExtSelectedData(optionalUrl, trackOptions)
       : null;
 
-    if (hudData?.code === "ERR_HTTP_INVALID_HEADER_VALUE") {
+    if (extensionData?.code === "ERR_HTTP_INVALID_HEADER_VALUE") {
       ctx.body =
         "Error with optional backend header. Check the URL or Address.";
       ctx.status = 422;
@@ -417,20 +417,20 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
       url,
       status: status,
       sslStatus: sslInfo.valid.toString(),
-      diskUsed: hudData ? hudData.diskUsed : -1,
-      diskSize: hudData ? hudData.diskSize : -1,
-      memUsage: hudData ? hudData.memUsage : 0,
-      cpuUsage: hudData ? hudData.cpuUsage : 0,
+      diskUsed: extensionData ? extensionData.diskUsed : -1,
+      diskSize: extensionData ? extensionData.diskSize : -1,
+      memUsage: extensionData ? extensionData.memUsage : 0,
+      cpuUsage: extensionData ? extensionData.cpuUsage : 0,
     });
 
-    const hudValue = await hudServerUpdateSchema.validateAsync({
+    const extensionValue = await extensionServerUpdateSchema.validateAsync({
       serverid: ctx.params.id,
       userid: user.id,
       optionalUrl: optionalUrl,
       trackOptions: trackOptions,
     });
 
-    await HudServer.update(hudValue, {
+    await ExtensionServer.update(extensionValue, {
       where: {
         serverid: ctx.params.id,
         userid: user.id,

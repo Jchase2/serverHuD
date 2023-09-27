@@ -4,7 +4,7 @@ import { Server } from "./server.model";
 import {DataType} from 'sequelize-typescript';
 
 @Table
-export class HudServer extends Model {
+export class ExtensionServer extends Model {
   @ForeignKey(() => Server)
   @Column
   serverid!: number;
