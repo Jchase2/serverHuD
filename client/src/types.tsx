@@ -32,6 +32,7 @@ export interface IUpdateServer {
   url: string;
   optionalUrl: string;
   name: string;
+  emailNotifications: boolean;
   trackOptions: {
     trackDisk: boolean,
     trackResources: boolean,

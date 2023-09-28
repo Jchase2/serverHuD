@@ -42,7 +42,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
     url: "",
     optionalUrl: "",
     name: "",
-    emailNotifications: false,
+    emailNotifications: data?.emailNotifications,
     trackOptions: {
       trackDisk: true,
       trackResources: true,
@@ -82,6 +82,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
         ? serverState.optionalUrl
         : data.optionalUrl,
       name: serverState.name ? serverState.name : data.name,
+      emailNotifications: serverState.emailNotifications,
       trackOptions: {
         trackDisk: checkedItems.trackDisk,
         trackResources: checkedItems.trackResources,
@@ -94,7 +95,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
       url: "",
       optionalUrl: "",
       name: "",
-      emailNotifications: data?.emailNotifications,
+      emailNotifications: !data?.emailNotifications,
       trackOptions: {
         trackDisk: checkedItems.trackDisk,
         trackResources: checkedItems.trackResources,
@@ -171,7 +172,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
             <Checkbox
               pt={2}
               pb={2}
-              isChecked={data?.emailNotifications}
+              isChecked={serverState.emailNotifications}
               onChange={(e) =>
                 setServerState({
                   ...serverState,
