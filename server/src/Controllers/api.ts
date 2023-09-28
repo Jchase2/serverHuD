@@ -196,6 +196,7 @@ const serverSchema = Joi.object({
   url: Joi.string().uri().required(),
   name: Joi.string().required(),
   sslExpiry: Joi.number(),
+  emailNotifications: Joi.boolean().required()
 });
 
 const liveServerSchema = Joi.object({
@@ -255,7 +256,7 @@ const extensionServerUpdateSchema = Joi.object({
   }
 */
 export const addServer = async (ctx: koa.Context, next: Function) => {
-  const { url, optionalUrl, name, trackOptions } = ctx.request.body;
+  const { url, optionalUrl, name, trackOptions, emailNotifications } = ctx.request.body;
 
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
@@ -302,6 +303,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       url,
       name: name,
       sslExpiry: sslInfo.daysRemaining,
+      emailNotifications: emailNotifications
     });
 
     if (!user) throw Error("User not found!");
@@ -361,7 +363,7 @@ export const getTimeseriesUpData = async (ctx: koa.Context, next: Function) => {
 };
 
 export const updateServer = async (ctx: koa.Context, next: Function) => {
-  const { url, optionalUrl, name, trackOptions } = ctx.request.body;
+  const { url, optionalUrl, name, trackOptions, emailNotifications } = ctx.request.body;
 
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
@@ -400,6 +402,7 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
       url,
       name: name,
       sslExpiry: sslInfo.daysRemaining,
+      emailNotifications: emailNotifications
     });
 
     if (!user) throw Error("User not found!");

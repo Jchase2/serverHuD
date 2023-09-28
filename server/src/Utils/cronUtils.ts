@@ -48,7 +48,9 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
             cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : 0
           });
 
-          sendUpdate(`Status has changed to <b>${checkUp}</b> for domain ${currStatus?.dataValues.url}`);
+          if(server?.dataValues.emailNotifications) {
+            sendUpdate(`Status has changed to <b>${checkUp}</b> for domain ${currStatus?.dataValues.url}`);
+          }
 
         } catch (err) {
           console.log("ERR UPDATING URL IN CRON: ", err)
@@ -125,7 +127,9 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
             sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
           });
 
-          sendUpdate(`SSL Status has changed to <b>${checkSsl.errno ? 'Down' : checkSsl.valid.toString()}</b> for domain ${url}`);
+          if(server?.dataValues.emailNotifications) {
+            sendUpdate(`SSL Status has changed to <b>${checkSsl.errno ? 'Down' : checkSsl.valid.toString()}</b> for domain ${url}`);
+          }
 
         } catch (err) {
           console.log("ERR UPDATING SSL IN CRON: ", err)

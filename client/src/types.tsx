@@ -19,6 +19,7 @@ export interface IData extends IAddServer {
   smart: string[];
   uptime: Object;
   userid: number;
+  emailNotifications: boolean;
   trackOptions: {
     trackDisk: boolean,
     trackResources: boolean,

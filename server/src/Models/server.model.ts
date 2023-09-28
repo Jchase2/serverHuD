@@ -23,6 +23,9 @@ export class Server extends Model {
   name!: string;
 
   @Column
+  emailNotifications!: boolean;
+
+  @Column
   sslExpiry!: number;
 
   @BelongsTo(() => User)

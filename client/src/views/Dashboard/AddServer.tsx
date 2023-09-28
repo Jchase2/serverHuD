@@ -1,4 +1,4 @@
-import { Box, Button, Input, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Checkbox, Input, Stack, Text } from "@chakra-ui/react";
 import { UseMutationResult } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { IAddServer } from "../../types";
@@ -6,7 +6,7 @@ import { AxiosError } from "axios";
 import UpdateOptionalServer from "../../components/UpdateServer/UpdateOptionalServer";
 
 interface IAddServerProps {
-  addNewServer: UseMutationResult<any, AxiosError<any>, IAddServer, unknown>
+  addNewServer: UseMutationResult<any, AxiosError<any>, IAddServer, unknown>;
 }
 
 const AddServer = (props: IAddServerProps) => {
@@ -17,12 +17,13 @@ const AddServer = (props: IAddServerProps) => {
     status: "",
     sslStatus: "",
     sslExpiry: 0,
+    emailNotifications: false,
     trackOptions: {
       trackDisk: true,
       trackResources: true,
       trackUpgrades: true,
-      trackSmart: false
-    }
+      trackSmart: false,
+    },
   });
 
   const [checkedItems, setCheckedItems] = useState({
@@ -33,9 +34,9 @@ const AddServer = (props: IAddServerProps) => {
   });
 
   useEffect(() => {
-    setServerState({...serverState, trackOptions: checkedItems})
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkedItems])
+    setServerState({ ...serverState, trackOptions: checkedItems });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkedItems]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setServerState((currentEvent) => ({
@@ -48,12 +49,20 @@ const AddServer = (props: IAddServerProps) => {
     e.preventDefault();
 
     // Make sure we have http or https prepended.
-    if (serverState.url && !serverState.url.startsWith("http://") && !serverState.url.startsWith("https://")) {
+    if (
+      serverState.url &&
+      !serverState.url.startsWith("http://") &&
+      !serverState.url.startsWith("https://")
+    ) {
       serverState.url = "https://" + serverState.url;
     }
 
     // Make sure we have http or https prepended.
-    if (serverState.optionalUrl && !serverState.optionalUrl.startsWith("http://") && !serverState.optionalUrl.startsWith("https://")) {
+    if (
+      serverState.optionalUrl &&
+      !serverState.optionalUrl.startsWith("http://") &&
+      !serverState.optionalUrl.startsWith("https://")
+    ) {
       serverState.optionalUrl = "http://" + serverState.optionalUrl;
     }
 
@@ -65,12 +74,13 @@ const AddServer = (props: IAddServerProps) => {
       status: "",
       sslStatus: "",
       sslExpiry: 0,
+      emailNotifications: false,
       trackOptions: {
         trackDisk: checkedItems.trackDisk,
         trackResources: checkedItems.trackResources,
         trackUpgrades: checkedItems.trackUpgrades,
-        trackSmart: checkedItems.trackSmart
-      }
+        trackSmart: checkedItems.trackSmart,
+      },
     });
   };
 
@@ -108,7 +118,25 @@ const AddServer = (props: IAddServerProps) => {
             value={serverState.optionalUrl}
             onChange={handleChange}
           />
-          {serverState?.optionalUrl ? <UpdateOptionalServer checkedItems={checkedItems} setCheckedItems={setCheckedItems}/> : null}
+          <Checkbox
+            pt={2}
+            pb={2}
+            isChecked={serverState.emailNotifications}
+            onChange={(e) =>
+              setServerState({
+                ...serverState,
+                emailNotifications: e.target.checked,
+              })
+            }
+          >
+            Recieve Email Notifications?
+          </Checkbox>
+          {serverState?.optionalUrl ? (
+            <UpdateOptionalServer
+              checkedItems={checkedItems}
+              setCheckedItems={setCheckedItems}
+            />
+          ) : null}
           <Button type="submit">Add Server</Button>
         </Stack>
       </form>

@@ -11,7 +11,8 @@ import {
   useDisclosure,
   IconButton,
   Input,
-  Text
+  Text,
+  Checkbox,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { Loading } from "../Loading/Loading";
@@ -25,7 +26,6 @@ interface IUpdateServerProps {
 }
 
 export const UpdateServer = (props: IUpdateServerProps) => {
-
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data } = props;
   const updateServer = useUpdateServer(data.id);
@@ -42,6 +42,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
     url: "",
     optionalUrl: "",
     name: "",
+    emailNotifications: false,
     trackOptions: {
       trackDisk: true,
       trackResources: true,
@@ -93,6 +94,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
       url: "",
       optionalUrl: "",
       name: "",
+      emailNotifications: data?.emailNotifications,
       trackOptions: {
         trackDisk: checkedItems.trackDisk,
         trackResources: checkedItems.trackResources,
@@ -166,8 +168,30 @@ export const UpdateServer = (props: IUpdateServerProps) => {
               value={serverState.optionalUrl}
               onChange={handleChange}
             />
-            {data?.optionalUrl ? <Text fontSize='md' mt={4}>Options:</Text> : null}
-            {data?.optionalUrl || serverState?.optionalUrl ? <UpdateOptionalServer checkedItems={checkedItems} setCheckedItems={setCheckedItems}  /> : null}
+            <Checkbox
+              pt={2}
+              pb={2}
+              isChecked={data?.emailNotifications}
+              onChange={(e) =>
+                setServerState({
+                  ...serverState,
+                  emailNotifications: e.target.checked,
+                })
+              }
+            >
+              Recieve Email Notifications?
+            </Checkbox>
+            {data?.optionalUrl ? (
+              <Text fontSize="md" mt={2}>
+                Extension Server Options:
+              </Text>
+            ) : null}
+            {data?.optionalUrl || serverState?.optionalUrl ? (
+              <UpdateOptionalServer
+                checkedItems={checkedItems}
+                setCheckedItems={setCheckedItems}
+              />
+            ) : null}
           </ModalBody>
           <ModalFooter>
             <Button mr={3} onClick={onClose}>
