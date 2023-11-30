@@ -19,6 +19,9 @@ export class ExtensionServer extends Model {
   @Column
   upgrades!: string;
 
+  @Column
+  jwt!: string
+
   @Column(DataType.ARRAY(DataType.STRING))
   smart!: Array<string>
 

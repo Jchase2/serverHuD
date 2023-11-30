@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
 export const verifyToken = (token: string) => {
   if (!token) return false;
@@ -10,6 +10,19 @@ export const verifyToken = (token: string) => {
     return false;
   }
 };
+
+// Check if token is expired.
+export const expiredToken = (token: string) => {
+  const decodedToken = jwt.verify(token, process.env.SECRET_KEY || "insecure");
+  if (typeof decodedToken === 'string') {
+    return false;
+  }
+  if (decodedToken.exp && Date.now() >= decodedToken?.exp * 1000) {
+    console.log("JWT IS EXPIRED.")
+    return false;
+  }
+  return true;
+}
 
 
 // Simply decode the JWT and return the users id.

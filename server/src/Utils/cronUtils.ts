@@ -35,7 +35,7 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
             where: { serverid: id, userid: userid },
             attributes: ["optionalUrl"]
           })
-          let optionalServerData = extensionServerBe?.dataValues.optionalUrl ? await extensionServerData(extensionServerBe?.dataValues.optionalUrl) : null;
+          let optionalServerData = extensionServerBe?.dataValues.optionalUrl ? await extensionServerData(extensionServerBe?.dataValues.optionalUrl, userid) : null;
           await LiveServer.create({
             status: checkUp,
             url: url,
@@ -204,7 +204,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
       // TODO: Review how often we want to get this data for performance.
       let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
         // TODO: Make sure optional server data isn't throwing an error
-        let optionalServerData = (extensionServerBe?.dataValues.optionalUrl && extensionServerBe?.dataValues.trackOptions) ? await getExtSelectedData(extensionServerBe?.dataValues.optionalUrl, extensionServerBe?.dataValues.trackOptions) : null;
+        let optionalServerData = (extensionServerBe?.dataValues.optionalUrl && extensionServerBe?.dataValues.trackOptions) ? await getExtSelectedData(extensionServerBe?.dataValues.optionalUrl, extensionServerBe?.dataValues.trackOptions, userid) : null;
 
         if(optionalServerData.errno) {
           console.log("Problem with extension server, error: ", optionalServerData.code);
@@ -297,7 +297,7 @@ export const startServerJobs = async () => {
       console.log("Creating first entry with url: ", url);
       let checkUp = await isUp(url);
       let checkSsl: IResolvedValues | any = await getSslDetails(url);
-      let optionalData: IExtensionServerData = optionalUrl ? await getExtSelectedData(extensionServerBe?.dataValues.optionalUrl, extensionServerBe?.dataValues.trackOptions) : null;
+      let optionalData: IExtensionServerData = optionalUrl ? await getExtSelectedData(extensionServerBe?.dataValues.optionalUrl, extensionServerBe?.dataValues.trackOptions, userid) : null;
 
       await LiveServer.create({
         status: checkUp,

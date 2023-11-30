@@ -280,7 +280,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
     let sslInfo: IResolvedValues | any = await getSslDetails(url);
     if (sslInfo.errno) sslInfo.valid = false;
 
-    const extensionData = optionalUrl ? await extensionServerData(optionalUrl) : null;
+    const extensionData = optionalUrl ? await extensionServerData(optionalUrl, ctx.state.user._id) : null;
 
     if (extensionData?.code === "ERR_HTTP_INVALID_HEADER_VALUE") {
       ctx.body =
@@ -374,7 +374,7 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
 
   try {
     const extensionData = optionalUrl
-      ? await getExtSelectedData(optionalUrl, trackOptions)
+      ? await getExtSelectedData(optionalUrl, trackOptions, ctx.state.user._id)
       : null;
 
     if (extensionData?.code === "ERR_HTTP_INVALID_HEADER_VALUE") {

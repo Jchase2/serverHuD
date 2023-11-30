@@ -2,6 +2,9 @@ import sslChecker from "ssl-checker";
 import axios from "axios";
 import { ITrackOptions } from "../types";
 const isReachable = require("is-reachable");
+import { ExtensionServer } from "../Models/extensionServer.model";
+import { expiredToken, getUserId } from "./jwt";
+
 
 export const isUp = async (hostname: string) => {
   let fixedUrl = hostname.replace(/^https?\:\/\//i, "").replace(/\/$/, "");
@@ -24,13 +27,35 @@ export const getSslDetails = async (hostname: string) => {
   }
 };
 
-const extensionServerLogin = async (url: string) => {
-  console.log("EXTENSION SERVER LOGIN URL: ", url);
+const extensionServerLogin = async (url: string, userid: number) => {
 
+  // Check if we already have a valid JWT or if we need to login again.
+  let extensionServerJwt = await ExtensionServer.findOne({
+    where: { optionalUrl: url, userid: userid },
+    attributes: ["jwt"]
+  })
+
+  const expCheck = expiredToken(extensionServerJwt?.dataValues.jwt)
+
+  if(extensionServerJwt?.dataValues.jwt && expCheck) {
+    return extensionServerJwt?.dataValues.jwt;
+  }
+
+  // Login
   try {
-    let resp = await axios.post(url, {
+    let resp = await axios.post(`${url}/api/login`, {
       Key: process.env.SECRET_KEY,
     });
+
+    await ExtensionServer.update({
+      jwt: resp.data
+    }, {
+      where: {
+        userid: userid,
+        optionalUrl: url
+      }
+    })
+
     return resp.data;
   } catch (err) {
     console.log("ERROR LOGGING IN: ", err);
@@ -38,7 +63,7 @@ const extensionServerLogin = async (url: string) => {
   }
 };
 
-export const extensionServerData = async (url: string) => {
+export const extensionServerData = async (url: string, userid: number) => {
   if (process.env.EXT_SERVER_SSL === "true") {
     // Make sure we have http or https prepended.
     if (!url.startsWith("https://")) {
@@ -47,7 +72,7 @@ export const extensionServerData = async (url: string) => {
     }
   }
 
-  let jwt = await extensionServerLogin(`${url}/api/login`);
+  let jwt = await extensionServerLogin(url, userid);
 
   try {
     let resp = await axios({
@@ -65,8 +90,9 @@ export const extensionServerData = async (url: string) => {
   }
 };
 
-export const extensionServerDisk = async (url: string) => {
-  let jwt = await extensionServerLogin(`${url}/api/login`);
+export const extensionServerDisk = async (url: string, userid: number) => {
+
+  let jwt = await extensionServerLogin(url, userid);
 
   try {
     let resp = await axios({
@@ -83,8 +109,9 @@ export const extensionServerDisk = async (url: string) => {
   }
 };
 
-export const extensionServerResources = async (url: string) => {
-  let jwt = await extensionServerLogin(`${url}/api/login`);
+export const extensionServerResources = async (url: string, userid: number) => {
+
+  let jwt = await extensionServerLogin(url, userid);
 
   try {
     let resp = await axios({
@@ -101,8 +128,9 @@ export const extensionServerResources = async (url: string) => {
   }
 };
 
-export const extensionServerUpgrades = async (url: string) => {
-  let jwt = await extensionServerLogin(`${url}/api/login`);
+export const extensionServerUpgrades = async (url: string, userid: number) => {
+
+  let jwt = await extensionServerLogin(url, userid);
 
   try {
     let resp = await axios({
@@ -119,8 +147,9 @@ export const extensionServerUpgrades = async (url: string) => {
   }
 };
 
-export const extensionServerSmart = async (url: string) => {
-  let jwt = await extensionServerLogin(`${url}/api/login`);
+export const extensionServerSmart = async (url: string, userid: number) => {
+
+  let jwt = await extensionServerLogin(url, userid);
 
   try {
     let resp = await axios({
@@ -139,7 +168,8 @@ export const extensionServerSmart = async (url: string) => {
 
 export const getExtSelectedData = async (
   optionalUrl: string,
-  trackOptions: ITrackOptions
+  trackOptions: ITrackOptions,
+  userid: number
 ) => {
   try {
     if (
@@ -149,33 +179,33 @@ export const getExtSelectedData = async (
       trackOptions.trackUpgrades &&
       trackOptions.trackSmart
     ) {
-      const extensionData = optionalUrl ? await extensionServerData(optionalUrl) : null;
+      const extensionData = optionalUrl ? await extensionServerData(optionalUrl, userid) : null;
       return extensionData;
     }
 
     let combinedRes = {};
 
     if (trackOptions && trackOptions.trackDisk) {
-      const diskData = optionalUrl ? await extensionServerDisk(optionalUrl) : null;
+      const diskData = optionalUrl ? await extensionServerDisk(optionalUrl, userid) : null;
       combinedRes = { ...combinedRes, ...diskData };
     }
 
     if (trackOptions && trackOptions.trackResources) {
       const resourcesData = optionalUrl
-        ? await extensionServerResources(optionalUrl)
+        ? await extensionServerResources(optionalUrl, userid)
         : null;
       combinedRes = { ...combinedRes, ...resourcesData };
     }
 
     if (trackOptions && trackOptions.trackUpgrades) {
       const upgradeData = optionalUrl
-        ? await extensionServerUpgrades(optionalUrl)
+        ? await extensionServerUpgrades(optionalUrl, userid)
         : null;
       combinedRes = { ...combinedRes, ...upgradeData };
     }
 
     if (trackOptions && trackOptions.trackSmart) {
-      const smartData = optionalUrl ? await extensionServerSmart(optionalUrl) : null;
+      const smartData = optionalUrl ? await extensionServerSmart(optionalUrl, userid) : null;
       combinedRes = { ...combinedRes, ...smartData };
       console.log("SMART DATA IS: ", smartData);
     }
