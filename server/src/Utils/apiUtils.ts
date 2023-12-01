@@ -1,14 +1,9 @@
 import dayjs from "dayjs";
 import { LiveServer } from "../Models/liveServer.model";
 import { Server } from "../Models/server.model";
-import { Op, QueryTypes } from "sequelize";
+import { QueryTypes } from "sequelize";
 import { ExtensionServer } from "../Models/extensionServer.model";
 import { sequelize } from "../Models";
-
-interface ICombinedData {
-  avgMem: number;
-  avgCpu: number;
-}
 
 export const getAllCombinedState = async (userid: number) => {
   try {
@@ -96,7 +91,8 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
     }
 
     Object.assign(server?.dataValues, res?.dataValues);
-    server.dataValues.trackOptions = extensionServerData?.dataValues.trackOptions;
+    server.dataValues.trackOptions =
+      extensionServerData?.dataValues.trackOptions;
     server.dataValues.optionalUrl = extensionServerData?.dataValues.optionalUrl;
     server.dataValues.upgrades = extensionServerData?.dataValues.upgrades;
     server.dataValues.smart = extensionServerData?.dataValues.smart;
@@ -118,7 +114,6 @@ export const SplitTime = (numberOfHours: number) => {
 
 // Calculates %up and %down from recorded data on a server.
 export const getMonitoredUpInfo = async (id: number, userid: number) => {
-
   // Get last diskSize and diskUsed
   let res = await LiveServer.findAll({
     where: {
@@ -156,8 +151,8 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
 
   // If there's nothing in diffArr, add liveserver stuff
   // so we can return an initial set of data.
-  if(!diffArr.length) {
-    diffArr.push(res[0])
+  if (!diffArr.length) {
+    diffArr.push(res[0]);
   }
 
   let totalUptime = diffArr.reduce(
@@ -226,110 +221,40 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
   };
 };
 
-// This function retrieves the past 5 minutes of live
-// server data given a startTime in js date format,
-// a user id, and a server id.
-const fiveMinuteLiveData = async (
-  startDate: Date,
-  id: number,
-  userid: number
-) => {
-  try {
-    let beginTime = startDate.getTime();
-    let endTime = beginTime - 5 * 60 * 1000;
-
-    let res = await LiveServer.findAll({
-      where: {
-        serverid: id,
-        userid: userid,
-        time: {
-          [Op.between]: [endTime, beginTime],
-        },
-      },
-      attributes: ["time", "memUsage", "cpuUsage"],
-      raw: true,
-    });
-
-    return res;
-  } catch (err) {
-    console.log("ERROR GETTING FIVE MINUTE LIVE DATA: ", err);
-  }
-};
-
-// Take an array of LiveServer data and average
-// cpu usage and mem usage over that interval.
-const averageFiveMinuteData = (data: LiveServer[]) => {
-  const totalVals = data.length;
-  const avgMem =
-    data.reduce(
-      (acc: number, curr: LiveServer) => acc + Number(curr?.memUsage),
-      0
-    ) / totalVals;
-  const avgCpu =
-    data.reduce(
-      (acc: number, curr: LiveServer) => acc + Number(curr?.cpuUsage),
-      0
-    ) / totalVals;
-  return {
-    avgMem: Math.round((avgMem + Number.EPSILON) * 100) / 100,
-    avgCpu: Math.round((avgCpu + Number.EPSILON) * 100) / 100,
-  };
-};
-
-// Build return object for FE graphing from retArr.
-const buildData = (combinedArr: ICombinedData[], key: string) => {
-  let retArr: { x: number; y: number }[] = [];
-  combinedArr.forEach((elem: ICombinedData, index: number) => {
-    let newObj = {
-      x: (index + 1) * 5,
-      y: elem[key as keyof typeof elem],
-    };
-
-    if (newObj["y"]) {
-      retArr.push(newObj);
-    }
-  });
-  return retArr;
-};
-
 // Get past hour of usage data.
 export const getMonitoredUsageData = async (id: number, userid: number) => {
   try {
-    let resA = await LiveServer.findOne({
-      where: { serverid: id, userid: userid },
-      order: [["time", "DESC"]],
-    });
-
-    // Get timstamp of last entry for this server.
-    const startTimeStamp = resA?.time;
-
-    // If it exists, get past five minutes of data from that point.
-    if (startTimeStamp) {
-      const jsDateBegin = new Date(startTimeStamp);
-
-      // Get array of times each 5 minutes before the last, up to one hour.
-      let timeArr = [jsDateBegin.getTime()];
-      for (let i = 1; i < 12; i++) {
-        timeArr[i] = new Date(timeArr[i - 1]).getTime() - 5 * 60 * 1000;
+    const memObj = await sequelize.query<LiveServer>(
+      `SELECT TO_CHAR(time_bucket('5 minutes', time), 'HH:MI') AS x, avg("memUsage") AS y
+    FROM liveserver WHERE serverid = :id AND userid = :userid
+    GROUP BY x
+    ORDER BY x DESC LIMIT 12;`,
+      {
+        replacements: { id, userid },
+        raw: true,
+        type: QueryTypes.SELECT,
       }
+    );
 
-      let retArr = [];
-      for (const elem of timeArr) {
-        let res = await fiveMinuteLiveData(new Date(elem), id, userid);
-        if (res) {
-          let avg = averageFiveMinuteData(res);
-          retArr.push(avg);
-        }
+    const cpuObj = await sequelize.query<LiveServer>(
+      `SELECT TO_CHAR(time_bucket('5 minutes', time), 'HH:MI') AS x, avg("cpuUsage") AS y
+    FROM liveserver WHERE serverid = :id AND userid = :userid
+    GROUP BY x
+    ORDER BY x DESC LIMIT 12;`,
+      {
+        replacements: { id, userid },
+        raw: true,
+        type: QueryTypes.SELECT,
       }
+    );
 
-      let memObj = buildData(retArr, "avgMem");
-      let cpuObj = buildData(retArr, "avgCpu");
+    const combinedArr2 = {
+      memObj,
+      cpuObj,
+    };
 
-      let combinedRetObj = { memObj: memObj, cpuObj: cpuObj };
-
-      return combinedRetObj;
-    }
+    return combinedArr2;
   } catch (err) {
-    console.log("ERROR FROM GETMONITORED USAGE DATA IS: ", err);
+    console.log("ERROR IS: ", err);
   }
 };

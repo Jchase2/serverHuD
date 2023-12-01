@@ -4,7 +4,7 @@ import { VictoryLabel, VictoryPie } from "victory";
 import { IDisk } from "../../types";
 
 interface IDiskGraphProps {
-  data: IDisk
+  data: IDisk;
 }
 
 const DiskGraph = (props: IDiskGraphProps) => {
@@ -47,6 +47,7 @@ const DiskGraph = (props: IDiskGraphProps) => {
         <VictoryLabel style={{ fill: colorMode === "light" ? "" : "gray" }} />
       }
       style={{
+        labels: { padding: 30 },
         data: {
           fillOpacity: 0.7,
         },

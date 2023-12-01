@@ -23,8 +23,8 @@ const ResourceUsage = (props: IResourceUsageProps) => {
         <CardHeader textAlign={"center"}>
           <Heading size="md">Live Resource Usage</Heading>
         </CardHeader>
-        <MemUsageGraph serverUsageData={props.serverUsageData.memObj} />
-        <CpuUsageGraph serverUsageData={props.serverUsageData.cpuObj} />
+        <MemUsageGraph memUsageData={props.serverUsageData.memObj} />
+        <CpuUsageGraph cpuUsageData={props.serverUsageData.cpuObj} />
         <Text as="cite" fontSize="xs">
           * Data begins from latest recorded entry.
         </Text>

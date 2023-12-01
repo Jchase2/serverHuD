@@ -9,12 +9,13 @@ import {
 import { IXYData } from "../../types";
 
 interface MemUsageGraphProps {
-  serverUsageData: IXYData[]
+  memUsageData: IXYData[]
 }
 
 const MemUsageGraph = (props: MemUsageGraphProps) => {
   const { colorMode } = useColorMode();
-  const { serverUsageData } = props;
+  const { memUsageData } = props;
+
   return (
     <VictoryChart height={200} width={600} theme={VictoryTheme.material}>
       <VictoryLabel text="Memory Usage" x={225} y={30} style={{ fill: colorMode === 'light' ? '' : 'gray' }} />
@@ -29,15 +30,16 @@ const MemUsageGraph = (props: MemUsageGraphProps) => {
         }}
         height={200}
         width={500}
-        data={serverUsageData}
+        data={memUsageData}
         animate={{
           duration: 2000,
           onLoad: { duration: 1000 },
         }}
       />
       <VictoryAxis
-        label="Minutes Ago"
+        label="Time"
         invertAxis={true}
+        fixLabelOverlap={true}
         style={{
           axis: { stroke: "none" },
           axisLabel: {
@@ -51,6 +53,7 @@ const MemUsageGraph = (props: MemUsageGraphProps) => {
       <VictoryAxis
         dependentAxis
         tickFormat={(tick) => `${tick}%`}
+        fixLabelOverlap={true}
         style={{
           axis: { stroke: "none" },
           ticks: { stroke: "none" },

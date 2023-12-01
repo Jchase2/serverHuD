@@ -10,13 +10,13 @@ import { IXYData } from "../../types";
 
 
 interface CpuUsageGraphProps {
-  serverUsageData: IXYData[]
+  cpuUsageData: IXYData[]
 }
 
 const CpuUsageGraph = (props: CpuUsageGraphProps) => {
 
   const { colorMode } = useColorMode();
-  
+
   return (
     <VictoryChart height={200} width={600} theme={VictoryTheme.material}>
       <VictoryLabel text="CPU Usage" x={225} y={30} style={{ fill: colorMode === 'light' ? '' : 'gray' }} />
@@ -31,15 +31,16 @@ const CpuUsageGraph = (props: CpuUsageGraphProps) => {
         }}
         height={200}
         width={500}
-        data={props.serverUsageData}
+        data={props.cpuUsageData}
         animate={{
           duration: 2000,
           onLoad: { duration: 1000 },
         }}
       />
       <VictoryAxis
-        label="Minutes Ago"
+        label="Time"
         invertAxis={true}
+        fixLabelOverlap={true}
         style={{
           axis: { stroke: "none" },
           axisLabel: {
@@ -52,6 +53,7 @@ const CpuUsageGraph = (props: CpuUsageGraphProps) => {
       />
       <VictoryAxis
         dependentAxis
+        fixLabelOverlap={true}
         tickFormat={(tick) => `${tick}%`}
         style={{
           axis: { stroke: "none" },
