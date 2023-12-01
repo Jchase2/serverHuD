@@ -3,7 +3,7 @@ import axios from "axios";
 import { ITrackOptions } from "../types";
 const isReachable = require("is-reachable");
 import { ExtensionServer } from "../Models/extensionServer.model";
-import { expiredToken, getUserId } from "./jwt";
+import { verifyToken } from "./jwt";
 
 
 export const isUp = async (hostname: string) => {
@@ -35,9 +35,9 @@ const extensionServerLogin = async (url: string, userid: number) => {
     attributes: ["jwt"]
   })
 
-  const expCheck = expiredToken(extensionServerJwt?.dataValues.jwt)
+  const expCheck = verifyToken(extensionServerJwt?.dataValues.jwt)
 
-  if(extensionServerJwt?.dataValues.jwt && expCheck) {
+  if(extensionServerJwt?.dataValues.jwt && expCheck !== false) {
     return extensionServerJwt?.dataValues.jwt;
   }
 

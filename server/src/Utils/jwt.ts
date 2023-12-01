@@ -11,19 +11,6 @@ export const verifyToken = (token: string) => {
   }
 };
 
-// Check if token is expired.
-export const expiredToken = (token: string) => {
-  const decodedToken = jwt.verify(token, process.env.SECRET_KEY || "insecure");
-  if (typeof decodedToken === 'string') {
-    return false;
-  }
-  if (decodedToken.exp && Date.now() >= decodedToken?.exp * 1000) {
-    console.log("JWT IS EXPIRED.")
-    return false;
-  }
-  return true;
-}
-
 
 // Simply decode the JWT and return the users id.
 // User can't really spoof ID from client when getting
