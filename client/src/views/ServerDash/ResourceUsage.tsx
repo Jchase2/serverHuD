@@ -25,9 +25,6 @@ const ResourceUsage = (props: IResourceUsageProps) => {
         </CardHeader>
         <MemUsageGraph memUsageData={props.serverUsageData.memObj} />
         <CpuUsageGraph cpuUsageData={props.serverUsageData.cpuObj} />
-        <Text as="cite" fontSize="xs">
-          * Data begins from latest recorded entry.
-        </Text>
       </Stack>
     </Card>
   );

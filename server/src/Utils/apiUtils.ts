@@ -225,7 +225,7 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
 export const getMonitoredUsageData = async (id: number, userid: number) => {
   try {
     const memObj = await sequelize.query<LiveServer>(
-      `SELECT TO_CHAR(time_bucket('5 minutes', time), 'HH:MI') AS x, avg("memUsage") AS y
+      `SELECT time_bucket('5 minutes', time) AS x, avg("memUsage") AS y
     FROM liveserver WHERE serverid = :id AND userid = :userid
     GROUP BY x
     ORDER BY x DESC LIMIT 12;`,
@@ -237,7 +237,7 @@ export const getMonitoredUsageData = async (id: number, userid: number) => {
     );
 
     const cpuObj = await sequelize.query<LiveServer>(
-      `SELECT TO_CHAR(time_bucket('5 minutes', time), 'HH:MI') AS x, avg("cpuUsage") AS y
+      `SELECT time_bucket('5 minutes', time) AS x, avg("cpuUsage") AS y
     FROM liveserver WHERE serverid = :id AND userid = :userid
     GROUP BY x
     ORDER BY x DESC LIMIT 12;`,

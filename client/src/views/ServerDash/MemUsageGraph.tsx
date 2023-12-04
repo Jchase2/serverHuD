@@ -37,9 +37,9 @@ const MemUsageGraph = (props: MemUsageGraphProps) => {
         }}
       />
       <VictoryAxis
-        label="Time"
         invertAxis={true}
         fixLabelOverlap={true}
+        tickFormat={(x) => new Date(x).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
         style={{
           axis: { stroke: "none" },
           axisLabel: {
