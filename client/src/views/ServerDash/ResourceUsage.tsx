@@ -1,7 +1,6 @@
 import { Card, CardHeader, Container, Heading, Stack } from "@chakra-ui/react";
 import MemUsageGraph from "./MemUsageGraph";
 import CpuUsageGraph from "./CpuUsageGraph";
-import { ILiveData } from "../../types";
 import { Dispatch, SetStateAction } from "react";
 import { Radio, RadioGroup } from "@chakra-ui/react";
 import { useGetServerUsage } from "../../services/api/api";
@@ -9,7 +8,6 @@ import { Loading } from "../../components/Loading/Loading";
 
 interface IResourceUsageProps {
   paramStr: string;
-  upData: ILiveData;
   inc: string;
   setInc: Dispatch<SetStateAction<string>>;
   incCount: number;
@@ -24,7 +22,7 @@ const ResourceUsage = (props: IResourceUsageProps) => {
     error: serverUsageError,
     data: serverUsageData,
   } = useGetServerUsage(paramStr, inc, incCount);
-  
+
   const onChange = (value: string) => {
     setInc(value);
     if (value === "1h") {

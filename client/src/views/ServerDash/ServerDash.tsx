@@ -90,7 +90,6 @@ const ServerDash = () => {
         {data?.trackOptions?.trackResources ? (
           <ResourceUsage
             paramStr={paramStr}
-            upData={upData.data}
             inc={inc}
             setInc = {setInc}
             incCount={incCount}

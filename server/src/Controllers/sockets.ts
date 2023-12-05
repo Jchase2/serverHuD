@@ -122,13 +122,13 @@ const extensionServerData = async (data: IUrlLiveData, socket: Socket) => {
       where: { serverid: servInfo?.id, userid: userid }
     })
 
-    console.log("EXTENSION SERVER DATA IS: ", data)
-
     if (extensionServerInfo?.optionalUrl) {
       let res = await getMonitoredUsageData(data.id, userid, data?.inc, data?.incCount);
       console.log("EMITTING RESOURCE UPDATE ON BACKEND");
       socket.emit("resourcesUpdate", {
         id: data.id,
+        inc: data.inc,
+        incCount: data.incCount,
         resourceObj: res,
       });
     }

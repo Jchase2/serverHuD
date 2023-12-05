@@ -24,7 +24,7 @@ const SmartDisplay = (props: ISmartDisplayProps) => {
       m={4}
       textAlign={"center"}
       align={"center"}
-      minW={"25vw"}
+      minW={["100vw", "50vw", "35vw", "25vw"]}
     >
       <Stack>
         <CardHeader textAlign={"center"}>

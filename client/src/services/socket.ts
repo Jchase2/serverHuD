@@ -52,7 +52,7 @@ export const useReactQuerySubscription = () => {
     });
 
     socket.on("resourcesUpdate", (data) => {
-      const queryKey = [`server-usage-${data.id}`].filter(Boolean);
+      const queryKey = [`server-usage-${data.id}-${data.inc}-${data.incCount}`].filter(Boolean);
       queryClient.setQueryData(
         queryKey,
         (
