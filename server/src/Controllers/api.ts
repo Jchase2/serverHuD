@@ -149,7 +149,7 @@ export const getIndServer = async (ctx: koa.Context, next: Function) => {
 };
 
 export const getServerUsage = async (ctx: koa.Context, next: Function) => {
-  const data = await getMonitoredUsageData(ctx.params.id, ctx.state.user._id);
+  const data = await getMonitoredUsageData(ctx.params.id, ctx.state.user._id, ctx.params.inc, ctx.params.incCount);
   if (data) {
     ctx.body = data;
     ctx.status = 200;

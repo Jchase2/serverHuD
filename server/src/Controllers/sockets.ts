@@ -20,6 +20,8 @@ interface IUrlLiveData {
   status: string;
   sslStatus: string;
   sslExpiry: string | undefined;
+  inc: string;
+  incCount: number;
 }
 
 // Register for status checking every 10 seconds..
@@ -27,20 +29,38 @@ interface IUrlLiveData {
 // This will check for all updates with different intervals using the same socket.
 export function sioUpCheck(socket: Socket) {
 
+  // TODO: Make sure this doesn't work without proper cookie lol.
   const cookies = cookie.parse(socket.handshake.headers.cookie || "");
   if(!cookies) console.log("No auth cookie provided.")
   let userid = getUserId(cookies?.accessToken);
 
   console.log("SIO UP CHECK CALLED, SOCKET ID: ", socket.id);
-  let intervalArr: string[] = [];
   let intervalObj: IIntervalObj = {};
+
+  console.log("INTERVAL OBJ IS: ", intervalObj)
+
   if (userid > 0) {
     socket.on("upCheck", async (data) => {
       console.log("UPCHECK RECIEVED WITH ID: ", data.id);
       let jobName = `sio-${data.url}-${data.id}`;
-      if (!intervalArr.includes(jobName)) {
-        intervalArr.push(jobName);
+      if (!intervalObj.hasOwnProperty(jobName)) {
         console.log("Adding ", jobName, " to interval list.");
+        const upInterval = setInterval(async function () {
+          console.log("RUNNING IN INTERVAL...");
+          urlDbChecker(data, socket);
+          sslDbChecker(data, socket);
+          urlLiveCheck(data, socket);
+          // If enableExtensionServer is true, send resource usage updates.
+          if (data.enableExtensionServer) {
+            extensionServerData(data, socket);
+          }
+        }, 10000);
+        intervalObj[jobName] = upInterval;
+      } else {
+        console.log("Re-setting " + jobName + " interval.")
+        clearInterval(intervalObj[jobName]);
+        delete intervalObj[jobName];
+        console.log("Re-Adding ", jobName, " to interval list.");
         const upInterval = setInterval(async function () {
           console.log("RUNNING IN INTERVAL...");
           urlDbChecker(data, socket);
@@ -102,8 +122,10 @@ const extensionServerData = async (data: IUrlLiveData, socket: Socket) => {
       where: { serverid: servInfo?.id, userid: userid }
     })
 
+    console.log("EXTENSION SERVER DATA IS: ", data)
+
     if (extensionServerInfo?.optionalUrl) {
-      let res = await getMonitoredUsageData(data.id, userid);
+      let res = await getMonitoredUsageData(data.id, userid, data?.inc, data?.incCount);
       console.log("EMITTING RESOURCE UPDATE ON BACKEND");
       socket.emit("resourcesUpdate", {
         id: data.id,

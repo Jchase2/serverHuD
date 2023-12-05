@@ -9,16 +9,22 @@ import {
 import { IXYData } from "../../types";
 
 interface MemUsageGraphProps {
-  memUsageData: IXYData[]
+  memUsageData: IXYData[];
+  inc: string;
 }
 
 const MemUsageGraph = (props: MemUsageGraphProps) => {
   const { colorMode } = useColorMode();
-  const { memUsageData } = props;
+  const { memUsageData, inc } = props;
 
   return (
     <VictoryChart height={200} width={600} theme={VictoryTheme.material}>
-      <VictoryLabel text="Memory Usage" x={225} y={30} style={{ fill: colorMode === 'light' ? '' : 'gray' }} />
+      <VictoryLabel
+        text="Memory Usage"
+        x={225}
+        y={30}
+        style={{ fill: colorMode === "light" ? "" : "gray" }}
+      />
       <VictoryArea
         style={{
           data: {
@@ -39,11 +45,22 @@ const MemUsageGraph = (props: MemUsageGraphProps) => {
       <VictoryAxis
         invertAxis={true}
         fixLabelOverlap={true}
-        tickFormat={(x) => new Date(x).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        tickFormat={(x) =>
+          inc === '1h' || inc === '1d' ?
+          new Date(x).toLocaleString("en-US", {
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
+          }) : new Date(x).toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "numeric",
+            year: "2-digit"
+          })
+        }
         style={{
           axis: { stroke: "none" },
           axisLabel: {
-            padding: 30
+            padding: 30,
           },
           ticks: { stroke: "none" },
           //tickLabels: { fill: "none" },

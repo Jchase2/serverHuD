@@ -31,7 +31,7 @@ router
   .get("/servers", getUserServers)
   .get("/servers/:id", getIndServer)
   .get("/servers/updata/:id", getTimeseriesUpData)
-  .get("/servers/usage/:id", getServerUsage)
+  .get("/servers/usage/:id/:inc/:incCount", getServerUsage)
   .get("/user/me", getVerifyUser)
   .get("/user/logout", getUserLogout)
   .put("/servers/delete/:id", deleteServer)

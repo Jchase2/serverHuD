@@ -10,12 +10,14 @@ import { IXYData } from "../../types";
 
 
 interface CpuUsageGraphProps {
-  cpuUsageData: IXYData[]
+  cpuUsageData: IXYData[],
+  inc: string
 }
 
 const CpuUsageGraph = (props: CpuUsageGraphProps) => {
 
   const { colorMode } = useColorMode();
+  const { inc } = props;
 
   return (
     <VictoryChart height={200} width={600} theme={VictoryTheme.material}>
@@ -40,8 +42,18 @@ const CpuUsageGraph = (props: CpuUsageGraphProps) => {
       <VictoryAxis
         invertAxis={true}
         fixLabelOverlap={true}
-        tickFormat={(x) => new Date(x).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-        style={{
+        tickFormat={(x) =>
+          inc === '1h' || inc === '1d' ?
+          new Date(x).toLocaleString("en-US", {
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
+          }) : new Date(x).toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "numeric",
+            year: "2-digit"
+          })
+        }        style={{
           axis: { stroke: "none" },
           axisLabel: {
             padding: 30

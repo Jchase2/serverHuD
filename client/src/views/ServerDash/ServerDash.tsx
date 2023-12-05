@@ -1,6 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useGetServerUsage } from "../../services/api/api";
 
 import {
   Box,
@@ -31,12 +30,8 @@ const ServerDash = () => {
   const { data, isLoading, isError, error } = useGetIndServer(Number(paramStr));
   const upData = useGetUpData(paramStr);
   const navigate = useNavigate();
-
-  const {
-    isLoading: serverUsageLoading,
-    error: serverUsageError,
-    data: serverUsageData,
-  } = useGetServerUsage(paramStr);
+  const [inc, setInc] = useState('1h');
+  const [incCount, setIncCount] = useState(12);
 
   useReactQuerySubscription();
 
@@ -48,28 +43,25 @@ const ServerDash = () => {
 
   useEffect(() => {
     if (data) {
-      console.log("EMITTING UPCHECK");
       socket.emit("upCheck", {
         id: data.id,
         url: data.url,
         status: data.status,
         sslStatus: data.sslStatus,
         enableExtensionServer: data.optionalUrl ? true : false,
+        inc: inc,
+        incCount: incCount
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [data, inc, incCount]);
 
-  if (isLoading || upData.isLoading || serverUsageLoading)
+  if (isLoading || upData.isLoading)
     return (
       <Container centerContent>
         <Loading />
       </Container>
     );
-
-  if (serverUsageError) {
-    console.log("SERVER USAGE ERROR!");
-  }
 
   // TODO: Replace with error component.
   if (isError) {
@@ -95,12 +87,14 @@ const ServerDash = () => {
         data?.diskSize > -1 ? (
           <DiskStatus data={data} />
         ) : null}
-        {data?.trackOptions?.trackResources &&
-        ((serverUsageData && serverUsageData.memObj.length > 1) ||
-          (serverUsageData && serverUsageData.cpuObj.length > 1)) ? (
+        {data?.trackOptions?.trackResources ? (
           <ResourceUsage
-            serverUsageData={serverUsageData}
+            paramStr={paramStr}
             upData={upData.data}
+            inc={inc}
+            setInc = {setInc}
+            incCount={incCount}
+            setIncCount={setIncCount}
           />
         ) : null}
         {data?.trackOptions?.trackUpgrades &&

@@ -222,27 +222,37 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
 };
 
 // Get past hour of usage data.
-export const getMonitoredUsageData = async (id: number, userid: number) => {
+export const getMonitoredUsageData = async (id: number, userid: number, inc: string, incCount: number) => {
   try {
+
+    const timeIncrementsObj = {
+      '1h': '5 minutes',
+      '1d': '1 hour',
+      '1w': '1 day',
+      '1m': '1 day'
+    }
+
+    let fixedInc: string = timeIncrementsObj[inc as keyof typeof timeIncrementsObj];
+
     const memObj = await sequelize.query<LiveServer>(
-      `SELECT time_bucket('5 minutes', time) AS x, avg("memUsage") AS y
+      `SELECT time_bucket(:fixedInc, time) AS x, avg("memUsage") AS y
     FROM liveserver WHERE serverid = :id AND userid = :userid
     GROUP BY x
-    ORDER BY x DESC LIMIT 12;`,
+    ORDER BY x DESC LIMIT :incCount;`,
       {
-        replacements: { id, userid },
+        replacements: { id, userid, fixedInc, incCount },
         raw: true,
         type: QueryTypes.SELECT,
       }
     );
 
     const cpuObj = await sequelize.query<LiveServer>(
-      `SELECT time_bucket('5 minutes', time) AS x, avg("cpuUsage") AS y
+      `SELECT time_bucket(:fixedInc, time) AS x, avg("cpuUsage") AS y
     FROM liveserver WHERE serverid = :id AND userid = :userid
     GROUP BY x
-    ORDER BY x DESC LIMIT 12;`,
+    ORDER BY x DESC LIMIT :incCount;`,
       {
-        replacements: { id, userid },
+        replacements: { id, userid, fixedInc, incCount },
         raw: true,
         type: QueryTypes.SELECT,
       }

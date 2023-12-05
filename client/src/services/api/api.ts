@@ -58,13 +58,13 @@ export function useGetUpData(id: string) {
   });
 }
 
-export function useGetServerUsage(id: string) {
+export function useGetServerUsage(id: string, increment: string, incCount: number) {
   return useQuery({
-    queryKey: [`server-usage-${id}`],
+    queryKey: [`server-usage-${id}-${increment}-${incCount}`],
     queryFn: async () => {
       const { data }: { data: IResourceData} = await axios({
         method: "get",
-        url: process.env.REACT_APP_BACKEND_URL + `/servers/usage/${id}`,
+        url: process.env.REACT_APP_BACKEND_URL + `/servers/usage/${id}/${increment}/${incCount}`,
         withCredentials: true,
       });
       return data;
