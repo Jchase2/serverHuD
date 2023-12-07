@@ -18,6 +18,7 @@ const AddServer = (props: IAddServerProps) => {
     sslStatus: "",
     sslExpiry: 0,
     emailNotifications: false,
+    interval: "1-minute",
     trackOptions: {
       trackDisk: true,
       trackResources: true,
@@ -75,6 +76,7 @@ const AddServer = (props: IAddServerProps) => {
       sslStatus: "",
       sslExpiry: 0,
       emailNotifications: false,
+      interval: "1-minute",
       trackOptions: {
         trackDisk: checkedItems.trackDisk,
         trackResources: checkedItems.trackResources,

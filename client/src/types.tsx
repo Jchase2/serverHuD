@@ -20,6 +20,7 @@ export interface IData extends IAddServer {
   uptime: Object;
   userid: number;
   emailNotifications: boolean;
+  interval: string;
   trackOptions: {
     trackDisk: boolean,
     trackResources: boolean,
@@ -33,6 +34,7 @@ export interface IUpdateServer {
   optionalUrl: string;
   name: string;
   emailNotifications: boolean;
+  interval: string;
   trackOptions: {
     trackDisk: boolean,
     trackResources: boolean,

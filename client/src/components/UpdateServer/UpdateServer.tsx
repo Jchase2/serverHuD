@@ -13,8 +13,9 @@ import {
   Input,
   Text,
   Checkbox,
+  Select,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { ChangeEventHandler, useState } from "react";
 import { Loading } from "../Loading/Loading";
 import { useUpdateServer } from "../../services/api/api";
 import { UpdateServerError } from "./UpdateServerError";
@@ -43,6 +44,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
     optionalUrl: "",
     name: "",
     emailNotifications: data?.emailNotifications,
+    interval: data?.interval,
     trackOptions: {
       trackDisk: true,
       trackResources: true,
@@ -52,6 +54,13 @@ export const UpdateServer = (props: IUpdateServerProps) => {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setServerState((currentEvent) => ({
+      ...currentEvent,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleDropdown: ChangeEventHandler<HTMLSelectElement> = (e) => {
     setServerState((currentEvent) => ({
       ...currentEvent,
       [e.target.name]: e.target.value,
@@ -83,6 +92,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
         : data.optionalUrl,
       name: serverState.name ? serverState.name : data.name,
       emailNotifications: serverState.emailNotifications,
+      interval: serverState?.interval,
       trackOptions: {
         trackDisk: checkedItems.trackDisk,
         trackResources: checkedItems.trackResources,
@@ -96,6 +106,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
       optionalUrl: "",
       name: "",
       emailNotifications: !data?.emailNotifications,
+      interval: data?.interval,
       trackOptions: {
         trackDisk: checkedItems.trackDisk,
         trackResources: checkedItems.trackResources,
@@ -170,7 +181,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
               onChange={handleChange}
             />
             <Checkbox
-              pt={2}
+              pt={4}
               pb={2}
               isChecked={serverState.emailNotifications}
               onChange={(e) =>
@@ -193,6 +204,17 @@ export const UpdateServer = (props: IUpdateServerProps) => {
                 setCheckedItems={setCheckedItems}
               />
             ) : null}
+              <Select
+                mt={4}
+                onChange={handleDropdown}
+                placeholder="Interval to check for updates"
+                name="interval"
+              >
+                <option value="10-seconds">10 seconds</option>
+                <option value="30-seconds">30 seconds</option>
+                <option value="1-minute">1 minute</option>
+                <option value="5-minutes">5 minutes</option>
+              </Select>
           </ModalBody>
           <ModalFooter>
             <Button mr={3} onClick={onClose}>

@@ -6,6 +6,17 @@ import { IExtensionServerData, IResolvedValues } from "../types";
 import { ExtensionServer } from "../Models/extensionServer.model";
 import { sendUpdate } from "./nodemailer";
 
+interface ITimeConverter {
+  [key: string]: string;
+}
+
+const timeConverter: ITimeConverter = {
+  "10-seconds": "*/10 * * * * *",
+  "30-seconds": "*/30 * * * * *",
+  "1-minute": "*/60 * * * * *",
+  "5-minutes": "*/5 * * * *"
+}
+
 // Create a cron job for a given URL, userid and server id.
 // This job monitors the up status of the endpoint.
 export const setupUrlCron = async (url: string, userid: number, id: number) => {
@@ -20,7 +31,8 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
 
   if (!jobArray.includes(jobName)) {
     console.log("Adding ", `${url}-status-${id}`, " to job list.");
-    let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
+    let job = Cron(`${timeConverter[server?.dataValues?.interval]}`, { name: jobName }, async () => {
+
       let checkUp = await isUp(url);
       let currStatus = await LiveServer.findOne({
         where: { serverid: server?.id, userid: userid },
@@ -101,7 +113,7 @@ export const setupSslCron = async (url: string, userid: number, id: number) => {
   if (!jobArray.includes(jobName)) {
     console.log("Adding ", `${url}-ssl-${id}`, " to job list.");
     // Checking SSL every 5 minutes.
-    let job = Cron("* 5 * * * *", { name: jobName }, async () => {
+    let job = Cron(`${timeConverter[server?.dataValues?.interval]}`, { name: jobName }, async () => {
       let checkSsl: IResolvedValues | any = await getSslDetails(url);
       // First we're going to update liveServer time series data,
       // if there's been changes.
@@ -202,7 +214,7 @@ export const setupOptionalCron = async (url: string, userid: number, id: number)
       console.log("Adding ", `${extensionServerBe?.dataValues.optionalUrl}-optional-${id}`, " to job list.");
 
       // TODO: Review how often we want to get this data for performance.
-      let job = Cron("*/60 * * * * *", { name: jobName }, async () => {
+      let job = Cron(`${timeConverter[server?.dataValues?.interval]}`, { name: jobName }, async () => {
         // TODO: Make sure optional server data isn't throwing an error
         let optionalServerData = (extensionServerBe?.dataValues.optionalUrl && extensionServerBe?.dataValues.trackOptions) ? await getExtSelectedData(extensionServerBe?.dataValues.optionalUrl, extensionServerBe?.dataValues.trackOptions, userid) : null;
 
