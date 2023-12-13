@@ -38,7 +38,7 @@ const UpGraph = (props: IUpGraphProps) => {
       animate={{
         duration: 2000,
       }}
-      height={300}
+      height={350}
       endAngle={endAngle}
       padding={{ right: 110, left: 125, top: 0, bottom: 100 }}
       labels={(datum) => `${datum.datum.y.toFixed(2)}% ${datum.datum.x}`}

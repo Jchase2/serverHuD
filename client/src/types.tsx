@@ -17,7 +17,8 @@ export interface IData extends IAddServer {
   updatedAt: string;
   upgrades: string;
   smart: string[];
-  uptime: Object;
+  uptime: number;
+  downtime: number;
   userid: number;
   emailNotifications: boolean;
   interval: string;

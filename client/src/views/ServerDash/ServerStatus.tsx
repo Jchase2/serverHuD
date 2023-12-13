@@ -26,7 +26,7 @@ interface IServerStatusProps {
 }
 
 const ServerStatus = (props: IServerStatusProps) => {
-  let { serverData, setUpInc, setUpIncCount, upIncCount, upInc, paramStr } =
+  let { serverData, setUpInc, setUpIncCount, upInc, paramStr } =
     props;
 
   const { data: upData, isLoading: upDataIsLoading, } = useGetUpData(paramStr);
@@ -68,7 +68,7 @@ const ServerStatus = (props: IServerStatusProps) => {
         </CardHeader>
         <CardBody p={0}>
           <Center>
-            <UpStatus serverData={serverData} />
+            <UpStatus serverData={serverData} upData={upData}/>
           </Center>
           <UpGraph data={upData} />
         </CardBody>

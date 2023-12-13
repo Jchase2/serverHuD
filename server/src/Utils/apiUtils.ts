@@ -170,6 +170,29 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     extract: number
   }
 
+  // TODO: Not sure if I want to split stuff like this into
+  // a separate utils/tools.ts file or implement this differently.
+  function secondsToText(totalSeconds: number) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const remainingSecondsAfterHours = totalSeconds % 3600;
+    const minutes = Math.floor(remainingSecondsAfterHours / 60);
+    const seconds = Math.round(remainingSecondsAfterHours % 60);
+
+    const timeArray = [];
+
+    if (hours > 0) {
+      timeArray.push(`${hours} hour${hours !== 1 ? 's' : ''}`);
+    }
+    if (minutes > 0) {
+      timeArray.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`);
+    }
+    if (seconds > 0 || totalSeconds === 0) {
+      timeArray.push(`${seconds} second${seconds !== 1 ? 's' : ''}`);
+    }
+
+    return timeArray.join(', ').replace(/,([^,]*)$/, ' and$1');
+  }
+
   const totalTime =  await sequelize.query<IUpTime>(
     `SELECT EXTRACT(EPOCH FROM (MAX(time) - MIN(time))) FROM liveserver  WHERE serverid = :id AND userid = :userid;`, {
       replacements: { id, userid },
@@ -215,8 +238,8 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
   );
 
   return {
-    uptime: totalUptime,
-    downtime: totalDowntime,
+    uptime: secondsToText(totalUptime),
+    downtime: secondsToText(totalDowntime),
     percentageUp: percentageUp,
     percentageDown: percentageDown,
     diskSize: latestDiskSize,
