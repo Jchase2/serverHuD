@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 
 import ServerStatus from "./ServerStatus";
-import { useGetIndServer, useGetUpData } from "../../services/api/api";
+import { useGetIndServer } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 import { useReactQuerySubscription } from "../../services/socket";
 import { socket } from "../../App";
@@ -28,10 +28,11 @@ const ServerDash = () => {
   const parts = location.pathname.split("/");
   const paramStr = parts[parts.length - 1];
   const { data, isLoading, isError, error } = useGetIndServer(Number(paramStr));
-  const upData = useGetUpData(paramStr);
   const navigate = useNavigate();
-  const [inc, setInc] = useState('1h');
-  const [incCount, setIncCount] = useState(12);
+  const [resourceInc, setResourceInc] = useState("1h");
+  const [resourceIncCount, setResourceIncCount] = useState(12);
+  const [upInc, setUpInc] = useState("1h");
+  const [upIncCount, setUpIncCount] = useState(12);
 
   useReactQuerySubscription();
 
@@ -49,14 +50,14 @@ const ServerDash = () => {
         status: data.status,
         sslStatus: data.sslStatus,
         enableExtensionServer: data.optionalUrl ? true : false,
-        inc: inc,
-        incCount: incCount
+        resourceInc: resourceInc,
+        resourceIncCount: resourceIncCount,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, inc, incCount]);
+  }, [data, resourceInc, resourceIncCount]);
 
-  if (isLoading || upData.isLoading)
+  if (isLoading)
     return (
       <Container centerContent>
         <Loading />
@@ -81,7 +82,14 @@ const ServerDash = () => {
         <Heading size="md">Server: {data.name}</Heading>
       </HStack>
       <Wrap minW={"80vw"} justify={"center"} mt={2}>
-        <ServerStatus serverData={data} upData={upData.data} />
+        <ServerStatus
+          paramStr={paramStr}
+          serverData={data}
+          upInc={upInc}
+          upIncCount={upIncCount}
+          setUpIncCount={setUpIncCount}
+          setUpInc={setUpInc}
+        />
         {data?.trackOptions?.trackDisk &&
         data?.diskUsed > -1 &&
         data?.diskSize > -1 ? (
@@ -90,10 +98,10 @@ const ServerDash = () => {
         {data?.trackOptions?.trackResources ? (
           <ResourceUsage
             paramStr={paramStr}
-            inc={inc}
-            setInc = {setInc}
-            incCount={incCount}
-            setIncCount={setIncCount}
+            resourceInc={resourceInc}
+            setResourceInc={setResourceInc}
+            resourceIncCount={resourceIncCount}
+            setResourceIncCount={setResourceIncCount}
           />
         ) : null}
         {data?.trackOptions?.trackUpgrades &&

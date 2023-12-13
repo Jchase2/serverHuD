@@ -8,33 +8,33 @@ import { Loading } from "../../components/Loading/Loading";
 
 interface IResourceUsageProps {
   paramStr: string;
-  inc: string;
-  setInc: Dispatch<SetStateAction<string>>;
-  incCount: number;
-  setIncCount: Dispatch<SetStateAction<number>>;
+  resourceInc: string;
+  setResourceInc: Dispatch<SetStateAction<string>>;
+  resourceIncCount: number;
+  setResourceIncCount: Dispatch<SetStateAction<number>>;
 }
 
 const ResourceUsage = (props: IResourceUsageProps) => {
-  const { paramStr, inc, incCount, setIncCount, setInc } = props;
+  const { paramStr, resourceInc, resourceIncCount, setResourceIncCount, setResourceInc } = props;
 
   const {
     isLoading: serverUsageLoading,
     error: serverUsageError,
     data: serverUsageData,
-  } = useGetServerUsage(paramStr, inc, incCount);
+  } = useGetServerUsage(paramStr, resourceInc, resourceIncCount);
 
   const onChange = (value: string) => {
-    setInc(value);
+    setResourceInc(value);
     if (value === "1h") {
-      setIncCount(12);
+      setResourceIncCount(12);
     } else if (value === "1d") {
-      setIncCount(24);
+      setResourceIncCount(24);
     } else if (value === "1w") {
-      setIncCount(7);
+      setResourceIncCount(7);
     } else if (value === "1m") {
-      setIncCount(30);
+      setResourceIncCount(30);
     } else {
-      setIncCount(24);
+      setResourceIncCount(24);
     }
   };
 
@@ -56,19 +56,19 @@ const ResourceUsage = (props: IResourceUsageProps) => {
       m={4}
       textAlign={"center"}
       align={"center"}
-      minW={"25vw"}
+      minW={["100vw", "50vw", "35vw", "25vw"]}
     >
       <Stack align={"center"}>
         <CardHeader textAlign={"center"}>
           <Heading size="md">Live Resource Usage</Heading>
         </CardHeader>
         {serverUsageData && serverUsageData.memObj ? (
-          <MemUsageGraph memUsageData={serverUsageData.memObj} inc={inc} />
+          <MemUsageGraph memUsageData={serverUsageData.memObj} inc={resourceInc} />
         ) : null}
         {serverUsageData && serverUsageData.cpuObj ? (
-          <CpuUsageGraph cpuUsageData={serverUsageData.cpuObj} inc={inc} />
+          <CpuUsageGraph cpuUsageData={serverUsageData.cpuObj} inc={resourceInc} />
         ) : null}
-        <RadioGroup onChange={onChange} value={inc}>
+        <RadioGroup onChange={onChange} value={resourceInc}>
           <Stack spacing={5} direction={"row"}>
             <Radio value="1h">1h</Radio>
             <Radio value="1d">1d</Radio>
