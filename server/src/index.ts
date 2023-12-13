@@ -45,6 +45,10 @@ const io = new Server(server, {
     await client.connect();
     console.log("Connected.");
     console.log("Attempting to create_hypertable...");
+    let addExtension = await client.query(
+      `CREATE EXTENSION IF NOT EXISTS timescaledb;`
+    );
+    console.log("ADD EXTENSION RESPONSE: ", addExtension)
     let hypRes = await client.query(
       `SELECT create_hypertable('"liveserver"', 'time', if_not_exists => TRUE);`
     );

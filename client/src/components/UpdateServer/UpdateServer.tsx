@@ -204,17 +204,20 @@ export const UpdateServer = (props: IUpdateServerProps) => {
                 setCheckedItems={setCheckedItems}
               />
             ) : null}
-              <Select
-                mt={4}
-                onChange={handleDropdown}
-                placeholder="Interval to check for updates"
-                name="interval"
-              >
-                <option value="10-seconds">10 seconds</option>
-                <option value="30-seconds">30 seconds</option>
-                <option value="1-minute">1 minute</option>
-                <option value="5-minutes">5 minutes</option>
-              </Select>
+            <Text fontSize="md" mt={4}>
+              Select Interval to Record Updates
+            </Text>
+            <Select
+              mt={2}
+              onChange={handleDropdown}
+              name="interval"
+              defaultValue={`${serverState?.interval}`}
+            >
+              <option value="10-seconds">10 seconds</option>
+              <option value="30-seconds">30 seconds</option>
+              <option value="1-minute">1 minute</option>
+              <option value="5-minutes">5 minutes</option>
+            </Select>
           </ModalBody>
           <ModalFooter>
             <Button mr={3} onClick={onClose}>

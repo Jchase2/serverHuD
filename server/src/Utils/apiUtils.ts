@@ -126,6 +126,17 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     raw: true,
   });
 
+  const lastEntryTime = await LiveServer.findOne({
+    where: {
+      serverid: id,
+      userid: userid,
+    },
+    order: [["time", "DESC"]],
+    attributes: ["time"],
+    limit: 1,
+    raw: true
+  })
+
   const latestDiskSize = res[res.length - 1]?.diskSize
     ? res[res.length - 1]?.diskSize
     : -1;
@@ -155,28 +166,16 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     diffArr.push(res[0]);
   }
 
-  let totalUptime = diffArr.reduce(
-    (acc: number, curr: LiveServer, ind: number) => {
-      // If current status is up and the next index is down, calculate the difference
-      // and add that to the accumulator.
+  interface IUpTime {
+    extract: number
+  }
 
-      if (
-        curr.status === "up" &&
-        diffArr[ind + 1] &&
-        diffArr[ind + 1].status === "down"
-      ) {
-        let difference = dayjs(diffArr[ind + 1].time).diff(
-          dayjs(curr.time),
-          "seconds"
-        );
-        return acc + difference;
-      } else if (curr.status === "up" && !diffArr[ind + 1]) {
-        let difference = dayjs(Date.now()).diff(dayjs(curr.time), "seconds");
-        return acc + difference;
-      }
-      return acc;
-    },
-    0
+  const totalTime =  await sequelize.query<IUpTime>(
+    `SELECT EXTRACT(EPOCH FROM (MAX(time) - MIN(time))) FROM liveserver  WHERE serverid = :id AND userid = :userid;`, {
+      replacements: { id, userid },
+      raw: true,
+      type: QueryTypes.SELECT,
+    }
   );
 
   let totalDowntime = diffArr.reduce(
@@ -200,12 +199,16 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     0
   );
 
-  let getTotalMonitoringTime = dayjs(Date.now()).diff(
-    dayjs(diffArr[0].time),
+  const totalUptime = totalTime[0]?.extract - totalDowntime;
+
+  let getTotalMonitoringTime = dayjs(lastEntryTime?.time).diff(
+    dayjs(res[0]?.time),
     "seconds"
   );
+
   let percentageUp = Number(
     ((totalUptime / getTotalMonitoringTime) * 100).toFixed(2)
+
   );
   let percentageDown = Number(
     ((totalDowntime / getTotalMonitoringTime) * 100).toFixed(2)
