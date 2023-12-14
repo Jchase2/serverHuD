@@ -181,13 +181,13 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     const timeArray = [];
 
     if (hours > 0) {
-      timeArray.push(`${hours} hour${hours !== 1 ? 's' : ''}`);
+      timeArray.push(`${hours}h`);
     }
     if (minutes > 0) {
-      timeArray.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`);
+      timeArray.push(`${minutes}m`);
     }
     if (seconds > 0 || totalSeconds === 0) {
-      timeArray.push(`${seconds} second${seconds !== 1 ? 's' : ''}`);
+      timeArray.push(`${seconds}s`);
     }
 
     return timeArray.join(', ').replace(/,([^,]*)$/, ' and$1');

@@ -38,9 +38,8 @@ const UpGraph = (props: IUpGraphProps) => {
       animate={{
         duration: 2000,
       }}
-      height={350}
       endAngle={endAngle}
-      padding={{ right: 110, left: 125, top: 0, bottom: 100 }}
+      padding={{ right: 110, left: 125, top: 10, bottom: 0 }}
       labels={(datum) => `${datum.datum.y.toFixed(2)}% ${datum.datum.x}`}
       labelComponent={<VictoryLabel style={{ fill: colorMode === 'light' ? '' : 'gray' }}/>}
       style={{

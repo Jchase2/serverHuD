@@ -1,8 +1,16 @@
-import { Card, CardHeader, Container, Heading, Stack } from "@chakra-ui/react";
+import {
+  Card,
+  CardHeader,
+  Container,
+  Heading,
+  Stack,
+  Tab,
+  TabList,
+  Tabs,
+} from "@chakra-ui/react";
 import MemUsageGraph from "./MemUsageGraph";
 import CpuUsageGraph from "./CpuUsageGraph";
-import { Dispatch, SetStateAction } from "react";
-import { Radio, RadioGroup } from "@chakra-ui/react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useGetServerUsage } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 
@@ -15,7 +23,14 @@ interface IResourceUsageProps {
 }
 
 const ResourceUsage = (props: IResourceUsageProps) => {
-  const { paramStr, resourceInc, resourceIncCount, setResourceIncCount, setResourceInc } = props;
+  const {
+    paramStr,
+    resourceInc,
+    resourceIncCount,
+    setResourceIncCount,
+    setResourceInc,
+  } = props;
+  const [tabIndex, setTabIndex] = useState(0);
 
   const {
     isLoading: serverUsageLoading,
@@ -23,17 +38,22 @@ const ResourceUsage = (props: IResourceUsageProps) => {
     data: serverUsageData,
   } = useGetServerUsage(paramStr, resourceInc, resourceIncCount);
 
-  const onChange = (value: string) => {
-    setResourceInc(value);
-    if (value === "1h") {
+  const handleTabsChange = (index: number) => {
+    setTabIndex(index);
+    if (index === 0) {
+      setResourceInc("1h");
       setResourceIncCount(12);
-    } else if (value === "1d") {
+    } else if (index === 1) {
+      setResourceInc("1d");
       setResourceIncCount(24);
-    } else if (value === "1w") {
+    } else if (index === 2) {
+      setResourceInc("1w");
       setResourceIncCount(7);
-    } else if (value === "1m") {
+    } else if (index === 3) {
+      setResourceInc("1m");
       setResourceIncCount(30);
     } else {
+      setResourceInc("all");
       setResourceIncCount(24);
     }
   };
@@ -53,29 +73,40 @@ const ResourceUsage = (props: IResourceUsageProps) => {
     <Card
       overflow="hidden"
       variant="outline"
-      m={4}
+      p={2}
       textAlign={"center"}
       align={"center"}
       minW={["100vw", "50vw", "35vw", "25vw"]}
     >
-      <Stack align={"center"}>
+      <Stack>
         <CardHeader textAlign={"center"}>
           <Heading size="md">Live Resource Usage</Heading>
         </CardHeader>
+        <Tabs
+          size="md"
+          variant="enclosed"
+          index={tabIndex}
+          onChange={handleTabsChange}
+        >
+          <TabList>
+            <Tab>1h</Tab>
+            <Tab>1d</Tab>
+            <Tab>1w</Tab>
+            <Tab>1m</Tab>
+          </TabList>
+        </Tabs>
         {serverUsageData && serverUsageData.memObj ? (
-          <MemUsageGraph memUsageData={serverUsageData.memObj} inc={resourceInc} />
+          <MemUsageGraph
+            memUsageData={serverUsageData.memObj}
+            inc={resourceInc}
+          />
         ) : null}
         {serverUsageData && serverUsageData.cpuObj ? (
-          <CpuUsageGraph cpuUsageData={serverUsageData.cpuObj} inc={resourceInc} />
+          <CpuUsageGraph
+            cpuUsageData={serverUsageData.cpuObj}
+            inc={resourceInc}
+          />
         ) : null}
-        <RadioGroup onChange={onChange} value={resourceInc}>
-          <Stack spacing={5} direction={"row"}>
-            <Radio value="1h">1h</Radio>
-            <Radio value="1d">1d</Radio>
-            <Radio value="1w">1w</Radio>
-            <Radio value="1m">1m</Radio>
-          </Stack>
-        </RadioGroup>
       </Stack>
     </Card>
   );

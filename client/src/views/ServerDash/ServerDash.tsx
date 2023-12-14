@@ -85,16 +85,10 @@ const ServerDash = () => {
         <ServerStatus
           paramStr={paramStr}
           serverData={data}
-          upInc={upInc}
           upIncCount={upIncCount}
           setUpIncCount={setUpIncCount}
           setUpInc={setUpInc}
         />
-        {data?.trackOptions?.trackDisk &&
-        data?.diskUsed > -1 &&
-        data?.diskSize > -1 ? (
-          <DiskStatus data={data} />
-        ) : null}
         {data?.trackOptions?.trackResources ? (
           <ResourceUsage
             paramStr={paramStr}
@@ -103,6 +97,11 @@ const ServerDash = () => {
             resourceIncCount={resourceIncCount}
             setResourceIncCount={setResourceIncCount}
           />
+        ) : null}
+        {data?.trackOptions?.trackDisk &&
+        data?.diskUsed > -1 &&
+        data?.diskSize > -1 ? (
+          <DiskStatus data={data} />
         ) : null}
         {data?.trackOptions?.trackUpgrades &&
         data?.upgrades &&

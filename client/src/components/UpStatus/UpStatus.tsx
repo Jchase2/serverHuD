@@ -14,7 +14,7 @@ interface IUpStatusProps {
 
 export const UpStatus = (props: IUpStatusProps) => {
   const { serverData, upData } = props;
-
+  
   return (
     <Stack align={"center"}>
       <HStack>

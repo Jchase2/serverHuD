@@ -5,20 +5,21 @@ import {
   Center,
   Container,
   Heading,
-  Radio,
-  RadioGroup,
   Stack,
+  Tab,
+  TabList,
+  Tabs,
+  Wrap,
 } from "@chakra-ui/react";
 import UpGraph from "./UpGraph";
 import { UpStatus } from "../../components/UpStatus/UpStatus";
 import { IData } from "../../types";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useGetUpData } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
 
 interface IServerStatusProps {
   serverData: IData;
-  upInc: string;
   setUpInc: Dispatch<SetStateAction<string>>;
   upIncCount: number;
   setUpIncCount: Dispatch<SetStateAction<number>>;
@@ -26,22 +27,27 @@ interface IServerStatusProps {
 }
 
 const ServerStatus = (props: IServerStatusProps) => {
-  let { serverData, setUpInc, setUpIncCount, upInc, paramStr } =
-    props;
+  let { serverData, setUpInc, setUpIncCount, paramStr } = props;
 
-  const { data: upData, isLoading: upDataIsLoading, } = useGetUpData(paramStr);
+  const { data: upData, isLoading: upDataIsLoading } = useGetUpData(paramStr);
+  const [tabIndex, setTabIndex] = useState(0);
 
-  const onChange = (value: string) => {
-    setUpInc(value);
-    if (value === "1h") {
+  const handleTabsChange = (index: number) => {
+    setTabIndex(index);
+    if (index === 0) {
+      setUpInc("1h");
       setUpIncCount(12);
-    } else if (value === "1d") {
+    } else if (index === 1) {
+      setUpInc("1d");
       setUpIncCount(24);
-    } else if (value === "1w") {
+    } else if (index === 2) {
+      setUpInc("1w");
       setUpIncCount(7);
-    } else if (value === "1m") {
+    } else if (index === 3) {
+      setUpInc("1m");
       setUpIncCount(30);
     } else {
+      setUpInc("all");
       setUpIncCount(24);
     }
   };
@@ -57,7 +63,7 @@ const ServerStatus = (props: IServerStatusProps) => {
     <Card
       overflow="hidden"
       variant="outline"
-      m={4}
+      p={2}
       textAlign={"center"}
       align={"center"}
       minW={["100vw", "50vw", "35vw", "25vw"]}
@@ -67,20 +73,31 @@ const ServerStatus = (props: IServerStatusProps) => {
           <Heading size="md">Live Up Status</Heading>
         </CardHeader>
         <CardBody p={0}>
-          <Center>
-            <UpStatus serverData={serverData} upData={upData}/>
-          </Center>
-          <UpGraph data={upData} />
+          <Tabs
+            size="md"
+            variant="enclosed"
+            index={tabIndex}
+            onChange={handleTabsChange}
+          >
+            <TabList>
+              <Tab>1h</Tab>
+              <Tab>1d</Tab>
+              <Tab>1w</Tab>
+              <Tab>1m</Tab>
+              <Tab>all</Tab>
+            </TabList>
+            <Wrap justify={"center"} mt={2}>
+              <Center>
+                <UpStatus serverData={serverData} upData={upData} />
+              </Center>
+              <Container
+                maxW={["80vw", "55vw", "40vw", "25vw", "20vw", "20vw"]}
+              >
+                <UpGraph data={upData} />
+              </Container>
+            </Wrap>
+          </Tabs>
         </CardBody>
-        <RadioGroup pb={4} onChange={onChange} value={upInc}>
-            <Stack spacing={5} direction={"row"}>
-              <Radio value="1h">1h</Radio>
-              <Radio value="1d">1d</Radio>
-              <Radio value="1w">1w</Radio>
-              <Radio value="1m">1m</Radio>
-              <Radio value="all">all</Radio>
-            </Stack>
-          </RadioGroup>
       </Stack>
     </Card>
   );
