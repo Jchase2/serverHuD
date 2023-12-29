@@ -219,9 +219,10 @@ func initRouter() *gin.Engine {
 		}
 
 		c.JSON(200, gin.H{
-			"hostName": GetHostname(),
-			"diskUsed": GetDiskUsage(),
-			"diskSize": GetDiskSize(),
+			"hostName":      GetHostname(),
+			"diskUsed":      GetDiskSize() - GetDiskUsage(),
+			"availableDisk": GetDiskUsage(),
+			"diskSize":      GetDiskSize(),
 		})
 	})
 
@@ -280,7 +281,8 @@ func initRouter() *gin.Engine {
 		c.JSON(200, gin.H{
 			"hostName":      GetHostname(),
 			"uptimeInHours": GetUptime(),
-			"diskUsed":      GetDiskUsage(),
+			"diskUsed":      GetDiskSize() - GetDiskUsage(),
+			"availableDisk": GetDiskUsage(),
 			"diskSize":      GetDiskSize(),
 			"upgrades":      GetUpgradeable(),
 			"smart":         GetSmartInfo(),

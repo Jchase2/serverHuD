@@ -46,6 +46,7 @@ export interface IUpdateServer {
 
 export interface ILiveData {
   id: number;
+  upInc: string;
   diskSize: number;
   diskUsed: number;
   downtime: number;

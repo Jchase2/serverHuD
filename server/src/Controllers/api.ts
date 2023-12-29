@@ -359,7 +359,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
 };
 
 export const getTimeseriesUpData = async (ctx: koa.Context, next: Function) => {
-  let res = await getMonitoredUpInfo(ctx.params.id, ctx.state.user._id);
+  let res = await getMonitoredUpInfo(ctx.params.id, ctx.state.user._id, ctx.params.upInc);
   ctx.body = res;
   ctx.status = 200;
 };

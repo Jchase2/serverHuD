@@ -39,13 +39,13 @@ export function useGetServers() {
   });
 }
 
-export function useGetUpData(id: string) {
+export function useGetUpData(id: string, increment: string) {
   return useQuery({
-    queryKey: [`live-server-${id}`],
+    queryKey: [`live-server-${id}-${increment}`],
     queryFn: async () => {
       const { data } = await axios({
         method: "get",
-        url: process.env.REACT_APP_BACKEND_URL + `/servers/updata/${id}`,
+        url: process.env.REACT_APP_BACKEND_URL + `/servers/updata/${id}/${increment}`,
         withCredentials: true,
       });
       return data;

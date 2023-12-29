@@ -48,6 +48,7 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
             attributes: ["optionalUrl"]
           })
           let optionalServerData = extensionServerBe?.dataValues.optionalUrl ? await extensionServerData(extensionServerBe?.dataValues.optionalUrl, userid) : null;
+          
           await LiveServer.create({
             status: checkUp,
             url: url,

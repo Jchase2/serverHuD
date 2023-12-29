@@ -32,7 +32,6 @@ const ServerDash = () => {
   const [resourceInc, setResourceInc] = useState("1h");
   const [resourceIncCount, setResourceIncCount] = useState(12);
   const [upInc, setUpInc] = useState("1h");
-  const [upIncCount, setUpIncCount] = useState(12);
 
   useReactQuerySubscription();
 
@@ -50,12 +49,13 @@ const ServerDash = () => {
         status: data.status,
         sslStatus: data.sslStatus,
         enableExtensionServer: data.optionalUrl ? true : false,
-        resourceInc: resourceInc,
-        resourceIncCount: resourceIncCount,
+        incCount: resourceIncCount,
+        inc: resourceInc,
+        upInc: upInc,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, resourceInc, resourceIncCount]);
+  }, [data, resourceInc, resourceIncCount, upInc]);
 
   if (isLoading)
     return (
@@ -85,8 +85,7 @@ const ServerDash = () => {
         <ServerStatus
           paramStr={paramStr}
           serverData={data}
-          upIncCount={upIncCount}
-          setUpIncCount={setUpIncCount}
+          upInc={upInc}
           setUpInc={setUpInc}
         />
         {data?.trackOptions?.trackResources ? (

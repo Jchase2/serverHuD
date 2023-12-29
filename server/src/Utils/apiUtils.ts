@@ -112,67 +112,9 @@ export const SplitTime = (numberOfHours: number) => {
   return { Days: Days, Hours: Hours };
 };
 
-// Calculates %up and %down from recorded data on a server.
-export const getMonitoredUpInfo = async (id: number, userid: number) => {
-  // Get last diskSize and diskUsed
-  let res = await LiveServer.findAll({
-    where: {
-      serverid: id,
-      userid: userid,
-    },
-    order: [["time", "ASC"]],
-    attributes: ["time", "status", "diskSize", "diskUsed"],
-    limit: 1,
-    raw: true,
-  });
-
-  const lastEntryTime = await LiveServer.findOne({
-    where: {
-      serverid: id,
-      userid: userid,
-    },
-    order: [["time", "DESC"]],
-    attributes: ["time"],
-    limit: 1,
-    raw: true
-  })
-
-  const latestDiskSize = res[res.length - 1]?.diskSize
-    ? res[res.length - 1]?.diskSize
-    : -1;
-  const latestDiskUsed = res[res.length - 1]?.diskSize
-    ? res[res.length - 1]?.diskSize
-    : -1;
-
-  // Using raw query here because sequelize doesn't support this
-  // sort of operation as far as I know, and making a db call
-  // should be better for memory management than filtering in JS.
-  const diffArr = await sequelize.query<LiveServer>(
-    `SELECT time, status, "diskSize", "diskUsed"
-      FROM
-        (SELECT time, status, "diskSize", "diskUsed", LAG(status) OVER (ORDER BY "time")
-        AS prev_status FROM liveserver WHERE serverid = :id AND userid = :userid)
-      AS subquery WHERE status IS NOT NULL AND status <> prev_status;`,
-    {
-      replacements: { id, userid },
-      raw: true,
-      type: QueryTypes.SELECT,
-    }
-  );
-
-  // If there's nothing in diffArr, add liveserver stuff
-  // so we can return an initial set of data.
-  if (!diffArr.length) {
-    diffArr.push(res[0]);
-  }
-
-  interface IUpTime {
-    extract: number
-  }
-
   // TODO: Not sure if I want to split stuff like this into
   // a separate utils/tools.ts file or implement this differently.
-  function secondsToText(totalSeconds: number) {
+  const secondsToText = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const remainingSecondsAfterHours = totalSeconds % 3600;
     const minutes = Math.floor(remainingSecondsAfterHours / 60);
@@ -193,13 +135,73 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
     return timeArray.join(', ').replace(/,([^,]*)$/, ' and$1');
   }
 
+// Calculates %up and %down from recorded data on a server.
+export const getMonitoredUpInfo = async (id: number, userid: number, upInc: string) => {
+
+  const timeIncrementsObj = {
+    '1h': '1 hour',
+    '1d': '1 day',
+    '1w': '1 week',
+    '1m': '1 month',
+    'all': '100 years',
+  }
+
+  let fixedInc: string = timeIncrementsObj[upInc as keyof typeof timeIncrementsObj];
+
+  interface IUpTime {
+    extract: number
+  }
+
   const totalTime =  await sequelize.query<IUpTime>(
-    `SELECT EXTRACT(EPOCH FROM (MAX(time) - MIN(time))) FROM liveserver  WHERE serverid = :id AND userid = :userid;`, {
-      replacements: { id, userid },
+    `SELECT EXTRACT(EPOCH FROM (MAX(time) - MIN(time))) FROM liveserver  WHERE serverid = :id AND userid = :userid AND time >= CURRENT_TIMESTAMP - INTERVAL :fixedInc;`, {
+      replacements: { id, userid, fixedInc },
       raw: true,
       type: QueryTypes.SELECT,
     }
   );
+
+  // Get last diskSize and diskUsed
+  let res = await LiveServer.findAll({
+    where: {
+      serverid: id,
+      userid: userid,
+    },
+    order: [["time", "ASC"]],
+    attributes: ["time", "status", "diskSize", "diskUsed"],
+    limit: 1,
+    raw: true,
+  });
+
+  const latestDiskSize = res[res.length - 1]?.diskSize
+    ? res[res.length - 1]?.diskSize
+    : -1;
+  const latestDiskUsed = res[res.length - 1]?.diskSize
+    ? res[res.length - 1]?.diskSize
+    : -1;
+
+
+  const diffArr = await sequelize.query<LiveServer>(
+    `SELECT time, status, "diskSize", "diskUsed"
+    FROM (
+        SELECT time, status, "diskSize", "diskUsed",
+               LAG(status) OVER (ORDER BY "time") AS prev_status
+        FROM liveserver
+        WHERE serverid = :id AND userid = :userid
+    ) AS subquery
+    WHERE status IS NOT NULL
+      AND status <> prev_status
+      AND time >= CURRENT_TIMESTAMP - INTERVAL :fixedInc`,
+    {
+      replacements: { id, userid, fixedInc },
+      raw: true,
+      type: QueryTypes.SELECT,
+    });
+
+  // If there's nothing in diffArr, add liveserver stuff
+  // so we can return an initial set of data.
+  if (!diffArr.length) {
+    diffArr.push(res[0]);
+  }
 
   let totalDowntime = diffArr.reduce(
     (acc: number, curr: LiveServer, ind: number) => {
@@ -224,17 +226,12 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
 
   const totalUptime = totalTime[0]?.extract - totalDowntime;
 
-  let getTotalMonitoringTime = dayjs(lastEntryTime?.time).diff(
-    dayjs(res[0]?.time),
-    "seconds"
-  );
-
   let percentageUp = Number(
-    ((totalUptime / getTotalMonitoringTime) * 100).toFixed(2)
+    ((totalUptime / totalTime[0]?.extract) * 100).toFixed(2)
 
   );
   let percentageDown = Number(
-    ((totalDowntime / getTotalMonitoringTime) * 100).toFixed(2)
+    ((totalDowntime / totalTime[0]?.extract) * 100).toFixed(2)
   );
 
   return {
@@ -249,6 +246,7 @@ export const getMonitoredUpInfo = async (id: number, userid: number) => {
 
 // Get past hour of usage data.
 export const getMonitoredUsageData = async (id: number, userid: number, inc: string, incCount: number) => {
+
   try {
 
     const timeIncrementsObj = {
@@ -291,6 +289,6 @@ export const getMonitoredUsageData = async (id: number, userid: number, inc: str
 
     return combinedArr2;
   } catch (err) {
-    console.log("ERROR IS: ", err);
+    console.log("MONITORED RESOURCE USAGE ERROR IS: ", err);
   }
 };

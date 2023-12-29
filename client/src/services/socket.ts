@@ -1,5 +1,5 @@
 import React from "react";
-import { cloneDeep, isEqual } from "lodash";
+import { cloneDeep, isEqual, merge } from "lodash";
 import { QueryClient, Updater } from "@tanstack/react-query";
 import { socket } from "../App";
 import { ILiveData, IResourceData } from "../types";
@@ -20,13 +20,7 @@ export const useReactQuerySubscription = () => {
         queryKey,
         (oldData: ILiveData | undefined) => {
           let mergedData = cloneDeep(oldData);
-          if (mergedData) {
-            for (const [key, value] of Object.entries(data)) {
-              if (mergedData[key as keyof typeof mergedData] !== value) {
-                mergedData[key as keyof typeof mergedData] = value;
-              }
-            }
-          }
+          merge(mergedData, data);
           return mergedData;
         }
       );
@@ -35,17 +29,13 @@ export const useReactQuerySubscription = () => {
     });
 
     socket.on("liveServerUpdate", (data: ILiveData) => {
-      const queryKey = [`live-server-${data.id}`].filter(Boolean);
+      const queryKey = [`live-server-${data.id}-${data.upInc}`].filter(Boolean);
       queryClient.setQueryData<ILiveData>(
         queryKey,
         (oldData: ILiveData | undefined) => {
           if (!oldData) return data;
           let mergedData = cloneDeep(oldData);
-          for (const [key, value] of Object.entries(data)) {
-            if (mergedData[key as keyof typeof mergedData] !== value) {
-              mergedData[key as keyof typeof mergedData] = value;
-            }
-          }
+          merge(mergedData, data);
           return mergedData;
         }
       );

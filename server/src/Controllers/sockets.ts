@@ -22,6 +22,7 @@ interface IUrlLiveData {
   sslExpiry: string | undefined;
   inc: string;
   incCount: number;
+  upInc: string;
 }
 
 // Register for status checking every 10 seconds..
@@ -41,7 +42,6 @@ export function sioUpCheck(socket: Socket) {
 
   if (userid > 0) {
     socket.on("upCheck", async (data) => {
-      console.log("UPCHECK RECIEVED WITH ID: ", data.id);
       let jobName = `sio-${data.url}-${data.id}`;
       if (!intervalObj.hasOwnProperty(jobName)) {
         console.log("Adding ", jobName, " to interval list.");
@@ -91,17 +91,21 @@ export function sioUpCheck(socket: Socket) {
 }
 
 const urlLiveCheck = async (data: IUrlLiveData, socket: Socket) => {
+
   const cookies = cookie.parse(socket.handshake.headers.cookie || "");
   let userid = getUserId(cookies?.accessToken);
 
   try {
-    let res = await getMonitoredUpInfo(data.id, userid);
+    let res = await getMonitoredUpInfo(data.id, userid, data?.upInc);
     socket.emit("liveServerUpdate", {
       id: data.id,
       percentageUp: res.percentageUp,
       percentageDown: res.percentageDown,
       diskUsed: res.diskUsed,
-      diskSize: res.diskSize
+      diskSize: res.diskSize,
+      upInc: data?.upInc,
+      uptime: res.uptime,
+      downtime: res.downtime
     });
   } catch (err) {
     console.log("LIVE CHECK ERROR: ", err);
@@ -123,7 +127,7 @@ const extensionServerData = async (data: IUrlLiveData, socket: Socket) => {
     })
 
     if (extensionServerInfo?.optionalUrl) {
-      let res = await getMonitoredUsageData(data.id, userid, data?.inc, data?.incCount);
+      let res = await getMonitoredUsageData(data.id, userid, data?.upInc, data?.incCount);
       console.log("EMITTING RESOURCE UPDATE ON BACKEND");
       socket.emit("resourcesUpdate", {
         id: data.id,

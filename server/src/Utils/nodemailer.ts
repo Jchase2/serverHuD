@@ -11,13 +11,17 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendUpdate = async (message: string) => {
-  const info = await transporter.sendMail({
-    from: `"${process.env.FROM_STRING}" <${process.env.EMAIL_USERNAME}>`, //
-    to: process.env.TO_EMAIL,
-    subject: "Server Status Changed",
-    text: "Server Status Changed",
-    html: `${message}`,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: `"${process.env.FROM_STRING}" <${process.env.EMAIL_USERNAME}>`, //
+      to: process.env.TO_EMAIL,
+      subject: "Server Status Changed",
+      text: "Server Status Changed",
+      html: `${message}`,
+    });
 
-  console.log("Message sent: %s", info.messageId);
+    console.log("Message sent: %s", info.messageId);
+  } catch (err) {
+    console.log("EMAIL UPDATE ERROR!: ", err);
+  }
 };

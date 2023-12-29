@@ -21,34 +21,28 @@ import { Loading } from "../../components/Loading/Loading";
 interface IServerStatusProps {
   serverData: IData;
   setUpInc: Dispatch<SetStateAction<string>>;
-  upIncCount: number;
-  setUpIncCount: Dispatch<SetStateAction<number>>;
+  upInc: string;
   paramStr: string;
 }
 
 const ServerStatus = (props: IServerStatusProps) => {
-  let { serverData, setUpInc, setUpIncCount, paramStr } = props;
+  let { serverData, setUpInc, paramStr, upInc } = props;
 
-  const { data: upData, isLoading: upDataIsLoading } = useGetUpData(paramStr);
   const [tabIndex, setTabIndex] = useState(0);
+  const { data: upData, isLoading: upDataIsLoading } = useGetUpData(paramStr, upInc);
 
   const handleTabsChange = (index: number) => {
     setTabIndex(index);
     if (index === 0) {
       setUpInc("1h");
-      setUpIncCount(12);
     } else if (index === 1) {
       setUpInc("1d");
-      setUpIncCount(24);
     } else if (index === 2) {
       setUpInc("1w");
-      setUpIncCount(7);
     } else if (index === 3) {
       setUpInc("1m");
-      setUpIncCount(30);
     } else {
       setUpInc("all");
-      setUpIncCount(24);
     }
   };
 

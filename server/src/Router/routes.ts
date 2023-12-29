@@ -30,7 +30,7 @@ router.use(
 router
   .get("/servers", getUserServers)
   .get("/servers/:id", getIndServer)
-  .get("/servers/updata/:id", getTimeseriesUpData)
+  .get("/servers/updata/:id/:upInc", getTimeseriesUpData)
   .get("/servers/usage/:id/:inc/:incCount", getServerUsage)
   .get("/user/me", getVerifyUser)
   .get("/user/logout", getUserLogout)
