@@ -50,8 +50,8 @@ export function sioUpCheck(socket: Socket) {
           urlDbChecker(data, socket);
           sslDbChecker(data, socket);
           urlLiveCheck(data, socket);
-          // If enableExtensionServer is true, send resource usage updates.
-          if (data.enableExtensionServer) {
+          // If optionalUrl is true, send resource usage updates.
+          if (data.optionalUrl) {
             extensionServerData(data, socket);
           }
         }, 10000);
@@ -66,8 +66,8 @@ export function sioUpCheck(socket: Socket) {
           urlDbChecker(data, socket);
           sslDbChecker(data, socket);
           urlLiveCheck(data, socket);
-          // If enableExtensionServer is true, send resource usage updates.
-          if (data.enableExtensionServer) {
+          // If optionalUrl is true, send resource usage updates.
+          if (data.optionalUrl) {
             extensionServerData(data, socket);
           }
         }, 10000);
@@ -128,7 +128,6 @@ const extensionServerData = async (data: IUrlLiveData, socket: Socket) => {
 
     if (extensionServerInfo?.optionalUrl) {
       let res = await getMonitoredUsageData(data.id, userid, data?.upInc, data?.incCount);
-      console.log("EMITTING RESOURCE UPDATE ON BACKEND");
       socket.emit("resourcesUpdate", {
         id: data.id,
         inc: data.inc,

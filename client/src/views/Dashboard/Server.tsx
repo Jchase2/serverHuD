@@ -37,6 +37,9 @@ const Server = (props: ServerListProps) => {
         optionalUrl: indServerData.optionalUrl,
         status: indServerData.status,
         sslStatus: indServerData.sslStatus,
+        incCount: 12,
+        inc: '1h',
+        upInc: '1h',
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

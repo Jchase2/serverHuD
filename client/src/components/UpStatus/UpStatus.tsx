@@ -44,7 +44,7 @@ export const UpStatus = (props: IUpStatusProps) => {
           <InfoOutlineIcon /> SSL Expires: {serverData?.sslExpiry} Days
         </Text>
       ) : null}
-      {serverData?.uptime ? (
+      {serverData?.uptime && Object.keys(serverData?.uptime).length > 0 ? (
         <Text fontSize={"sm"}>
           <InfoOutlineIcon /> Server Uptime: {serverData?.uptime} Days
         </Text>

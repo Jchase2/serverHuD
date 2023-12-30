@@ -1,4 +1,4 @@
-import { useColorMode } from "@chakra-ui/react";
+import { Card, CardBody, useColorMode } from "@chakra-ui/react";
 import { VictoryLabel, VictoryPie } from "victory";
 import { ILiveData } from "../../types";
 
@@ -21,7 +21,7 @@ const UpGraph = (props: IUpGraphProps) => {
     },
   ];
 
-  return (
+  return !props?.data?.percentageDown && !props?.data?.percentageUp ? <Card><CardBody>No Data Recorded Yet</CardBody></Card> : (
     <VictoryPie
       data={data}
       colorScale={["#003f5c", "#ffa600"]}

@@ -48,7 +48,7 @@ const ServerDash = () => {
         url: data.url,
         status: data.status,
         sslStatus: data.sslStatus,
-        enableExtensionServer: data.optionalUrl ? true : false,
+        optionalUrl: data.optionalUrl ? true : false,
         incCount: resourceIncCount,
         inc: resourceInc,
         upInc: upInc,
@@ -88,7 +88,7 @@ const ServerDash = () => {
           upInc={upInc}
           setUpInc={setUpInc}
         />
-        {data?.trackOptions?.trackResources ? (
+        {data?.trackOptions?.trackResources && data?.optionalUrl ? (
           <ResourceUsage
             paramStr={paramStr}
             resourceInc={resourceInc}

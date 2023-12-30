@@ -11,12 +11,8 @@ import {
   isUp,
 } from "../Utils/serverDetails";
 import {
-  setupOptionalCron,
-  setupSslCron,
-  setupUrlCron,
-  updateOptionalCron,
-  updateSslCron,
-  updateUrlCron,
+  setupGlobalCron,
+  updateGlobalCron
 } from "../Utils/cronUtils";
 import { LiveServer } from "../Models/liveServer.model";
 import {
@@ -335,9 +331,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
 
     await ExtensionServer.create(extensionValue);
     await LiveServer.create(liveValue);
-    await setupUrlCron(url, ctx.state.user._id, dbResp?.dataValues.id);
-    await setupSslCron(url, ctx.state.user._id, dbResp?.dataValues.id);
-    await setupOptionalCron(url, ctx.state.user._id, dbResp.dataValues.id);
+    await setupGlobalCron(url, ctx.state.user._id, dbResp?.dataValues.id);
 
     ctx.body = { Status: "Server added.", id: dbResp.id };
     ctx.status = 201;
@@ -444,9 +438,7 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
     });
 
     await LiveServer.create(liveValue);
-    await updateUrlCron(url, ctx.state.user._id, ctx.params.id);
-    await updateSslCron(url, ctx.state.user._id, ctx.params.id);
-    await updateOptionalCron(url, ctx.state.user._id, ctx.params.id);
+    await updateGlobalCron(url, ctx.state.user._id, ctx.params.id);
 
     ctx.body = { Status: "Server Updated.", id: ctx.params.id };
     ctx.status = 201;

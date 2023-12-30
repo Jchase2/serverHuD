@@ -1,8 +1,13 @@
 import { LiveServer } from "../Models/liveServer.model";
 import { Cron, scheduledJobs } from "croner";
-import { isUp, getSslDetails, extensionServerData, getExtSelectedData } from "./serverDetails";
+import {
+  isUp,
+  getSslDetails,
+  extensionServerData,
+  getExtSelectedData,
+} from "./serverDetails";
 import { Server } from "../Models/server.model";
-import { IExtensionServerData, IResolvedValues } from "../types";
+import { IResolvedValues } from "../types";
 import { ExtensionServer } from "../Models/extensionServer.model";
 import { sendUpdate } from "./nodemailer";
 
@@ -14,12 +19,14 @@ const timeConverter: ITimeConverter = {
   "10-seconds": "*/10 * * * * *",
   "30-seconds": "*/30 * * * * *",
   "1-minute": "*/60 * * * * *",
-  "5-minutes": "*/5 * * * *"
-}
+  "5-minutes": "*/5 * * * *",
+};
 
-// Create a cron job for a given URL, userid and server id.
-// This job monitors the up status of the endpoint.
-export const setupUrlCron = async (url: string, userid: number, id: number) => {
+export const setupGlobalCron = async (
+  url: string,
+  userid: number,
+  id: number
+) => {
   let server = await Server.findOne({
     where: { id: id, userid: userid },
   });
@@ -27,57 +34,41 @@ export const setupUrlCron = async (url: string, userid: number, id: number) => {
   let jobName = `${server?.dataValues.url}-status-${server?.dataValues.id}`;
   let jobArray = scheduledJobs.map((elem) => elem.name);
 
-  console.log("JOB ARRAY: ", jobArray)
+  console.log("JOB ARRAY: ", jobArray);
 
   if (!jobArray.includes(jobName)) {
-    console.log("Adding ", `${url}-status-${id}`, " to job list.");
-    let job = Cron(`${timeConverter[server?.dataValues?.interval]}`, { name: jobName }, async () => {
+    let job = Cron(
+      `${timeConverter[server?.dataValues?.interval]}`,
+      { name: jobName },
+      async () => {
+        if (server) {
+          const urlData = await buildUrlData(url, userid, id, server);
+          const sslData = await buildSslData(url, userid, id, server);
+          const extensionData = await buildExtensionData(userid, id);
 
-      let checkUp = await isUp(url);
-      let currStatus = await LiveServer.findOne({
-        where: { serverid: server?.id, userid: userid },
-        attributes: ["status", "url"],
-        order: [["time", "DESC"]],
-      });
-
-      if (checkUp !== currStatus?.dataValues.status) {
-        console.log("Up status has changed.")
-        try {
-          let extensionServerBe = await ExtensionServer.findOne({
-            where: { serverid: id, userid: userid },
-            attributes: ["optionalUrl"]
-          })
-          let optionalServerData = extensionServerBe?.dataValues.optionalUrl ? await extensionServerData(extensionServerBe?.dataValues.optionalUrl, userid) : null;
-          
           await LiveServer.create({
-            status: checkUp,
-            url: url,
-            userid: userid,
-            serverid: id,
-            sslStatus: currStatus?.dataValues.sslStatus,
-            diskUsed: optionalServerData?.diskUsed ? optionalServerData?.diskUsed : -1,
-            diskSize: optionalServerData?.diskSize ? optionalServerData?.diskSize : -1,
-            memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : 0,
-            cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : 0
+            status: urlData?.status,
+            url: urlData.url,
+            userid: urlData.userid,
+            serverid: urlData.serverid,
+            sslStatus: sslData.sslStatus,
+            diskUsed: extensionData?.diskUsed ? extensionData?.diskUsed : -1,
+            diskSize: extensionData?.diskSize ? extensionData?.diskSize : -1,
+            memUsage: extensionData?.memUsage ? extensionData?.memUsage : 0,
+            cpuUsage: extensionData?.cpuUsage ? extensionData?.cpuUsage : 0,
           });
-
-          if(server?.dataValues.emailNotifications) {
-            sendUpdate(`Status has changed to <b>${checkUp}</b> for domain ${currStatus?.dataValues.url}`);
-          }
-
-        } catch (err) {
-          console.log("ERR UPDATING URL IN CRON: ", err)
-          return;
         }
       }
-    });
+    );
     return job.isRunning();
   }
-  return false;
 };
 
-// Replaces cron job for server url with new url.
-export const updateUrlCron = async (newUrl: string, userid: number, id: number) => {
+export const updateGlobalCron = async (
+  newUrl: string,
+  userid: number,
+  id: number
+) => {
   let server = await Server.findOne({
     where: { id: id, userid: userid },
   });
@@ -85,204 +76,144 @@ export const updateUrlCron = async (newUrl: string, userid: number, id: number) 
   let oldJobName = `${server?.dataValues.url}-status-${server?.dataValues.id}`;
 
   let oldJob;
-  for(let obj of scheduledJobs) {
-    if(obj.name === oldJobName) {
+  for (let obj of scheduledJobs) {
+    if (obj.name === oldJobName) {
       oldJob = obj;
     }
   }
 
   // Get rid of the old job.
-  if(oldJob) {
+  if (oldJob) {
     console.log("Stopping job: ", oldJob?.name);
     oldJob.stop();
   }
 
-  let res = await setupUrlCron(newUrl, userid, id);
+  let res = await setupGlobalCron(newUrl, userid, id);
   return res;
-}
-
-// Create a cron job for a given SSL URL, userid and server id.
-// This job monitors the SSL status of the endpoint.
-export const setupSslCron = async (url: string, userid: number, id: number) => {
-  let server = await Server.findOne({
-    where: { id: id, userid: userid },
-  });
-
-  let jobName = `${server?.dataValues.url}-ssl-${server?.dataValues.id}`;
-  let jobArray = scheduledJobs.map((elem) => elem.name);
-
-  if (!jobArray.includes(jobName)) {
-    console.log("Adding ", `${url}-ssl-${id}`, " to job list.");
-    // Checking SSL every 5 minutes.
-    let job = Cron(`${timeConverter[server?.dataValues?.interval]}`, { name: jobName }, async () => {
-      let checkSsl: IResolvedValues | any = await getSslDetails(url);
-      // First we're going to update liveServer time series data,
-      // if there's been changes.
-      let currStatus = await LiveServer.findOne({
-        where: { serverid: server?.id, userid: userid },
-        attributes: ["status", "sslStatus"],
-        order: [["time", "DESC"]],
-      });
-
-      if (
-        // if no ssl and we're not storing false
-        (checkSsl.errno && currStatus?.dataValues.sslStatus !== "false") ||
-        (checkSsl.valid &&
-          // or if result of ssl isn't equal to stored ssl status
-          checkSsl?.valid?.toString() !== currStatus?.dataValues.sslStatus)
-      ) {
-        try {
-          let resp = await LiveServer.create({
-            status: currStatus?.dataValues.status,
-            url: url,
-            userid: userid,
-            serverid: id,
-            sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
-          });
-
-          if(server?.dataValues.emailNotifications) {
-            sendUpdate(`SSL Status has changed to <b>${checkSsl.errno ? 'Down' : checkSsl.valid.toString()}</b> for domain ${url}`);
-          }
-
-        } catch (err) {
-          console.log("ERR UPDATING SSL IN CRON: ", err)
-          return;
-        }
-      }
-
-      // Next, since SSL expiry isn't time series data, we also
-      // have to check in the Server table to see if we need to
-      // update that.
-      let sslExpRes = await Server.findOne({
-        where: { id: id },
-        attributes: ["sslExpiry"],
-      });
-
-      if (checkSsl.daysRemaining !== sslExpRes?.dataValues.sslExpiry) {
-        Server.update(
-          {
-            sslExpiry: checkSsl.daysRemaining,
-          },
-          { where: { id: id } }
-        );
-      }
-    });
-    return job.isRunning();
-  }
-  return false;
 };
 
-// Replaces cron job for ssl with new url.
-export const updateSslCron = async (newUrl: string, userid: number, id: number) => {
-  let server = await Server.findOne({
-    where: { id: id, userid: userid },
+export const buildUrlData = async (
+  url: string,
+  userid: number,
+  id: number,
+  server: Server
+) => {
+  let checkUp = await isUp(url);
+
+  let currStatus = await LiveServer.findOne({
+    where: { serverid: server?.id, userid: userid },
+    attributes: ["status", "url"],
+    order: [["time", "DESC"]],
   });
 
-  const oldJobName = `${server?.dataValues.url}-ssl-${server?.dataValues.id}`;
+  if (
+    server?.dataValues.emailNotifications &&
+    checkUp !== currStatus?.dataValues.status
+  ) {
+    sendUpdate(
+      `Status has changed to <b>${checkUp}</b> for domain ${currStatus?.dataValues.url}`
+    );
+  }
 
-  let oldJob;
-  for(let obj of scheduledJobs) {
-    if(obj.name === oldJobName) {
-      oldJob = obj;
+  return {
+    status: checkUp,
+    url: url,
+    userid: userid,
+    serverid: id,
+  };
+};
+
+export const buildSslData = async (
+  url: string,
+  userid: number,
+  id: number,
+  server: any
+) => {
+  let checkSsl: IResolvedValues | any = await getSslDetails(url);
+  let currStatus = await LiveServer.findOne({
+    where: { serverid: server?.id, userid: userid },
+    attributes: ["sslStatus", "url"],
+    order: [["time", "DESC"]],
+  });
+  if (
+    // if no ssl and we're not storing false
+    (checkSsl.errno && currStatus?.dataValues.sslStatus !== "false") ||
+    (checkSsl.valid &&
+      // or if result of ssl isn't equal to stored ssl status
+      checkSsl?.valid?.toString() !== currStatus?.dataValues.sslStatus)
+  ) {
+    if (server?.dataValues.emailNotifications) {
+      sendUpdate(
+        `SSL Status has changed to <b>${
+          checkSsl.errno ? "Down" : checkSsl.valid.toString()
+        }</b> for domain ${url}`
+      );
     }
   }
 
-  // Get rid of the old job.
-  if(oldJob) {
-    console.log("Stopping job: ", oldJob?.name);
-    oldJob.stop();
-  }
-
-  let res = await setupSslCron(newUrl, userid, id);
-  return res;
-}
-
-// Create a cron job for a given optional extension server URL,
-// userid and server id. This job monitors an extension-server endpoint.
-export const setupOptionalCron = async (url: string, userid: number, id: number) => {
-  let server = await Server.findOne({
-    where: { id: id, userid: userid  },
+  // Next, since SSL expiry isn't time series data, we also
+  // have to check in the Server table to see if we need to
+  // update that.
+  let sslExpRes = await Server.findOne({
+    where: { id: id },
+    attributes: ["sslExpiry"],
   });
 
+  if (checkSsl.daysRemaining !== sslExpRes?.dataValues.sslExpiry) {
+    Server.update(
+      {
+        sslExpiry: checkSsl.daysRemaining,
+      },
+      { where: { id: id } }
+    );
+  }
+
+  return { sslStatus: checkSsl.errno ? false : checkSsl.valid.toString() };
+};
+
+export const buildExtensionData = async (userid: number, id: number) => {
   let extensionServerBe = await ExtensionServer.findOne({
-    where: { serverid: id, userid: userid }
-  })
-
-  if(extensionServerBe?.dataValues.optionalUrl) {
-    let jobName = `${extensionServerBe?.dataValues.optionalUrl}-optional-${extensionServerBe?.dataValues.serverid}`;
-    let jobArray = scheduledJobs.map((elem) => elem.name);
-    if (!jobArray.includes(jobName)) {
-      console.log("Adding ", `${extensionServerBe?.dataValues.optionalUrl}-optional-${id}`, " to job list.");
-
-      // TODO: Review how often we want to get this data for performance.
-      let job = Cron(`${timeConverter[server?.dataValues?.interval]}`, { name: jobName }, async () => {
-        // TODO: Make sure optional server data isn't throwing an error
-        let optionalServerData = (extensionServerBe?.dataValues.optionalUrl && extensionServerBe?.dataValues.trackOptions) ? await getExtSelectedData(extensionServerBe?.dataValues.optionalUrl, extensionServerBe?.dataValues.trackOptions, userid) : null;
-
-        if(optionalServerData.errno) {
-          console.log("Problem with extension server, error: ", optionalServerData.code);
-          return;
-        }
-
-        let currStatus = await LiveServer.findOne({
-          where: { serverid: server?.id },
-          attributes: ["status", "sslStatus", "diskUsed", "diskSize", "memUsage", "cpuUsage"],
-          order: [["time", "DESC"]],
-        });
-
-        await LiveServer.create({
-          status: currStatus?.status,
-          url: url,
-          userid: userid,
-          serverid: id,
-          sslStatus: currStatus?.dataValues.sslStatus,
-          diskUsed: optionalServerData?.diskUsed ? optionalServerData?.diskUsed : -1,
-          diskSize: optionalServerData?.diskSize ? optionalServerData?.diskSize : -1,
-          memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : 0,
-          cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : 0
-        });
-
-        await ExtensionServer.update(
-          {
-            uptime: optionalServerData?.uptimeInHours ? optionalServerData?.uptimeInHours : 0,
-            upgrades: optionalServerData?.upgrades ? optionalServerData?.upgrades : "empty",
-            smart: optionalServerData?.smart ? optionalServerData?.smart : [""]
-          },
-          { where: { serverid: id, userid: userid } }
-        );
-
-      });
-      return job.isRunning();
-    }
-  }
-  return false;
-};
-
-// Replaces cron job for optional url with new url.
-export const updateOptionalCron = async (newUrl: string, userid: number, id: number) => {
-
-  let extensionServer = await ExtensionServer.findOne({
     where: { serverid: id, userid: userid },
   });
 
-  const oldJobName = `${extensionServer?.dataValues.optionalUrl}-optional-${id}`;
+  let optionalServerData =
+    extensionServerBe?.dataValues.optionalUrl &&
+    extensionServerBe?.dataValues.trackOptions
+      ? await getExtSelectedData(
+          extensionServerBe?.dataValues.optionalUrl,
+          extensionServerBe?.dataValues.trackOptions,
+          userid
+        )
+      : null;
 
-  let oldJob;
-  for(let obj of scheduledJobs) {
-    if(obj.name === oldJobName) {
-      oldJob = obj;
-    }
+  if (optionalServerData?.errno) {
+    console.log(
+      "Problem with extension server, error: ",
+      optionalServerData.code
+    );
+    return;
   }
 
-  // Get rid of the old job.
-  if(oldJob) {
-    console.log("Stopping job: ", oldJob?.name);
-    oldJob.stop();
-  }
+  await ExtensionServer.update(
+    {
+      uptime: optionalServerData?.uptimeInHours
+        ? optionalServerData?.uptimeInHours
+        : 0,
+      upgrades: optionalServerData?.upgrades
+        ? optionalServerData?.upgrades
+        : "empty",
+      smart: optionalServerData?.smart ? optionalServerData?.smart : [""],
+    },
+    { where: { serverid: id, userid: userid } }
+  );
 
-  let res = await setupOptionalCron(newUrl, userid, id);
-  return res;
-}
+  return {
+    diskUsed: optionalServerData?.diskUsed ? optionalServerData?.diskUsed : -1,
+    diskSize: optionalServerData?.diskSize ? optionalServerData?.diskSize : -1,
+    memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : 0,
+    cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : 0,
+  };
+};
 
 // Util to start all jobs for servers in postgres if
 // those servers are not running.
@@ -290,12 +221,6 @@ export const startServerJobs = async () => {
   let servArr = await Server.findAll();
   servArr.map(async (server) => {
     let { url, userid, id } = server;
-
-    let extensionServerBe = await ExtensionServer.findOne({
-      where: {serverid: id, userid: userid }
-    });
-
-    let optionalUrl = extensionServerBe?.dataValues.optionalUrl;
 
     // Grab the last status of this server.
     let currStatus = await LiveServer.findOne({
@@ -307,26 +232,22 @@ export const startServerJobs = async () => {
     // If currStatus is null, we'll insert immediately.
     // This way we immediately have some data to work with.
     if (currStatus === null) {
-      console.log("Creating first entry with url: ", url);
-      let checkUp = await isUp(url);
-      let checkSsl: IResolvedValues | any = await getSslDetails(url);
-      let optionalData: IExtensionServerData = optionalUrl ? await getExtSelectedData(extensionServerBe?.dataValues.optionalUrl, extensionServerBe?.dataValues.trackOptions, userid) : null;
-
+      const urlData = await buildUrlData(url, userid, id, server);
+      const sslData = await buildSslData(url, userid, id, server);
+      const extensionData = await buildExtensionData(userid, id);
       await LiveServer.create({
-        status: checkUp,
-        url: url,
-        userid: userid,
-        serverid: id,
-        sslStatus: checkSsl.errno ? false : checkSsl.valid.toString(),
-        diskUsed: optionalData?.diskUsed ? optionalData.diskUsed : -1,
-        diskSize: optionalData?.diskSize ? optionalData.diskSize : -1,
-        memUsage: optionalData?.memUsage ? optionalData.memUsage : 0,
-        cpuUsage: optionalData?.cpuUsage ? optionalData.cpuUsage : 0
+        status: urlData?.status,
+        url: urlData.url,
+        userid: urlData.userid,
+        serverid: urlData.serverid,
+        sslStatus: sslData.sslStatus,
+        diskUsed: extensionData?.diskUsed ? extensionData?.diskUsed : -1,
+        diskSize: extensionData?.diskSize ? extensionData?.diskSize : -1,
+        memUsage: extensionData?.memUsage ? extensionData?.memUsage : 0,
+        cpuUsage: extensionData?.cpuUsage ? extensionData?.cpuUsage : 0,
       });
     }
 
-    setupUrlCron(url, userid, id);
-    setupSslCron(url, userid, id);
-    setupOptionalCron(url, userid, id);
+    setupGlobalCron(url, userid, id);
   });
 };
