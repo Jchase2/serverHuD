@@ -127,7 +127,7 @@ const extensionServerData = async (data: IUrlLiveData, socket: Socket) => {
     })
 
     if (extensionServerInfo?.optionalUrl) {
-      let res = await getMonitoredUsageData(data.id, userid, data?.upInc, data?.incCount);
+      let res = await getMonitoredUsageData(data.id, userid, data?.inc, data?.incCount);
       socket.emit("resourcesUpdate", {
         id: data.id,
         inc: data.inc,
