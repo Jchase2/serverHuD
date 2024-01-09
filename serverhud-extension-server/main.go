@@ -10,27 +10,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JChase2/serverhud-extension-server/middleware"
+	"github.com/JChase2/serverhud/serverhud-extension-server/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 )
-
-// GetStatus returns http status of url or ip
-// func GetStatus(url string) string {
-// 	resp, err := http.Get(url)
-// 	if err != nil {
-// 		return err.Error()
-// 	} else if resp.StatusCode == 200 {
-// 		return "Up"
-// 	}
-// 	return strconv.Itoa(resp.StatusCode)
-// }
 
 func GetUpgradeable() string {
 	cmd := exec.Command("/usr/bin/apt", "list", "--upgradeable")
@@ -42,30 +30,6 @@ func GetUpgradeable() string {
 	fmt.Printf("combined out:\n%s\n", string(out))
 	return string(out)
 }
-
-// GetCertStatus returns cert expiration for url
-// func GetCertStatus(url string, port string) string {
-
-// 	conn, err := net.Dial("tcp", url+":"+port)
-// 	if err != nil {
-// 		fmt.Println("NO")
-// 		return err.Error()
-// 	}
-// 	client := tls.Client(conn, &tls.Config{
-// 		ServerName: url,
-// 	})
-// 	defer client.Close()
-
-// 	if err := client.Handshake(); err != nil {
-// 		fmt.Println("Client handshake error")
-// 		return err.Error()
-// 	}
-
-// 	cert := client.ConnectionState().PeerCertificates[0]
-// 	var retMeUnformatted = cert.NotAfter.Format(time.RFC3339)
-// 	var retMe = strings.Split(retMeUnformatted, "T")
-// 	return retMe[0]
-// }
 
 // GetHostname returns hostname of system
 func GetHostname() string {
@@ -79,20 +43,8 @@ func GetUptime() uint64 {
 	return currUptime / 60 / 60
 }
 
-// GetDiskUsage gets remaining disk space in GB for curr partition.
-func GetDiskUsage() uint64 {
-	var diskUsage, _ = disk.Usage("./")
-	return diskUsage.Free / 1024 / 1024 / 1024
-}
-
-// Get Disk Size gets total disk space.
-func GetDiskSize() uint64 {
-	var diskSize, _ = disk.Usage("./")
-	println("DISK SIZE RETURNING: ", diskSize.Total/1024/1024/1024)
-	return diskSize.Total / 1024 / 1024 / 1024
-}
-
 // Get smart result
+// TODO: Make sure the drive is mounted
 func GetSmartInfo() []string {
 
 	// Gets a list of drives
@@ -210,19 +162,13 @@ func initRouter() *gin.Engine {
 	serverinfo := api.Group("/serverinfo").Use(middleware.Auth())
 
 	serverinfo.GET("/disk", func(c *gin.Context) {
-
-		println("Running /disk")
-
 		var req GetReq
 		if err := c.Bind(&req); err != nil {
 			println("ERROR WITH BIND: ", err)
 		}
 
 		c.JSON(200, gin.H{
-			"hostName":      GetHostname(),
-			"diskUsed":      GetDiskSize() - GetDiskUsage(),
-			"availableDisk": GetDiskUsage(),
-			"diskSize":      GetDiskSize(),
+			"diskData": GetCombinedDiskInfo(),
 		})
 	})
 
@@ -281,9 +227,7 @@ func initRouter() *gin.Engine {
 		c.JSON(200, gin.H{
 			"hostName":      GetHostname(),
 			"uptimeInHours": GetUptime(),
-			"diskUsed":      GetDiskSize() - GetDiskUsage(),
-			"availableDisk": GetDiskUsage(),
-			"diskSize":      GetDiskSize(),
+			"diskData":      GetCombinedDiskInfo(),
 			"upgrades":      GetUpgradeable(),
 			"smart":         GetSmartInfo(),
 			"memUsage":      GetMemUsage(),

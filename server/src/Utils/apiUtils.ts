@@ -22,8 +22,7 @@ export const getAllCombinedState = async (userid: number) => {
         attributes: [
           "status",
           "sslStatus",
-          "diskUsed",
-          "diskSize",
+          "diskData",
           "memUsage",
           "cpuUsage",
         ],
@@ -67,8 +66,7 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
       attributes: [
         "status",
         "sslStatus",
-        "diskUsed",
-        "diskSize",
+        "diskData",
         "memUsage",
         "cpuUsage",
       ],
@@ -76,11 +74,8 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
     });
     // Make sure we're returning -1 if we don't have these values.
     if (res && res.dataValues) {
-      res.dataValues.diskSize = res.dataValues.diskSize
-        ? res.dataValues.diskSize
-        : -1;
-      res.dataValues.diskUsed = res.dataValues.diskUsed
-        ? res.dataValues.diskUsed
+      res.dataValues.diskData = res.dataValues.diskData
+        ? res.dataValues.diskData
         : -1;
       res.dataValues.memUsage = res.dataValues.memUsage
         ? res.dataValues.memUsage
@@ -160,30 +155,22 @@ export const getMonitoredUpInfo = async (id: number, userid: number, upInc: stri
     }
   );
 
-  // Get last diskSize and diskUsed
+  // Get diskData
   let res = await LiveServer.findAll({
     where: {
       serverid: id,
       userid: userid,
     },
     order: [["time", "ASC"]],
-    attributes: ["time", "status", "diskSize", "diskUsed"],
+    attributes: ["time", "status", "diskData"],
     limit: 1,
     raw: true,
   });
 
-  const latestDiskSize = res[res.length - 1]?.diskSize
-    ? res[res.length - 1]?.diskSize
-    : -1;
-  const latestDiskUsed = res[res.length - 1]?.diskSize
-    ? res[res.length - 1]?.diskSize
-    : -1;
-
-
   const diffArr = await sequelize.query<LiveServer>(
-    `SELECT time, status, "diskSize", "diskUsed"
+    `SELECT time, status, "diskData"
     FROM (
-        SELECT time, status, "diskSize", "diskUsed",
+        SELECT time, status, "diskData",
                LAG(status) OVER (ORDER BY "time") AS prev_status
         FROM liveserver
         WHERE serverid = :id AND userid = :userid
@@ -239,8 +226,7 @@ export const getMonitoredUpInfo = async (id: number, userid: number, upInc: stri
     downtime: secondsToText(totalDowntime),
     percentageUp: percentageUp,
     percentageDown: percentageDown,
-    diskSize: latestDiskSize,
-    diskUsed: latestDiskUsed,
+    diskData: res[0]?.diskData,
   };
 };
 

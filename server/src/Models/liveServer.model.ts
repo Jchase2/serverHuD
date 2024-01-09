@@ -31,11 +31,11 @@ export class LiveServer extends Model {
   @Column
   sslStatus!: string;
 
-  @Column
-  diskUsed!: number;
-
-  @Column
-  diskSize!: number;
+  @Column(DataType.JSONB)
+  diskData!: [{
+    diskUsed: number,
+    diskSize: number
+  }]
 
   @Column({ type: DataType.DOUBLE })
   memUsage!: number;

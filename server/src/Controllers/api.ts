@@ -203,8 +203,12 @@ const liveServerSchema = Joi.object({
   status: Joi.string().required(),
   sslStatus: Joi.string().required(),
   memUsage: Joi.number(),
-  diskUsed: Joi.number(),
-  diskSize: Joi.number(),
+  diskData: Joi.object([
+    {
+      diskUsed: Joi.number(),
+      diskSize: Joi.number(),
+    }
+  ]),
   cpuUsage: Joi.number(),
 });
 
@@ -313,8 +317,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       url,
       status: status,
       sslStatus: sslInfo.valid.toString(),
-      diskUsed: extensionData ? extensionData.diskUsed : -1,
-      diskSize: extensionData ? extensionData.diskSize : -1,
+      diskData: extensionData ? extensionData?.DiskData : -1,
       memUsage: extensionData ? extensionData.memUsage : 0,
       cpuUsage: extensionData ? extensionData.cpuUsage : 0,
     });
@@ -417,8 +420,7 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
       url,
       status: status,
       sslStatus: sslInfo.valid.toString(),
-      diskUsed: extensionData ? extensionData.diskUsed : -1,
-      diskSize: extensionData ? extensionData.diskSize : -1,
+      diskData: extensionData ? extensionData.diskData : -1,
       memUsage: extensionData ? extensionData.memUsage : 0,
       cpuUsage: extensionData ? extensionData.cpuUsage : 0,
     });

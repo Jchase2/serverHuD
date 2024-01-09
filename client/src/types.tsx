@@ -10,8 +10,12 @@ export interface IAddServer {
 export interface IData extends IAddServer {
   cpuUsage: number;
   createdAt: string;
-  diskSize: number;
-  diskUsed: number;
+  diskData: [{
+    name: string;
+    type: string;
+    diskSize: number;
+    diskUsed: number;
+  }] | number;
   id: number;
   memUsage: number;
   updatedAt: string;
@@ -47,8 +51,12 @@ export interface IUpdateServer {
 export interface ILiveData {
   id: number;
   upInc: string;
-  diskSize: number;
-  diskUsed: number;
+  diskData: [{
+    name: string;
+    type: string;
+    diskSize: number;
+    diskUsed: number;
+  }] | number;
   downtime: number;
   percentageDown: number;
   percentageUp: number;
@@ -66,6 +74,17 @@ export interface IResourceData {
 }
 
 export interface IDisk {
+  diskData:[{
+    name: string;
+    type: string;
+    diskSize: number;
+    diskUsed: number;
+  }] | number;
+}
+
+export interface IDiskElement {
+  name: string;
+  type: string;
   diskSize: number;
   diskUsed: number;
 }

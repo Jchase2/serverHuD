@@ -18,8 +18,10 @@ export interface IUrlLiveData {
 
 export interface IExtensionServerData {
   cpuUsage: number,
-  diskSize: number,
-  diskUsed: number,
+  diskData: [{
+    diskSize: number,
+    diskUsed: number,
+  }],
   hostName: string,
   memUsage: number,
   upgrades: string,

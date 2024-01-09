@@ -1,10 +1,11 @@
 import { useColorMode } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { VictoryLabel, VictoryPie } from "victory";
-import { IDisk } from "../../types";
+import { IDiskElement } from "../../types";
 
 interface IDiskGraphProps {
-  data: IDisk;
+  data: IDiskElement;
+  key: number;
 }
 
 const DiskGraph = (props: IDiskGraphProps) => {
@@ -20,9 +21,9 @@ const DiskGraph = (props: IDiskGraphProps) => {
   useEffect(() => {
     setGraphicData(props.data); // Setting the data that we want to display
     setEndAngle(360);
-  }, [props.data]);
+  }, [props.data, props.key]);
 
-  const data = [
+  let data = [
     {
       x: `Used`,
       y: Number(graphicData.diskUsed),

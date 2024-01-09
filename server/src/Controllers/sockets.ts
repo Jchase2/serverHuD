@@ -101,8 +101,7 @@ const urlLiveCheck = async (data: IUrlLiveData, socket: Socket) => {
       id: data.id,
       percentageUp: res.percentageUp,
       percentageDown: res.percentageDown,
-      diskUsed: res.diskUsed,
-      diskSize: res.diskSize,
+      diskData: res.diskData,
       upInc: data?.upInc,
       uptime: res.uptime,
       downtime: res.downtime

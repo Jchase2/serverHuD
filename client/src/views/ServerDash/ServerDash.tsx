@@ -98,8 +98,7 @@ const ServerDash = () => {
           />
         ) : null}
         {data?.trackOptions?.trackDisk &&
-        data?.diskUsed > -1 &&
-        data?.diskSize > -1 ? (
+        data?.diskData !== -1 ? (
           <DiskStatus data={data} />
         ) : null}
         {data?.trackOptions?.trackUpgrades &&

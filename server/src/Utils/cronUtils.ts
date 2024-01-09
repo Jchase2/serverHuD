@@ -52,8 +52,7 @@ export const setupGlobalCron = async (
             userid: urlData.userid,
             serverid: urlData.serverid,
             sslStatus: sslData.sslStatus,
-            diskUsed: extensionData?.diskUsed ? extensionData?.diskUsed : -1,
-            diskSize: extensionData?.diskSize ? extensionData?.diskSize : -1,
+            diskData: extensionData?.diskData ? extensionData?.diskData : -1,
             memUsage: extensionData?.memUsage ? extensionData?.memUsage : 0,
             cpuUsage: extensionData?.cpuUsage ? extensionData?.cpuUsage : 0,
           });
@@ -208,8 +207,7 @@ export const buildExtensionData = async (userid: number, id: number) => {
   );
 
   return {
-    diskUsed: optionalServerData?.diskUsed ? optionalServerData?.diskUsed : -1,
-    diskSize: optionalServerData?.diskSize ? optionalServerData?.diskSize : -1,
+    diskData: optionalServerData?.diskData ? optionalServerData?.diskData : -1,
     memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : 0,
     cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : 0,
   };
@@ -241,8 +239,7 @@ export const startServerJobs = async () => {
         userid: urlData.userid,
         serverid: urlData.serverid,
         sslStatus: sslData.sslStatus,
-        diskUsed: extensionData?.diskUsed ? extensionData?.diskUsed : -1,
-        diskSize: extensionData?.diskSize ? extensionData?.diskSize : -1,
+        diskData: extensionData?.diskData ? extensionData?.diskData : -1,
         memUsage: extensionData?.memUsage ? extensionData?.memUsage : 0,
         cpuUsage: extensionData?.cpuUsage ? extensionData?.cpuUsage : 0,
       });
