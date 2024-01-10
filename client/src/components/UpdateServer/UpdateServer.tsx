@@ -43,7 +43,10 @@ export const UpdateServer = (props: IUpdateServerProps) => {
     url: "",
     optionalUrl: "",
     name: "",
-    emailNotifications: data?.emailNotifications,
+    serverOptions: {
+      emailNotifications: false,
+      checkHttp: true,
+    },
     interval: data?.interval,
     trackOptions: {
       trackDisk: true,
@@ -91,7 +94,10 @@ export const UpdateServer = (props: IUpdateServerProps) => {
         ? serverState.optionalUrl
         : data.optionalUrl,
       name: serverState.name ? serverState.name : data.name,
-      emailNotifications: serverState.emailNotifications,
+      serverOptions: {
+        emailNotifications: serverState.serverOptions.emailNotifications,
+        checkHttp: serverState.serverOptions.checkHttp,
+      },
       interval: serverState?.interval,
       trackOptions: {
         trackDisk: checkedItems.trackDisk,
@@ -105,7 +111,10 @@ export const UpdateServer = (props: IUpdateServerProps) => {
       url: "",
       optionalUrl: "",
       name: "",
-      emailNotifications: !data?.emailNotifications,
+      serverOptions: {
+        emailNotifications: !data?.serverOptions.emailNotifications,
+        checkHttp: !data?.serverOptions.checkHttp,
+      },
       interval: data?.interval,
       trackOptions: {
         trackDisk: checkedItems.trackDisk,
@@ -181,17 +190,35 @@ export const UpdateServer = (props: IUpdateServerProps) => {
               onChange={handleChange}
             />
             <Checkbox
-              pt={4}
+              pt={2}
               pb={2}
-              isChecked={serverState.emailNotifications}
+              isChecked={serverState.serverOptions.emailNotifications}
               onChange={(e) =>
                 setServerState({
                   ...serverState,
-                  emailNotifications: e.target.checked,
+                  serverOptions: {
+                    ...serverState.serverOptions,
+                    emailNotifications: e.target.checked,
+                  },
                 })
               }
             >
               Recieve Email Notifications?
+            </Checkbox>
+            <Checkbox
+              pt={2}
+              isChecked={serverState.serverOptions.checkHttp}
+              onChange={(e) =>
+                setServerState({
+                  ...serverState,
+                  serverOptions: {
+                    ...serverState.serverOptions,
+                    checkHttp: e.target.checked,
+                  },
+                })
+              }
+            >
+              Check http status code?
             </Checkbox>
             {data?.optionalUrl ? (
               <Text fontSize="md" mt={2}>

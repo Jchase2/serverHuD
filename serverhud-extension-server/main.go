@@ -44,7 +44,6 @@ func GetUptime() uint64 {
 }
 
 // Get smart result
-// TODO: Make sure the drive is mounted
 func GetSmartInfo() []string {
 
 	// Gets a list of drives
@@ -72,13 +71,19 @@ func GetSmartInfo() []string {
 	}
 
 	// Creates smartResults array and gets the result of smartctl -H
-	// into it for each drive.
+	// into it for each drive. Only checks drives that are mounted.
 	var smartResults = make([][]byte, len(smartArr))
 	for i := 0; i < len(smartArr); i++ {
-		var currArr = smartArr[i]
-		smartResults[i], err = exec.Command("smartctl", "-H", currArr[0], currArr[1], currArr[2]).CombinedOutput()
-		if err != nil {
-			fmt.Print("ERROR FROM RES IS: ", err.Error())
+		grep := exec.Command("grep", smartArr[i][0], "/proc/mounts")
+		out, grepErr := grep.CombinedOutput()
+		if grepErr != nil {
+			fmt.Println("DISK LIST GREP ERROR (this is usually ok): ", grepErr)
+		} else if out != nil {
+			var currArr = smartArr[i]
+			smartResults[i], err = exec.Command("smartctl", "-H", currArr[0], currArr[1], currArr[2]).CombinedOutput()
+			if err != nil {
+				fmt.Print("ERROR FROM RES IS: ", err.Error())
+			}
 		}
 	}
 

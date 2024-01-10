@@ -23,7 +23,14 @@ export class Server extends Model {
   name!: string;
 
   @Column
-  emailNotifications!: boolean;
+  httpCode!: number;
+
+  @Column(DataType.JSONB)
+  serverOptions!: {
+    emailNotifications: boolean,
+    checkHttp: boolean,
+    trackSsl: boolean
+  };
 
   @Column
   interval!: string

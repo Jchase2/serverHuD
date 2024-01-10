@@ -37,6 +37,7 @@ const ListServer = (props: ListServerProps) => {
         id: indServerData.id,
         url: indServerData.url,
         optionalUrl: indServerData.optionalUrl,
+        httpCode: indServerData.httpCode,
         status: indServerData.status,
         sslStatus: indServerData.sslStatus,
         incCount: 12,

@@ -27,6 +27,22 @@ export const getSslDetails = async (hostname: string) => {
   }
 };
 
+export const getHttpStatusCode = async (url: string) => {
+  try {
+    let resp = await axios({
+      method: "get",
+      url: url,
+    });
+    return resp.status;
+  } catch (err: any) {
+    if(err?.response && err.response.status) {
+      return err.response.status
+    }
+    console.log("Failed to get http status code: ", err);
+    return -1;
+  }
+}
+
 const extensionServerLogin = async (url: string, userid: number) => {
 
   // Check if we already have a valid JWT or if we need to login again.
@@ -207,7 +223,6 @@ export const getExtSelectedData = async (
     if (trackOptions && trackOptions.trackSmart) {
       const smartData = optionalUrl ? await extensionServerSmart(optionalUrl, userid) : null;
       combinedRes = { ...combinedRes, ...smartData };
-      console.log("SMART DATA IS: ", smartData);
     }
 
     return combinedRes;

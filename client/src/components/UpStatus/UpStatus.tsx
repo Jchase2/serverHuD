@@ -13,13 +13,16 @@ interface IUpStatusProps {
 }
 
 export const UpStatus = (props: IUpStatusProps) => {
+  
   const { serverData, upData } = props;
 
   return (
     <Stack align={"center"}>
       <HStack>
         <Icon as={CiServer} mt={0.5} />
-        <Text fontSize={"sm"} m={0}>Host: {serverData?.url}</Text>
+        <Text fontSize={"sm"} m={0}>
+          Host: {serverData?.url}
+        </Text>
       </HStack>
       {serverData?.status === "up" ? (
         <Text fontSize={"sm"}>
@@ -39,6 +42,23 @@ export const UpStatus = (props: IUpStatusProps) => {
           <TriangleDownIcon color="red.500" /> SSL Status: Down!
         </Text>
       )}
+      {serverData?.serverOptions?.checkHttp ? (
+        serverData?.httpCode === -1 ? (
+          <Text fontSize={"sm"}>
+            <TriangleDownIcon color="red.500" /> Http Code: Not Available
+          </Text>
+        ) : serverData?.httpCode && serverData?.httpCode < 400 ? (
+          <Text fontSize={"sm"}>
+            <TriangleUpIcon color="green.500" /> HTTP Code:{" "}
+            {serverData?.httpCode}
+          </Text>
+        ) : (
+          <Text fontSize={"sm"}>
+            <TriangleDownIcon color="red.500" /> Http Code:{" "}
+            {serverData?.httpCode}
+          </Text>
+        )
+      ) : null}
       {serverData?.sslStatus === "true" ? (
         <Text fontSize={"sm"}>
           <InfoOutlineIcon /> SSL Expires: {serverData?.sslExpiry} Days
@@ -54,7 +74,7 @@ export const UpStatus = (props: IUpStatusProps) => {
           <InfoOutlineIcon /> Recorded Uptime: {upData?.uptime}
         </Text>
       ) : null}
-            {upData?.downtime ? (
+      {upData?.downtime ? (
         <Text fontSize={"sm"}>
           <InfoOutlineIcon /> Recorded Downtime: {upData?.downtime}
         </Text>

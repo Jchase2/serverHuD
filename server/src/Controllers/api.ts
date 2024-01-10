@@ -9,6 +9,7 @@ import {
   getSslDetails,
   extensionServerData,
   isUp,
+  getHttpStatusCode,
 } from "../Utils/serverDetails";
 import {
   setupGlobalCron,
@@ -155,7 +156,6 @@ export const getServerUsage = async (ctx: koa.Context, next: Function) => {
   }
 };
 
-// TODO: Verify user owns server.
 export const deleteServer = async (ctx: koa.Context, next: Function) => {
   try {
     const user = await User.findByPk(ctx.state.user._id);
@@ -192,8 +192,12 @@ const serverSchema = Joi.object({
   url: Joi.string().uri().required(),
   name: Joi.string().required(),
   sslExpiry: Joi.number(),
-  emailNotifications: Joi.boolean().required(),
-  interval: Joi.string().required()
+  interval: Joi.string().required(),
+  httpCode: Joi.number(),
+  serverOptions: {
+    emailNotifications: Joi.boolean().required(),
+    checkHttp: Joi.boolean().required()
+  },
 });
 
 const liveServerSchema = Joi.object({
@@ -203,12 +207,7 @@ const liveServerSchema = Joi.object({
   status: Joi.string().required(),
   sslStatus: Joi.string().required(),
   memUsage: Joi.number(),
-  diskData: Joi.object([
-    {
-      diskUsed: Joi.number(),
-      diskSize: Joi.number(),
-    }
-  ]),
+  diskData: Joi.array<object>(),
   cpuUsage: Joi.number(),
 });
 
@@ -257,7 +256,7 @@ const extensionServerUpdateSchema = Joi.object({
   }
 */
 export const addServer = async (ctx: koa.Context, next: Function) => {
-  const { url, optionalUrl, name, trackOptions, emailNotifications, interval } = ctx.request.body;
+  const { url, optionalUrl, name, trackOptions, serverOptions, interval } = ctx.request.body;
 
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
@@ -292,6 +291,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
 
     const user = await User.findByPk(ctx.state.user._id);
     const status = await isUp(url);
+    const httpStatus = await getHttpStatusCode(url);
 
     if (!user) {
       ctx.body = "User not found!";
@@ -304,7 +304,11 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       url,
       name: name,
       sslExpiry: sslInfo.daysRemaining,
-      emailNotifications: emailNotifications,
+      httpCode: httpStatus,
+      serverOptions: {
+        emailNotifications: serverOptions?.emailNotifications,
+        checkHttp: serverOptions?.checkHttp
+      },
       interval: interval
     });
 
@@ -317,7 +321,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       url,
       status: status,
       sslStatus: sslInfo.valid.toString(),
-      diskData: extensionData ? extensionData?.DiskData : -1,
+      diskData: extensionData ? extensionData?.DiskData : [],
       memUsage: extensionData ? extensionData.memUsage : 0,
       cpuUsage: extensionData ? extensionData.cpuUsage : 0,
     });
@@ -346,7 +350,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
         Server.destroy({ where: { id: error?._original?.serverid } });
       }
       ctx.body =
-        "Ensure ServerHuD servers are running and the input is correct.";
+        "Ensure ServerHuD backend is running and the input is correct.";
       ctx.status = 422;
     } else {
       ctx.body = `${error}`;
@@ -362,7 +366,7 @@ export const getTimeseriesUpData = async (ctx: koa.Context, next: Function) => {
 };
 
 export const updateServer = async (ctx: koa.Context, next: Function) => {
-  const { url, optionalUrl, name, trackOptions, emailNotifications, interval } = ctx.request.body;
+  const { url, optionalUrl, name, trackOptions, serverOptions, interval } = ctx.request.body;
 
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
@@ -395,13 +399,18 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
     }
 
     const status = await isUp(url);
+    const httpStatus = await getHttpStatusCode(url);
 
     const value = await serverSchema.validateAsync({
       userid: user.id,
       url,
       name: name,
       sslExpiry: sslInfo.daysRemaining,
-      emailNotifications: emailNotifications,
+      httpCode: httpStatus,
+      serverOptions: {
+        emailNotifications: serverOptions?.emailNotifications,
+        checkHttp: serverOptions?.checkHttp
+      },
       interval: interval
     });
 
@@ -420,7 +429,7 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
       url,
       status: status,
       sslStatus: sslInfo.valid.toString(),
-      diskData: extensionData ? extensionData.diskData : -1,
+      diskData: extensionData ? extensionData.diskData : [],
       memUsage: extensionData ? extensionData.memUsage : 0,
       cpuUsage: extensionData ? extensionData.cpuUsage : 0,
     });

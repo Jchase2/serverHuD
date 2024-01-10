@@ -76,7 +76,7 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
     if (res && res.dataValues) {
       res.dataValues.diskData = res.dataValues.diskData
         ? res.dataValues.diskData
-        : -1;
+        : [];
       res.dataValues.memUsage = res.dataValues.memUsage
         ? res.dataValues.memUsage
         : 0;

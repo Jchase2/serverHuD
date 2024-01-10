@@ -35,7 +35,7 @@ export class LiveServer extends Model {
   diskData!: [{
     diskUsed: number,
     diskSize: number
-  }]
+  }] 
 
   @Column({ type: DataType.DOUBLE })
   memUsage!: number;

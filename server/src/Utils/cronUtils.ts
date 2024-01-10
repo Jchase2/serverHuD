@@ -3,8 +3,8 @@ import { Cron, scheduledJobs } from "croner";
 import {
   isUp,
   getSslDetails,
-  extensionServerData,
   getExtSelectedData,
+  getHttpStatusCode,
 } from "./serverDetails";
 import { Server } from "../Models/server.model";
 import { IResolvedValues } from "../types";
@@ -52,7 +52,7 @@ export const setupGlobalCron = async (
             userid: urlData.userid,
             serverid: urlData.serverid,
             sslStatus: sslData.sslStatus,
-            diskData: extensionData?.diskData ? extensionData?.diskData : -1,
+            diskData: extensionData?.diskData ? extensionData?.diskData : [],
             memUsage: extensionData?.memUsage ? extensionData?.memUsage : 0,
             cpuUsage: extensionData?.cpuUsage ? extensionData?.cpuUsage : 0,
           });
@@ -98,6 +98,7 @@ export const buildUrlData = async (
   server: Server
 ) => {
   let checkUp = await isUp(url);
+  let httpStatus = await getHttpStatusCode(url);
 
   let currStatus = await LiveServer.findOne({
     where: { serverid: server?.id, userid: userid },
@@ -106,7 +107,7 @@ export const buildUrlData = async (
   });
 
   if (
-    server?.dataValues.emailNotifications &&
+    server?.dataValues.serverOptions?.emailNotifications &&
     checkUp !== currStatus?.dataValues.status
   ) {
     sendUpdate(
@@ -114,8 +115,25 @@ export const buildUrlData = async (
     );
   }
 
+  if (
+    server?.dataValues.serverOptions?.httpCode &&
+    httpStatus !== server?.dataValues?.httpCode
+  ) {
+    Server.update(
+      {
+        httpCode: httpStatus,
+      },
+      { where: { id: id, userid: userid } }
+    );
+
+    sendUpdate(
+      `Http Code has changed to <b>${httpStatus}</b> for domain ${currStatus?.dataValues.url}`
+    );
+  }
+
   return {
     status: checkUp,
+    httpStatus: httpStatus,
     url: url,
     userid: userid,
     serverid: id,
@@ -141,7 +159,7 @@ export const buildSslData = async (
       // or if result of ssl isn't equal to stored ssl status
       checkSsl?.valid?.toString() !== currStatus?.dataValues.sslStatus)
   ) {
-    if (server?.dataValues.emailNotifications) {
+    if (server?.dataValues?.serverOptions.emailNotifications) {
       sendUpdate(
         `SSL Status has changed to <b>${
           checkSsl.errno ? "Down" : checkSsl.valid.toString()
@@ -163,7 +181,7 @@ export const buildSslData = async (
       {
         sslExpiry: checkSsl.daysRemaining,
       },
-      { where: { id: id } }
+      { where: { id: id, userid: userid } }
     );
   }
 
@@ -207,7 +225,7 @@ export const buildExtensionData = async (userid: number, id: number) => {
   );
 
   return {
-    diskData: optionalServerData?.diskData ? optionalServerData?.diskData : -1,
+    diskData: optionalServerData?.diskData ? optionalServerData?.diskData : [],
     memUsage: optionalServerData?.memUsage ? optionalServerData?.memUsage : 0,
     cpuUsage: optionalServerData?.cpuUsage ? optionalServerData?.cpuUsage : 0,
   };
@@ -239,7 +257,7 @@ export const startServerJobs = async () => {
         userid: urlData.userid,
         serverid: urlData.serverid,
         sslStatus: sslData.sslStatus,
-        diskData: extensionData?.diskData ? extensionData?.diskData : -1,
+        diskData: extensionData?.diskData ? extensionData?.diskData : [],
         memUsage: extensionData?.memUsage ? extensionData?.memUsage : 0,
         cpuUsage: extensionData?.cpuUsage ? extensionData?.cpuUsage : 0,
       });

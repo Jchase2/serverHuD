@@ -10,6 +10,7 @@ interface IAddServerProps {
 }
 
 const AddServer = (props: IAddServerProps) => {
+  
   const [serverState, setServerState] = useState({
     url: "",
     optionalUrl: "",
@@ -17,7 +18,10 @@ const AddServer = (props: IAddServerProps) => {
     status: "",
     sslStatus: "",
     sslExpiry: 0,
-    emailNotifications: false,
+    serverOptions: {
+      emailNotifications: false,
+      checkHttp: false,
+    },
     interval: "1-minute",
     trackOptions: {
       trackDisk: true,
@@ -75,7 +79,10 @@ const AddServer = (props: IAddServerProps) => {
       status: "",
       sslStatus: "",
       sslExpiry: 0,
-      emailNotifications: false,
+      serverOptions: {
+        emailNotifications: false,
+        checkHttp: false,
+      },
       interval: "1-minute",
       trackOptions: {
         trackDisk: checkedItems.trackDisk,
@@ -122,16 +129,33 @@ const AddServer = (props: IAddServerProps) => {
           />
           <Checkbox
             pt={2}
-            pb={2}
-            isChecked={serverState.emailNotifications}
+            isChecked={serverState.serverOptions.emailNotifications}
             onChange={(e) =>
               setServerState({
                 ...serverState,
-                emailNotifications: e.target.checked,
+                serverOptions:{
+                  ...serverState.serverOptions,
+                  emailNotifications: e.target.checked
+                },
               })
             }
           >
             Recieve Email Notifications?
+          </Checkbox>
+          <Checkbox
+            pb={2}
+            isChecked={serverState.serverOptions.checkHttp}
+            onChange={(e) =>
+              setServerState({
+                ...serverState,
+                serverOptions:{
+                  ...serverState.serverOptions,
+                  checkHttp: e.target.checked
+                },
+              })
+            }
+          >
+            Check http status code?
           </Checkbox>
           {serverState?.optionalUrl ? (
             <UpdateOptionalServer

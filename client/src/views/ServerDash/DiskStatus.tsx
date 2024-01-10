@@ -44,8 +44,8 @@ const ResourceUsage = (props: ResourceUsageProps) => {
         <CardHeader textAlign={"center"}>
           <Heading size="md">Live Disk Usage</Heading>
         </CardHeader>
-        <Select placeholder="Select Drive" onChange={handleSelectChange}>
-          {typeof props?.data?.diskData === "object" ? (
+        <Select placeholder="Select Drive" onChange={handleSelectChange} pl={2} pr={2}>
+          {typeof props?.data?.diskData === "object" && props?.data?.diskData.length > 0 ? (
             props?.data?.diskData.map((elem) => (
               <option key={elem.name} value={elem.name}>Disk: {elem.name}</option>
             ))

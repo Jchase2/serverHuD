@@ -19,8 +19,7 @@ import { Socket, io } from "socket.io-client";
 import { queryClient } from "./services/socket";
 import { verifyUser, userLogout } from "./services/api/api";
 
-// TODO: Replace localhost with .env backend url.
-export const socket = io("localhost:3001", {
+export const socket = io(process.env.REACT_APP_BACKEND_URL || 'localhost:3001', {
   withCredentials: true,
   transports: ["websocket"],
   autoConnect: false,

@@ -49,6 +49,7 @@ const ServerDash = () => {
         status: data.status,
         sslStatus: data.sslStatus,
         optionalUrl: data.optionalUrl ? true : false,
+        httpCode: data.httpCode,
         incCount: resourceIncCount,
         inc: resourceInc,
         upInc: upInc,
@@ -98,7 +99,7 @@ const ServerDash = () => {
           />
         ) : null}
         {data?.trackOptions?.trackDisk &&
-        data?.diskData !== -1 ? (
+        data?.diskData.length > 0 ? (
           <DiskStatus data={data} />
         ) : null}
         {data?.trackOptions?.trackUpgrades &&

@@ -34,6 +34,7 @@ const Server = (props: ServerListProps) => {
       socket.emit("upCheck", {
         id: indServerData.id,
         url: indServerData.url,
+        httpCode: indServerData.httpCode,
         optionalUrl: indServerData.optionalUrl,
         status: indServerData.status,
         sslStatus: indServerData.sslStatus,

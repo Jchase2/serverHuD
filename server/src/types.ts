@@ -30,8 +30,8 @@ export interface IExtensionServerData {
 }
 
 export interface ITrackOptions {
-  trackDisk: Boolean
-  trackResources: Boolean
-  trackUpgrades: Boolean
-  trackSmart: Boolean
+  trackDisk: Boolean,
+  trackResources: Boolean,
+  trackUpgrades: Boolean,
+  trackSmart: Boolean,
 }

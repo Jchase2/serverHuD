@@ -15,7 +15,7 @@ export interface IData extends IAddServer {
     type: string;
     diskSize: number;
     diskUsed: number;
-  }] | number;
+  }];
   id: number;
   memUsage: number;
   updatedAt: string;
@@ -24,13 +24,17 @@ export interface IData extends IAddServer {
   uptime: number;
   downtime: number;
   userid: number;
-  emailNotifications: boolean;
+  serverOptions: {
+    emailNotifications: boolean;
+    checkHttp: boolean;
+  };
+  httpCode: number;
   interval: string;
   trackOptions: {
     trackDisk: boolean,
     trackResources: boolean,
     trackUpgrades: boolean,
-    trackSmart: boolean
+    trackSmart: boolean,
   }
 }
 
@@ -38,7 +42,10 @@ export interface IUpdateServer {
   url: string;
   optionalUrl: string;
   name: string;
-  emailNotifications: boolean;
+  serverOptions: {
+    emailNotifications: boolean;
+    checkHttp: boolean;
+  }
   interval: string;
   trackOptions: {
     trackDisk: boolean,
@@ -56,7 +63,7 @@ export interface ILiveData {
     type: string;
     diskSize: number;
     diskUsed: number;
-  }] | number;
+  }];
   downtime: number;
   percentageDown: number;
   percentageUp: number;
@@ -79,7 +86,7 @@ export interface IDisk {
     type: string;
     diskSize: number;
     diskUsed: number;
-  }] | number;
+  }];
 }
 
 export interface IDiskElement {
