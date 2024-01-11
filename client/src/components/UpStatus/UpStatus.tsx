@@ -13,7 +13,7 @@ interface IUpStatusProps {
 }
 
 export const UpStatus = (props: IUpStatusProps) => {
-  
+
   const { serverData, upData } = props;
 
   return (

@@ -53,6 +53,7 @@ export const setupGlobalCron = async (
             serverid: urlData.serverid,
             sslStatus: sslData.sslStatus,
             diskData: extensionData?.diskData ? extensionData?.diskData : [],
+            httpCode: urlData?.httpCode ? urlData.httpCode : 0,
             memUsage: extensionData?.memUsage ? extensionData?.memUsage : 0,
             cpuUsage: extensionData?.cpuUsage ? extensionData?.cpuUsage : 0,
           });
@@ -102,7 +103,7 @@ export const buildUrlData = async (
 
   let currStatus = await LiveServer.findOne({
     where: { serverid: server?.id, userid: userid },
-    attributes: ["status", "url"],
+    attributes: ["status", "url", "httpCode"],
     order: [["time", "DESC"]],
   });
 
@@ -117,15 +118,8 @@ export const buildUrlData = async (
 
   if (
     server?.dataValues.serverOptions?.httpCode &&
-    httpStatus !== server?.dataValues?.httpCode
+    httpStatus !== currStatus?.dataValues?.httpCode
   ) {
-    Server.update(
-      {
-        httpCode: httpStatus,
-      },
-      { where: { id: id, userid: userid } }
-    );
-
     sendUpdate(
       `Http Code has changed to <b>${httpStatus}</b> for domain ${currStatus?.dataValues.url}`
     );
@@ -133,7 +127,7 @@ export const buildUrlData = async (
 
   return {
     status: checkUp,
-    httpStatus: httpStatus,
+    httpCode: httpStatus,
     url: url,
     userid: userid,
     serverid: id,
@@ -240,7 +234,7 @@ export const startServerJobs = async () => {
 
     // Grab the last status of this server.
     let currStatus = await LiveServer.findOne({
-      where: { serverid: id },
+      where: { serverid: id, userid: userid },
       attributes: ["status", "sslStatus"],
       order: [["time", "DESC"]],
     });

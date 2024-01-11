@@ -67,6 +67,7 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
         "status",
         "sslStatus",
         "diskData",
+        "httpCode",
         "memUsage",
         "cpuUsage",
       ],

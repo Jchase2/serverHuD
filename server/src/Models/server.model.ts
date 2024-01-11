@@ -22,9 +22,6 @@ export class Server extends Model {
   @Column
   name!: string;
 
-  @Column
-  httpCode!: number;
-
   @Column(DataType.JSONB)
   serverOptions!: {
     emailNotifications: boolean,

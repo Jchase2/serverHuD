@@ -4,8 +4,8 @@ import WrapServers from "./WrapServers";
 import { IData } from "../../types";
 
 interface DisplayServerListProps {
-  isListView: string | null,
-  data: IData[]
+  isListView: string | null;
+  data: IData[];
 }
 
 const DisplayServerList = (props: DisplayServerListProps) => {
@@ -19,8 +19,12 @@ const DisplayServerList = (props: DisplayServerListProps) => {
           display={"flex"}
           spacing={["40vw", "35vw", "35vw", "60vw", "27vw", "28vw"]}
         >
-          <Text>Host / Status</Text>
-          <Text>SSL Status</Text>
+          {data?.length ? (
+            <>
+              <Text>Host / Status</Text>
+              <Text>SSL Status</Text>
+            </>
+          ) : null}
         </HStack>
       ) : null}
       {isListView === "true" ? (

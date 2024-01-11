@@ -181,11 +181,12 @@ const httpDbChecker = async (data: ISocketData, socket: Socket) => {
   let userid = getUserId(cookies?.accessToken);
 
   // Check database for previous state
-  let serv = await Server.findOne({
+  let serv = await LiveServer.findOne({
     where: {
-      id: data.id,
+      serverid: data.id,
       userid: userid,
     },
+    order: [['time', 'DESC']]
   });
 
   let res = serv?.dataValues.httpCode;

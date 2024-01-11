@@ -193,7 +193,6 @@ const serverSchema = Joi.object({
   name: Joi.string().required(),
   sslExpiry: Joi.number(),
   interval: Joi.string().required(),
-  httpCode: Joi.number(),
   serverOptions: {
     emailNotifications: Joi.boolean().required(),
     checkHttp: Joi.boolean().required()
@@ -208,6 +207,7 @@ const liveServerSchema = Joi.object({
   sslStatus: Joi.string().required(),
   memUsage: Joi.number(),
   diskData: Joi.array<object>(),
+  httpCode: Joi.number(),
   cpuUsage: Joi.number(),
 });
 
@@ -304,7 +304,6 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       url,
       name: name,
       sslExpiry: sslInfo.daysRemaining,
-      httpCode: httpStatus,
       serverOptions: {
         emailNotifications: serverOptions?.emailNotifications,
         checkHttp: serverOptions?.checkHttp
@@ -322,6 +321,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       status: status,
       sslStatus: sslInfo.valid.toString(),
       diskData: extensionData ? extensionData?.DiskData : [],
+      httpCode: httpStatus,
       memUsage: extensionData ? extensionData.memUsage : 0,
       cpuUsage: extensionData ? extensionData.cpuUsage : 0,
     });
@@ -406,7 +406,6 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
       url,
       name: name,
       sslExpiry: sslInfo.daysRemaining,
-      httpCode: httpStatus,
       serverOptions: {
         emailNotifications: serverOptions?.emailNotifications,
         checkHttp: serverOptions?.checkHttp
@@ -430,6 +429,7 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
       status: status,
       sslStatus: sslInfo.valid.toString(),
       diskData: extensionData ? extensionData.diskData : [],
+      httpCode: httpStatus,
       memUsage: extensionData ? extensionData.memUsage : 0,
       cpuUsage: extensionData ? extensionData.cpuUsage : 0,
     });
