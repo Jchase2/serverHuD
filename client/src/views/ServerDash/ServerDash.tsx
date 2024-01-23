@@ -22,6 +22,7 @@ import DiskStatus from "./DiskStatus";
 import { UpdateServer } from "../../components/UpdateServer/UpdateServer";
 import { DeleteServer } from "./DeleteServer";
 import SmartDisplay from "./SmartDisplay";
+import { ErrorComp } from "../../components/Error/ErrorComp";
 
 const ServerDash = () => {
   const location = useLocation();
@@ -65,15 +66,13 @@ const ServerDash = () => {
       </Container>
     );
 
-  // TODO: Replace with error component.
   if (isError) {
     // If not logged in or token expired,
     // push to login screen.
     if (error.response?.status === 401) {
       navigate("/login");
     }
-    // TODO: Replace with error component.
-    return <p>ERROR</p>;
+    return <ErrorComp message={error?.message}/>
   }
 
   return (

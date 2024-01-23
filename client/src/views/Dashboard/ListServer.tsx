@@ -15,6 +15,7 @@ import { Loading } from "../../components/Loading/Loading";
 import { socket } from "../../App";
 import { useNavigate } from "react-router-dom";
 import { IData } from "../../types";
+import { ErrorComp } from "../../components/Error/ErrorComp";
 
 interface ListServerProps {
   serverData: IData;
@@ -53,8 +54,7 @@ const ListServer = (props: ListServerProps) => {
       </Container>
     );
 
-  // TODO: Replace with error component.
-  if (indServerError) return <p>Error.</p>;
+  if (indServerError) return <ErrorComp message={indServerError?.message}/>;
 
   return (
     <LinkBox>

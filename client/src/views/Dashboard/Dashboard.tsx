@@ -19,6 +19,7 @@ import DisplayServerList from "./DisplayServerList";
 import { useReactQuerySubscription } from "../../services/socket";
 import ServerSearch from "./ServerSearch";
 import { IData } from "../../types";
+import { ErrorComp } from "../../components/Error/ErrorComp";
 
 const Dashboard = () => {
   const [isListView, setIsListView] = useState(
@@ -68,7 +69,6 @@ const Dashboard = () => {
       </Container>
     );
 
-  // TODO: Replace with error component.
   if (isError && error) {
     // If not logged in or token expired,
     // push to login screen.
@@ -77,8 +77,7 @@ const Dashboard = () => {
     } else {
       setStateMessage(error.response?.data || error?.message);
     }
-    // TODO: Replace with error component.
-    return <p>ERROR</p>;
+    return <ErrorComp message="Unknown Error has Occured"/>
   }
 
   return (

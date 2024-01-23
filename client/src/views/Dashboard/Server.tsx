@@ -14,6 +14,7 @@ import { Loading } from "../../components/Loading/Loading";
 import { socket } from "../../App";
 import { UpdateServer } from "../../components/UpdateServer/UpdateServer";
 import { IData } from "../../types";
+import { ErrorComp } from "../../components/Error/ErrorComp";
 
 interface ServerListProps {
   serverData: IData
@@ -53,8 +54,7 @@ const Server = (props: ServerListProps) => {
       </Container>
     );
 
-  // TODO: Replace with error component.
-  if (indServerError) return <p>Error.</p>;
+  if (indServerError) return <ErrorComp message={indServerError?.message}/>;
 
   return (
     <Card align="center" m={2} minW="20vw" display={"flex"}>

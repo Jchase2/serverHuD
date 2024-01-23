@@ -13,6 +13,7 @@ import CpuUsageGraph from "./CpuUsageGraph";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useGetServerUsage } from "../../services/api/api";
 import { Loading } from "../../components/Loading/Loading";
+import { ErrorComp } from "../../components/Error/ErrorComp";
 
 interface IResourceUsageProps {
   paramStr: string;
@@ -65,9 +66,9 @@ const ResourceUsage = (props: IResourceUsageProps) => {
       </Container>
     );
 
-  if (serverUsageError) {
-    console.log("SERVER USAGE ERROR!");
-  }
+    if(serverUsageError) {
+      return <ErrorComp message={serverUsageError?.message}/>
+    }
 
   return (
     <Card
