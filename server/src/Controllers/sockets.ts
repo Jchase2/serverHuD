@@ -6,6 +6,7 @@ import { Server } from "../Models/server.model";
 import { getMonitoredUsageData, getMonitoredUpInfo } from "../Utils/apiUtils";
 import cookie from "cookie";
 import { ExtensionServer } from "../Models/extensionServer.model";
+import { isUp } from "../Utils/serverDetails";
 
 // TODO: Test with bad input.
 
@@ -125,6 +126,7 @@ const extensionServerData = async (data: ISocketData, socket: Socket) => {
     });
 
     if (extensionServerInfo?.optionalUrl) {
+
       let res = await getMonitoredUsageData(
         data.id,
         userid,
@@ -160,17 +162,30 @@ const urlDbChecker = async (data: ISocketData, socket: Socket) => {
 
   let res = serv?.dataValues.status;
 
+  let extensionServerInfo = await ExtensionServer.findOne({
+    where: { serverid: data?.id, userid: userid },
+  });
+
+  const extensionServerStatus = data?.optionalUrl ? await isUp(extensionServerInfo?.dataValues.optionalUrl) : "down";
+
   // If current data.status isn't the same as the DB
   // we will emit. Then we set data.status to resp.status,
   // this way it doesn't re-run.
   if (data.status !== res && serv !== null) {
     socket.emit(
       "serverUpdate",
-      { status: res, id: data.id },
+      { status: res, id: data.id, extensionServerStatus: extensionServerStatus },
       (resp: { id: number; status: string }) => {
         data.status = resp.status;
       }
     );
+  }
+
+  if(extensionServerStatus) {
+    socket.emit("serverUpdate", {id: data.id, extensionServerStatus: extensionServerStatus},
+    (resp: { id: number; status: string }) => {
+      console.log("Extension Server Status Changed.")
+    })
   }
 };
 

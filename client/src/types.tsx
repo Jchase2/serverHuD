@@ -17,11 +17,16 @@ export interface IData extends IAddServer {
     diskUsed: number;
   }];
   id: number;
+  extensionServerStatus: string;
   memUsage: number;
   updatedAt: string;
   upgrades: string;
   smart: string[];
   uptime: number;
+  extServerUptime: {
+    Days: number,
+    Hours: number
+  }
   downtime: number;
   userid: number;
   serverOptions: {
@@ -68,6 +73,7 @@ export interface ILiveData {
   percentageDown: number;
   percentageUp: number;
   uptime: number;
+  extensionServerStatus: string;
 }
 
 export interface IXYData {

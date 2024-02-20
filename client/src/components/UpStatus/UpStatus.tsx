@@ -13,7 +13,6 @@ interface IUpStatusProps {
 }
 
 export const UpStatus = (props: IUpStatusProps) => {
-
   const { serverData, upData } = props;
 
   return (
@@ -64,9 +63,12 @@ export const UpStatus = (props: IUpStatusProps) => {
           <InfoOutlineIcon /> SSL Expires: {serverData?.sslExpiry} Days
         </Text>
       ) : null}
-      {serverData?.uptime && Object.keys(serverData?.uptime).length > 0 ? (
+      {serverData?.extServerUptime &&
+      Object.keys(serverData?.extServerUptime).length > 0 &&
+      serverData?.extensionServerStatus === "up" ? (
         <Text fontSize={"sm"}>
-          <InfoOutlineIcon /> Server Uptime: {serverData?.uptime} Days
+          <InfoOutlineIcon /> OS Uptime: {serverData?.extServerUptime?.Days}{" "}
+          Days, {serverData?.extServerUptime?.Hours} Hours
         </Text>
       ) : null}
       {upData?.uptime ? (

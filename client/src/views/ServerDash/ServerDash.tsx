@@ -23,6 +23,7 @@ import { UpdateServer } from "../../components/UpdateServer/UpdateServer";
 import { DeleteServer } from "./DeleteServer";
 import SmartDisplay from "./SmartDisplay";
 import { ErrorComp } from "../../components/Error/ErrorComp";
+import ExtensionServerDown from "./ExtensionServerDown";
 
 const ServerDash = () => {
   const location = useLocation();
@@ -72,7 +73,7 @@ const ServerDash = () => {
     if (error.response?.status === 401) {
       navigate("/login");
     }
-    return <ErrorComp message={error?.message}/>
+    return <ErrorComp message={error?.message} />;
   }
 
   return (
@@ -88,7 +89,12 @@ const ServerDash = () => {
           upInc={upInc}
           setUpInc={setUpInc}
         />
-        {data?.trackOptions?.trackResources && data?.optionalUrl ? (
+        {data?.optionalUrl && data?.extensionServerStatus === "down" ? (
+          <ExtensionServerDown />
+        ) : null}
+        {data?.trackOptions?.trackResources &&
+        data?.optionalUrl &&
+        data?.extensionServerStatus === "up" ? (
           <ResourceUsage
             paramStr={paramStr}
             resourceInc={resourceInc}
@@ -98,16 +104,21 @@ const ServerDash = () => {
           />
         ) : null}
         {data?.trackOptions?.trackDisk &&
-        data?.diskData.length > 0 ? (
+        data?.diskData.length > 0 &&
+        data?.extensionServerStatus === "up" ? (
           <DiskStatus data={data} />
         ) : null}
         {data?.trackOptions?.trackUpgrades &&
         data?.upgrades &&
-        data?.upgrades !== "empty" ? (
+        data?.upgrades !== "empty" &&
+        data?.extensionServerStatus === "up" ? (
           <Upgrades upgrades={data.upgrades} />
         ) : null}
 
-        {data?.trackOptions?.trackSmart && data?.smart && data?.smart.length ? (
+        {data?.trackOptions?.trackSmart &&
+        data?.smart &&
+        data?.smart.length &&
+        data?.extensionServerStatus === "up" ? (
           <SmartDisplay serverData={data} />
         ) : null}
       </Wrap>

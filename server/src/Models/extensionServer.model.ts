@@ -17,6 +17,9 @@ export class ExtensionServer extends Model {
   optionalUrl!: string;
 
   @Column
+  extensionServerStatus!: string;
+
+  @Column
   upgrades!: string;
 
   @Column
@@ -26,7 +29,7 @@ export class ExtensionServer extends Model {
   smart!: Array<string>
 
   @Column(DataType.JSONB)
-  uptime!: {
+  extServerUptime!: {
     Days: number;
     Hours: number;
   }

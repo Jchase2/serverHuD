@@ -15,6 +15,7 @@ export const useReactQuerySubscription = () => {
     });
 
     socket.on("serverUpdate", (data: ILiveData, callback) => {
+
       const queryKey = [`server-${data.id}`].filter(Boolean);
       queryClient.setQueryData<ILiveData>(
         queryKey,

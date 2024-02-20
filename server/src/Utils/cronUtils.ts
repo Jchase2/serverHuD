@@ -10,6 +10,7 @@ import { Server } from "../Models/server.model";
 import { IResolvedValues } from "../types";
 import { ExtensionServer } from "../Models/extensionServer.model";
 import { sendUpdate } from "./nodemailer";
+import { SplitTime } from "./apiUtils";
 
 interface ITimeConverter {
   [key: string]: string;
@@ -52,10 +53,10 @@ export const setupGlobalCron = async (
             userid: urlData.userid,
             serverid: urlData.serverid,
             sslStatus: sslData.sslStatus,
-            diskData: extensionData?.diskData ? extensionData?.diskData : [],
             httpCode: urlData?.httpCode ? urlData.httpCode : 0,
-            memUsage: extensionData?.memUsage ? extensionData?.memUsage : 0,
-            cpuUsage: extensionData?.cpuUsage ? extensionData?.cpuUsage : 0,
+            diskData: !(extensionData instanceof Error) && extensionData?.diskData ? extensionData?.diskData : [],
+            memUsage: !(extensionData instanceof Error) && extensionData?.memUsage ? extensionData?.memUsage : null,
+            cpuUsage: !(extensionData instanceof Error) && extensionData?.cpuUsage ? extensionData?.cpuUsage : null,
           });
         }
       }
@@ -183,10 +184,14 @@ export const buildSslData = async (
 };
 
 export const buildExtensionData = async (userid: number, id: number) => {
+
+  // Getting extension server from database
   let extensionServerBe = await ExtensionServer.findOne({
     where: { serverid: id, userid: userid },
   });
 
+  // If optionalUrl and trackOptions exists, getExtSelectedData from
+  // extension server via this API call.
   let optionalServerData =
     extensionServerBe?.dataValues.optionalUrl &&
     extensionServerBe?.dataValues.trackOptions
@@ -202,13 +207,13 @@ export const buildExtensionData = async (userid: number, id: number) => {
       "Problem with extension server, error: ",
       optionalServerData.code
     );
-    return;
+    return new Error("Extension Server Error!");
   }
 
   await ExtensionServer.update(
     {
-      uptime: optionalServerData?.uptimeInHours
-        ? optionalServerData?.uptimeInHours
+      extServerUptime: optionalServerData?.uptimeInHours
+        ? SplitTime(optionalServerData?.uptimeInHours)
         : 0,
       upgrades: optionalServerData?.upgrades
         ? optionalServerData?.upgrades
@@ -245,15 +250,16 @@ export const startServerJobs = async () => {
       const urlData = await buildUrlData(url, userid, id, server);
       const sslData = await buildSslData(url, userid, id, server);
       const extensionData = await buildExtensionData(userid, id);
+
       await LiveServer.create({
         status: urlData?.status,
         url: urlData.url,
         userid: urlData.userid,
         serverid: urlData.serverid,
         sslStatus: sslData.sslStatus,
-        diskData: extensionData?.diskData ? extensionData?.diskData : [],
-        memUsage: extensionData?.memUsage ? extensionData?.memUsage : 0,
-        cpuUsage: extensionData?.cpuUsage ? extensionData?.cpuUsage : 0,
+        diskData: !(extensionData instanceof Error) && extensionData?.diskData ? extensionData?.diskData : [],
+        memUsage: !(extensionData instanceof Error) && extensionData?.memUsage ? extensionData?.memUsage : null,
+        cpuUsage: !(extensionData instanceof Error) && extensionData?.cpuUsage ? extensionData?.cpuUsage : null,
       });
     }
 

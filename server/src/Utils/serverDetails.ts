@@ -86,6 +86,11 @@ export const extensionServerData = async (url: string, userid: number) => {
       url = url.replace(/^https?\:\/\//i, "").replace(/\/$/, "");
       url = "https://" + url;
     }
+  } else {
+    if(url.startsWith('https://')) {
+      url = url.replace(/^https?\:\/\//i, "").replace(/\/$/, "");
+      url = "http://" + url;
+    }
   }
 
   let jwt = await extensionServerLogin(url, userid);

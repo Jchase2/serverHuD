@@ -4,6 +4,7 @@ import { Server } from "../Models/server.model";
 import { QueryTypes } from "sequelize";
 import { ExtensionServer } from "../Models/extensionServer.model";
 import { sequelize } from "../Models";
+import { isUp } from "./serverDetails";
 
 export const getAllCombinedState = async (userid: number) => {
   try {
@@ -14,7 +15,7 @@ export const getAllCombinedState = async (userid: number) => {
     let combinedData = serverList.map(async (server) => {
       const extensionData = await ExtensionServer.findOne({
         where: { serverid: server.id, userid: userid },
-        attributes: ["optionalUrl", "upgrades", "uptime", "trackOptions"],
+        attributes: ["optionalUrl", "upgrades", "extServerUptime", "trackOptions"],
       });
 
       let res = await LiveServer.findOne({
@@ -52,7 +53,7 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
         "optionalUrl",
         "upgrades",
         "smart",
-        "uptime",
+        "extServerUptime",
         "trackOptions",
       ],
     });
@@ -60,6 +61,8 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
     if (!server) {
       return null;
     }
+
+    const extensionServerStatus = await isUp(extensionServerData?.dataValues.optionalUrl)
 
     let res = await LiveServer.findOne({
       where: { serverid: serverid, userid: userid },
@@ -92,7 +95,8 @@ export const getOneCombinedState = async (serverid: number, userid: number) => {
     server.dataValues.optionalUrl = extensionServerData?.dataValues.optionalUrl;
     server.dataValues.upgrades = extensionServerData?.dataValues.upgrades;
     server.dataValues.smart = extensionServerData?.dataValues.smart;
-    server.dataValues.uptime = extensionServerData?.dataValues.uptime;
+    server.dataValues.extServerUptime = extensionServerData?.dataValues.extServerUptime;
+    server.dataValues.extensionServerStatus = extensionServerStatus;
 
     return server;
   } catch (err) {
@@ -221,6 +225,11 @@ export const getMonitoredUpInfo = async (id: number, userid: number, upInc: stri
   let percentageDown = Number(
     ((totalDowntime / totalTime[0]?.extract) * 100).toFixed(2)
   );
+
+  const extensionData = await ExtensionServer.findOne({
+    where: { id, userid: userid },
+    attributes: ["optionalUrl"],
+  });
 
   return {
     uptime: secondsToText(totalUptime),
