@@ -39,8 +39,6 @@ export function sioUpCheck(socket: Socket) {
   console.log("SIO UP CHECK CALLED, SOCKET ID: ", socket.id);
   let intervalObj: IIntervalObj = {};
 
-  console.log("INTERVAL OBJ IS: ", intervalObj);
-
   if (userid > 0) {
     socket.on("upCheck", async (data) => {
       const executeInterval = () => {
@@ -74,6 +72,7 @@ export function sioUpCheck(socket: Socket) {
         }, 10000);
         intervalObj[jobName] = upInterval;
       }
+      console.log("INTERVAL OBJ NOW IS: ", intervalObj)
       return false;
     });
   } else {
@@ -86,6 +85,7 @@ export function sioUpCheck(socket: Socket) {
       if (intervalObj.hasOwnProperty(key)) {
         console.log("CLEARING INTERVAL: ", key);
         clearInterval(intervalObj[key]);
+        delete intervalObj[key]
       }
     }
   });

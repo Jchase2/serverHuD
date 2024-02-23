@@ -38,7 +38,6 @@ export function useGetServers() {
     onError: (error: AxiosError) => error,
   });
 }
-
 export function useGetUpData(id: string, increment: string) {
   return useQuery({
     queryKey: [`live-server-${id}-${increment}`],
@@ -107,10 +106,10 @@ export function useDeleteServer(id: string) {
       });
       return data;
     },
-    // After deleting the server, we'll want to invalidate that in the cache
+    // After deleting the server, we'll want to invalidate / remove from the cache
     // so the ui updates.
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`server-${id}`] });
+      queryClient.removeQueries({ queryKey: [`server-${id}`], exact: true })
       return queryClient.invalidateQueries({
         queryKey: [`server-list-${userId}`],
       });
