@@ -1,7 +1,10 @@
-#/bin/sh
+#!/bin/bash
 su - postgres << EOF
-pg_ctl start -D /var/lib/postgresql/data
+/usr/lib/postgresql/14/bin/pg_ctl start -D /etc/postgresql/14/main && psql -c "ALTER USER postgres WITH PASSWORD '$DB_PW';"
 psql -c "CREATE DATABASE serverhud;"
 EOF
-su serverhud
-/bin/sh
+
+su - serverhud << EOF 
+cd /ServerHuD/server
+node . 
+EOF
