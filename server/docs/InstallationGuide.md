@@ -1,5 +1,7 @@
 # ServerHuD Server Installation Guide
 
+There are several ways to setup and use the serverhud backend. Currently, the easiest way is to use docker, but you can also install it on linux manually. Support for other systems has not currently been tested, but is planned. 
+
 ## .env configuration
 
 First, you will need to copy the .env_example into a .env file. You can do this by running this command: 
