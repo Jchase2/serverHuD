@@ -1,0 +1,13 @@
+services:
+  serverhud-server:
+    env_file:
+      - ./.env
+    build:
+      context: ./
+      dockerfile: serverhud-server
+    command: bash -c "/usr/local/bin/serverhud_docker.sh"
+    image: serverhud-server
+    volumes:
+      - serverhud:/home/serverhud
+volumes:
+  serverhud:   # Defining the serverhud volume

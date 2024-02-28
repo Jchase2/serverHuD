@@ -14,12 +14,12 @@ RUN wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sud
 RUN apt update
 RUN apt install -y timescaledb-2-postgresql-14
 RUN useradd -ms /bin/bash serverhud
-RUN chown -R serverhud:serverhud /ServerHuD 
+RUN chown -R serverhud:serverhud /ServerHuD
 RUN echo "shared_preload_libraries = 'timescaledb'" >> /etc/postgresql/14/main/postgresql.conf
 RUN npm i -g typescript
 USER serverhud
-RUN npm i 
+RUN npm i
 RUN tsc
 USER root
-ADD docker.sh /docker.sh
-CMD ["/docker.sh"]
+COPY serverhud_docker.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/serverhud_docker.sh
