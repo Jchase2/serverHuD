@@ -37,6 +37,7 @@ function App() {
           localStorage.setItem("authed", "true");
         } else {
           setIsAuthed("false");
+          localStorage.setItem("authed", "false");
         }
       } catch (err) {
         console.log("Err: ", err)

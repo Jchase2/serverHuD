@@ -4,9 +4,11 @@ services:
       - ./.env
     build:
       context: ./
-      dockerfile: serverhud-server
+      dockerfile: Dockerfile
+    ports:
+      - 3001:3001
     command: bash -c "/usr/local/bin/serverhud_docker.sh"
-    image: serverhud-server
+    image: jchase23/serverhud-server
     volumes:
       - serverhud:/home/serverhud
 volumes:

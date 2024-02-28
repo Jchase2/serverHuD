@@ -101,8 +101,14 @@ export const loginUser = async (ctx: koa.Context, next: Function) => {
 export const getVerifyUser = async (ctx: koa.Context, next: Function) => {
   let accessToken = ctx.cookies.get("accessToken");
   if (accessToken) {
+
     let userId = getUserId(accessToken);
-    if (userId === -1) {
+
+    const user = await User.findOne({
+      where: { id: userId },
+    });
+
+    if (userId === -1 || userId !== user?.id) {
       ctx.status = 401;
     } else {
       ctx.body = { userId: userId };
