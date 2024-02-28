@@ -77,6 +77,6 @@ To build the image:
 
 To launch the server:
 
-`docker run -e .env -it -p 127.0.0.1:3001:3001 serverhud-server`
+`docker run --env-file .env -it -p 127.0.0.1:3001:3001 serverhud-server`
 
 Make sure you're in the server directory when you run these comands, as it relies on the dockerfile and script. Feel free to open an issue if you run into problems.
