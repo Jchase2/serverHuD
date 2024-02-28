@@ -77,7 +77,7 @@ const Register = () => {
   useEffect(() => {
     if (createUser.isError) {
       setClosed(false);
-      setStateMessage("Error: " + createUser.error.message);
+      setStateMessage("Error: " + createUser.error.response?.data);
     }
 
     if (createUser.isSuccess) {

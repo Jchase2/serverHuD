@@ -74,7 +74,7 @@ const Dashboard = () => {
   if (isError && error) {
     // If not logged in or token expired,
     // push to login screen.
-    if (error.message === "401 Unauthorized") {
+    if (error.message === "401 Unauthorized" || error.message === "Request failed with status code 401") {
       navigate("/login");
     } else {
       setStateMessage(error?.message);

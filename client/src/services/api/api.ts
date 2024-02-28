@@ -8,7 +8,7 @@ export function useGetIndServer(id: number) {
   return useQuery({
     queryKey: [`server-${id}`],
     queryFn: async () => {
-      const { data }: { data: IData} = await axios({
+      const { data }: { data: IData } = await axios({
         method: "get",
         url: process.env.REACT_APP_BACKEND_URL + `/servers/${id}`,
         withCredentials: true,
@@ -33,7 +33,7 @@ export function useGetServers() {
         withCredentials: true,
       });
       return data;
-    }
+    },
   });
 }
 export function useGetUpData(id: string, increment: string) {
@@ -42,7 +42,9 @@ export function useGetUpData(id: string, increment: string) {
     queryFn: async () => {
       const { data } = await axios({
         method: "get",
-        url: process.env.REACT_APP_BACKEND_URL + `/servers/updata/${id}/${increment}`,
+        url:
+          process.env.REACT_APP_BACKEND_URL +
+          `/servers/updata/${id}/${increment}`,
         withCredentials: true,
       });
       return data;
@@ -54,13 +56,19 @@ export function useGetUpData(id: string, increment: string) {
   });
 }
 
-export function useGetServerUsage(id: string, increment: string, incCount: number) {
+export function useGetServerUsage(
+  id: string,
+  increment: string,
+  incCount: number
+) {
   return useQuery({
     queryKey: [`server-usage-${id}-${increment}-${incCount}`],
     queryFn: async () => {
-      const { data }: { data: IResourceData} = await axios({
+      const { data }: { data: IResourceData } = await axios({
         method: "get",
-        url: process.env.REACT_APP_BACKEND_URL + `/servers/usage/${id}/${increment}/${incCount}`,
+        url:
+          process.env.REACT_APP_BACKEND_URL +
+          `/servers/usage/${id}/${increment}/${incCount}`,
         withCredentials: true,
       });
       return data;
@@ -73,13 +81,16 @@ export function useGetServerUsage(id: string, increment: string, incCount: numbe
 }
 
 export const verifyUser = async () => {
-  const { data } = await axios({
-    method: "get",
-    url: process.env.REACT_APP_BACKEND_URL + `/user/me`,
-    withCredentials: true,
-  });
-
-  return data;
+  try {
+    const { data } = await axios({
+      method: "get",
+      url: process.env.REACT_APP_BACKEND_URL + `/user/me`,
+      withCredentials: true,
+    });
+    return data;
+  } catch (err: any) {
+    return false;
+  }
 };
 
 export const userLogout = async () => {
@@ -105,7 +116,7 @@ export function useDeleteServer(id: string) {
     // After deleting the server, we'll want to invalidate / remove from the cache
     // so the ui updates.
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: [`server-${id}`], exact: true })
+      queryClient.removeQueries({ queryKey: [`server-${id}`], exact: true });
       return queryClient.invalidateQueries({
         queryKey: [`server-list-${userId}`],
       });
@@ -134,7 +145,7 @@ export function useAddServer() {
       queryClient.invalidateQueries({ queryKey: [`server-list-${userId}`] });
     },
     onError: (error: AxiosError) => {
-      return error
+      return error;
     },
   });
 }
@@ -179,7 +190,10 @@ export function useCreateUser() {
         withCredentials: true,
       });
       return data;
-    }
+    },
+    onError: (error: AxiosError) => {
+      return error;
+    },
   });
 }
 

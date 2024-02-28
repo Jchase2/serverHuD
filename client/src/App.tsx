@@ -78,7 +78,7 @@ function App() {
             element={localStorage.getItem("authed") === "true" ? <Dashboard /> : <HomePage />}
           />
           <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login setIsAuthed={setIsAuthed}/>} />
+          <Route path="/login" element={<Login isAuthed={isAuthed} setIsAuthed={setIsAuthed}/>} />
           <Route
             path="/dashboard"
             element={

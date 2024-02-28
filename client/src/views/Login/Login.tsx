@@ -19,10 +19,11 @@ import { Loading } from "../../components/Loading/Loading";
 
 interface LoginProps {
   setIsAuthed: React.Dispatch<React.SetStateAction<string>>
+  isAuthed: string
 }
 
 const Login = (props: LoginProps) => {
-  const { setIsAuthed } = props;
+  const { setIsAuthed, isAuthed } = props;
 
   let SwitchIcon: IconType;
   let navigate = useNavigate();
@@ -77,6 +78,12 @@ const Login = (props: LoginProps) => {
       console.log("Error");
     }
   }, [login]);
+
+  useEffect(() => {
+    if(isAuthed === "true") {
+      navigate("/dashboard");
+    }
+  }, [isAuthed, navigate]);
 
   if (login.isPending) {
     return (
