@@ -8,8 +8,8 @@ import { CiServer } from "react-icons/ci";
 import { IData } from "../../types";
 
 interface IUpStatusProps {
-  serverData: IData;
-  upData?: IData;
+  serverData: IData | undefined;
+  upData?: IData | undefined;
 }
 
 export const UpStatus = (props: IUpStatusProps) => {

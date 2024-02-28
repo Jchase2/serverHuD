@@ -4,7 +4,7 @@ import { IData } from "../../types";
 
 interface ServerSearchProps {
   setSearchData: React.Dispatch<React.SetStateAction<IData[] | undefined>>,
-  data: IData[]
+  data: IData[] | undefined
 }
 
 const ServerSearch = (props: ServerSearchProps) => {

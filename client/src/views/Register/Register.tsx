@@ -77,7 +77,7 @@ const Register = () => {
   useEffect(() => {
     if (createUser.isError) {
       setClosed(false);
-      setStateMessage("Error: " + createUser.error.response?.data);
+      setStateMessage("Error: " + createUser.error.message);
     }
 
     if (createUser.isSuccess) {
@@ -86,7 +86,7 @@ const Register = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createUser]);
 
-  if (createUser.isLoading) {
+  if (createUser.isPending) {
     return (
       <Flex align="center" justifyContent="center" mt={5}>
         <Loading />

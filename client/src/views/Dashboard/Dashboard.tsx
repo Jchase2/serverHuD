@@ -48,7 +48,9 @@ const Dashboard = () => {
   useEffect(() => {
     if (addNewServer.isError) {
       setClosed(false);
-      setStateMessage("Error: " + (addNewServer.error.response?.data || "Unknown Error"));
+      setStateMessage(
+        "Error: " + (addNewServer.error.response?.data || "Unknown Error")
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addNewServer]);
@@ -60,7 +62,7 @@ const Dashboard = () => {
   const handleClose = () => {
     addNewServer.reset();
     setClosed(true);
-  }
+  };
 
   if (isLoading)
     return (
@@ -72,12 +74,12 @@ const Dashboard = () => {
   if (isError && error) {
     // If not logged in or token expired,
     // push to login screen.
-    if (error.response && error.response.status === 401) {
+    if (error.message === "401 Unauthorized") {
       navigate("/login");
     } else {
-      setStateMessage(error.response?.data || error?.message);
+      setStateMessage(error?.message);
     }
-    return <ErrorComp message="Unknown Error has Occured"/>
+    return <ErrorComp message="Unknown Error has Occured" />;
   }
 
   return (
@@ -88,9 +90,9 @@ const Dashboard = () => {
         closed={closed}
         setClosed={handleClose}
         isError={isError || addNewServer?.isError}
-        maxW={['100vw', '70vw', '50vw', '30vw', '20vw']}
+        maxW={["100vw", "70vw", "50vw", "30vw", "20vw"]}
       />
-      {addNewServer?.isLoading ? <Loading /> : null}
+      {addNewServer?.isPending ? <Loading /> : null}
       <Box justifyContent={"center"}>
         {isListView === "true" ? (
           <HStack>
@@ -109,10 +111,12 @@ const Dashboard = () => {
         )}
         <Divider mt={"2"} />
       </Box>
-      <DisplayServerList
-        isListView={isListView}
-        data={searchData ? searchData : data}
-      />
+      {data ? (
+        <DisplayServerList
+          isListView={isListView}
+          data={searchData ? searchData : data}
+        />
+      ) : null}
     </Flex>
   );
 };

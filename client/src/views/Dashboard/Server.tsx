@@ -17,7 +17,7 @@ import { IData } from "../../types";
 import { ErrorComp } from "../../components/Error/ErrorComp";
 
 interface ServerListProps {
-  serverData: IData
+  serverData: IData;
 }
 
 const Server = (props: ServerListProps) => {
@@ -40,8 +40,8 @@ const Server = (props: ServerListProps) => {
         status: indServerData.status,
         sslStatus: indServerData.sslStatus,
         incCount: 12,
-        inc: '1h',
-        upInc: '1h',
+        inc: "1h",
+        upInc: "1h",
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,11 +54,11 @@ const Server = (props: ServerListProps) => {
       </Container>
     );
 
-  if (indServerError) return <ErrorComp message={indServerError?.message}/>;
+  if (indServerError) return <ErrorComp message={indServerError?.message} />;
 
   return (
     <Card align="center" m={2} minW="20vw" display={"flex"}>
-      {indServerData.status === "down" ? (
+      {indServerData?.status === "down" ? (
         <CardHeader
           borderRadius="md"
           w={"100%"}
@@ -68,7 +68,7 @@ const Server = (props: ServerListProps) => {
           {indServerData.name}
           <UpdateServer data={indServerData} />
         </CardHeader>
-      ) : indServerData.status === "up" &&
+      ) : indServerData?.status === "up" &&
         indServerData.sslStatus === "false" ? (
         <CardHeader
           borderRadius="md"
@@ -79,7 +79,7 @@ const Server = (props: ServerListProps) => {
           {indServerData.name}
           <UpdateServer data={indServerData} />
         </CardHeader>
-      ) : (
+      ) : indServerData ? (
         <CardHeader
           textColor={"#fff"}
           borderRadius="md"
@@ -87,17 +87,19 @@ const Server = (props: ServerListProps) => {
           textAlign={"center"}
           backgroundColor="#2f4858"
         >
-          {indServerData.name}
+          {indServerData?.name}
           <UpdateServer data={indServerData} />
         </CardHeader>
-      )}
+      ) : null}
       <CardBody m={2}>
         <UpStatus serverData={indServerData} />
       </CardBody>
       <CardFooter>
-        <Button onClick={() => navigate("/server/" + indServerData.id)}>
-          More Info
-        </Button>
+        {indServerData ? (
+          <Button onClick={() => navigate("/server/" + indServerData.id)}>
+            More Info
+          </Button>
+        ) : null}
       </CardFooter>
     </Card>
   );

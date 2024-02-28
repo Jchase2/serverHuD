@@ -70,17 +70,19 @@ const ServerDash = () => {
   if (isError) {
     // If not logged in or token expired,
     // push to login screen.
-    if (error.response?.status === 401) {
+    if (error.message === "401 Unauthorized") {
       navigate("/login");
     }
     return <ErrorComp message={error?.message} />;
   }
 
+  if(!data && !isLoading) return <ErrorComp message="API didn't get data" />
+
   return (
     <Container centerContent width={"100%"} maxWidth={"100%"}>
       <HStack m={3}>
-        <UpdateServer data={data} />
-        <Heading size="md">Server: {data.name}</Heading>
+        {data ? <UpdateServer data={data} /> : null}
+        <Heading size="md">Server: {data?.name}</Heading>
       </HStack>
       <Wrap minW={"80vw"} justify={"center"} mt={2}>
         <ServerStatus

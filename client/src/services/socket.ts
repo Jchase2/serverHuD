@@ -1,10 +1,17 @@
 import React from "react";
 import { cloneDeep, isEqual, merge } from "lodash";
-import { QueryClient, Updater } from "@tanstack/react-query";
+import { QueryCache, QueryClient, Updater } from "@tanstack/react-query";
 import { socket } from "../App";
 import { ILiveData, IResourceData } from "../types";
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error) => {
+      console.log("GLOBAL ERROR IS: ", error)
+      return error
+    }
+  }),
+});
 
 export const useReactQuerySubscription = () => {
   socket.connect();

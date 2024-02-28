@@ -72,7 +72,6 @@ export function sioUpCheck(socket: Socket) {
         }, 10000);
         intervalObj[jobName] = upInterval;
       }
-      console.log("INTERVAL OBJ NOW IS: ", intervalObj)
       return false;
     });
   } else {

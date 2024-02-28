@@ -60,7 +60,7 @@ const ListServer = (props: ListServerProps) => {
     <LinkBox>
       <LinkOverlay
         cursor={"pointer"}
-        onClick={() => navigate("/server/" + indServerData.id)}
+        onClick={() => navigate("/server/" + indServerData?.id)}
       >
         <Card
           m={2}
@@ -69,13 +69,13 @@ const ListServer = (props: ListServerProps) => {
         >
           <CardBody>
             <Flex direction={"row"} justify={"center"}>
-              {indServerData.status === "up" ? (
+              {indServerData?.status === "up" ? (
                 <Text p={0} m={0} fontSize={"sm"} wordBreak={"break-all"}>
                   <TriangleUpIcon color="green.500" /> {indServerData.url}
                 </Text>
               ) : (
                 <Text p={0} m={0} fontSize={"sm"}>
-                  <TriangleDownIcon color="red.500" /> {indServerData.url}
+                  <TriangleDownIcon color="red.500" /> {indServerData?.url}
                 </Text>
               )}
               <Spacer />

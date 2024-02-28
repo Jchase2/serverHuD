@@ -5,6 +5,7 @@ import { QueryTypes } from "sequelize";
 import { ExtensionServer } from "../Models/extensionServer.model";
 import { sequelize } from "../Models";
 import { isUp } from "./serverDetails";
+import axios from "axios";
 
 export const getAllCombinedState = async (userid: number) => {
   try {
@@ -288,3 +289,14 @@ export const getMonitoredUsageData = async (id: number, userid: number, inc: str
     console.log("MONITORED RESOURCE USAGE ERROR IS: ", err);
   }
 };
+
+
+export const timeoutChecker = async (url: string) => {
+  try {
+    await axios.get(url, {timeout: 10000});
+    return false
+  } catch(err: any) {
+    if(err.code === "ECONNABORTED") return true
+    else return false
+  }
+}

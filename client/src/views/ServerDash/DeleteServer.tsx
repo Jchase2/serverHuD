@@ -31,7 +31,7 @@ export const DeleteServer = (props: DeleteServerProps) => {
     deleteServer.mutate();
   }
 
-  if (deleteServer.isLoading)
+  if (deleteServer.isPending)
   return (
     <Container centerContent>
       <Loading />

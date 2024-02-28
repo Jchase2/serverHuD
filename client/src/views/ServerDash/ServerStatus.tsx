@@ -20,7 +20,7 @@ import { Loading } from "../../components/Loading/Loading";
 import { ErrorComp } from "../../components/Error/ErrorComp";
 
 interface IServerStatusProps {
-  serverData: IData;
+  serverData: IData | undefined;
   setUpInc: Dispatch<SetStateAction<string>>;
   upInc: string;
   paramStr: string;

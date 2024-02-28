@@ -15,11 +15,10 @@ export function useGetIndServer(id: number) {
       });
       return data;
     },
-    onError: (error: AxiosError) => error,
     // Since we're getting updates with sockets,
     // no need to mark cache data as stale and refetch it.
     staleTime: Infinity,
-    cacheTime: Infinity,
+    gcTime: Infinity,
   });
 }
 
@@ -34,8 +33,7 @@ export function useGetServers() {
         withCredentials: true,
       });
       return data;
-    },
-    onError: (error: AxiosError) => error,
+    }
   });
 }
 export function useGetUpData(id: string, increment: string) {
@@ -49,11 +47,10 @@ export function useGetUpData(id: string, increment: string) {
       });
       return data;
     },
-    onError: (error: AxiosError) => error,
     // Since we're getting updates with sockets,
     // no need to mark cache data as stale and refetch it.
     staleTime: Infinity,
-    cacheTime: Infinity,
+    gcTime: Infinity,
   });
 }
 
@@ -68,11 +65,10 @@ export function useGetServerUsage(id: string, increment: string, incCount: numbe
       });
       return data;
     },
-    onError: (error: AxiosError) => error,
     // Since we're getting updates with sockets,
     // no need to mark cache data as stale and refetch it.
     staleTime: Infinity,
-    cacheTime: Infinity,
+    gcTime: Infinity,
   });
 }
 
@@ -132,10 +128,14 @@ export function useAddServer() {
     },
     // After adding the server, we'll want to invalidate that in the cache
     // so the ui updates.
+    retry: false,
+    retryDelay: 10_000,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`server-list-${userId}`] });
     },
-    onError: (error: AxiosError) => error,
+    onError: (error: AxiosError) => {
+      return error
+    },
   });
 }
 
@@ -179,8 +179,7 @@ export function useCreateUser() {
         withCredentials: true,
       });
       return data;
-    },
-    onError: (error: AxiosError) => error,
+    }
   });
 }
 

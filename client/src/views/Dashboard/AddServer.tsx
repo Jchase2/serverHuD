@@ -10,7 +10,7 @@ interface IAddServerProps {
 }
 
 const AddServer = (props: IAddServerProps) => {
-  
+
   const [serverState, setServerState] = useState({
     url: "",
     optionalUrl: "",

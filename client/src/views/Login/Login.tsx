@@ -78,7 +78,7 @@ const Login = (props: LoginProps) => {
     }
   }, [login]);
 
-  if (login.isLoading) {
+  if (login.isPending) {
     return (
       <Flex align="center" justifyContent="center">
         <Loading />

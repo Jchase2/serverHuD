@@ -30,7 +30,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data } = props;
   const updateServer = useUpdateServer(data.id);
-  const { mutate, reset, isLoading, isError, isSuccess } = updateServer;
+  const { mutate, reset, isPending, isError, isSuccess } = updateServer;
 
   const [checkedItems, setCheckedItems] = useState({
     trackDisk: data?.trackOptions?.trackDisk,
@@ -125,7 +125,7 @@ export const UpdateServer = (props: IUpdateServerProps) => {
     });
   };
 
-  if (isLoading) {
+  if (isPending) {
     return <Loading />;
   }
 

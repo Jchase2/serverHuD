@@ -19,6 +19,9 @@ const ResourceUsage = (props: ResourceUsageProps) => {
     Array.isArray(props.data.diskData) ? props.data.diskData[0] : undefined
   );
 
+  // TODO: Test renaming this to avoid conflict with react key
+  // I think it's necessary to fix a victory graph bug like this
+  // though.
   const [key, setKey] = useState(0);
 
   const handleSelectChange = (event: any) => {

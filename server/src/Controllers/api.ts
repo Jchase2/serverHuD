@@ -11,10 +11,7 @@ import {
   isUp,
   getHttpStatusCode,
 } from "../Utils/serverDetails";
-import {
-  setupGlobalCron,
-  updateGlobalCron
-} from "../Utils/cronUtils";
+import { setupGlobalCron, updateGlobalCron } from "../Utils/cronUtils";
 import { LiveServer } from "../Models/liveServer.model";
 import {
   SplitTime,
@@ -22,10 +19,13 @@ import {
   getMonitoredUpInfo,
   getMonitoredUsageData,
   getOneCombinedState,
+  timeoutChecker,
 } from "../Utils/apiUtils";
 import { getUserId, verifyToken } from "../Utils/jwt";
 import { IResolvedValues } from "../types";
 import { ExtensionServer } from "../Models/extensionServer.model";
+import axios from "axios";
+import { error } from "console";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -93,7 +93,7 @@ export const loginUser = async (ctx: koa.Context, next: Function) => {
     ctx.body = { userId: user.id };
     ctx.status = 200;
   } catch (e) {
-    console.log("ERROR THROWN IN LOGIN: ", e);
+    console.log("401 Unauthorized");
     ctx.status = 401;
   }
 };
@@ -146,7 +146,12 @@ export const getIndServer = async (ctx: koa.Context, next: Function) => {
 };
 
 export const getServerUsage = async (ctx: koa.Context, next: Function) => {
-  const data = await getMonitoredUsageData(ctx.params.id, ctx.state.user._id, ctx.params.inc, ctx.params.incCount);
+  const data = await getMonitoredUsageData(
+    ctx.params.id,
+    ctx.state.user._id,
+    ctx.params.inc,
+    ctx.params.incCount
+  );
   if (data) {
     ctx.body = data;
     ctx.status = 200;
@@ -195,7 +200,7 @@ const serverSchema = Joi.object({
   interval: Joi.string().required(),
   serverOptions: {
     emailNotifications: Joi.boolean().required(),
-    checkHttp: Joi.boolean().required()
+    checkHttp: Joi.boolean().required(),
   },
 });
 
@@ -256,7 +261,8 @@ const extensionServerUpdateSchema = Joi.object({
   }
 */
 export const addServer = async (ctx: koa.Context, next: Function) => {
-  const { url, optionalUrl, name, trackOptions, serverOptions, interval } = ctx.request.body;
+  const { url, optionalUrl, name, trackOptions, serverOptions, interval } =
+    ctx.request.body;
 
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
@@ -277,10 +283,20 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       return;
     }
 
+    // Send back a timeout error after 60 seconds if we don't get a response.
+    // This short circuits in cases where SSL isn't configured on a redirect,
+    // for example, which will just hang for a long time.
+    const timeout = await timeoutChecker(url)
+    if(timeout) {
+      throw new Error("timeout")
+    }
+
     let sslInfo: IResolvedValues | any = await getSslDetails(url);
     if (sslInfo.errno) sslInfo.valid = false;
 
-    const extensionData = optionalUrl ? await extensionServerData(optionalUrl, ctx.state.user._id) : null;
+    const extensionData = optionalUrl
+      ? await extensionServerData(optionalUrl, ctx.state.user._id)
+      : null;
 
     if (extensionData?.code === "ERR_HTTP_INVALID_HEADER_VALUE") {
       ctx.body =
@@ -290,6 +306,7 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
     }
 
     const user = await User.findByPk(ctx.state.user._id);
+
     const status = await isUp(url);
     const httpStatus = await getHttpStatusCode(url);
 
@@ -306,9 +323,9 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
       sslExpiry: sslInfo.daysRemaining,
       serverOptions: {
         emailNotifications: serverOptions?.emailNotifications,
-        checkHttp: serverOptions?.checkHttp
+        checkHttp: serverOptions?.checkHttp,
       },
-      interval: interval
+      interval: interval,
     });
 
     if (!user) throw Error("User not found!");
@@ -343,8 +360,11 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
     ctx.body = { Status: "Server added.", id: dbResp.id };
     ctx.status = 201;
   } catch (error: any) {
-    console.log("ERROR IS: ", error);
-    if ((error as any)?.isJoi) {
+    if (error?.message === 'timeout') {
+      console.log("Timeout occured.")
+      ctx.body = "Server timed out, check your dns. If this is a redirect, ensure SSL is properly configured."
+      ctx.status = 500
+    } else if ((error as any)?.isJoi) {
       console.log("JOI ERROR OCCURED: ", error);
       if (error?._original?.serverid) {
         Server.destroy({ where: { id: error?._original?.serverid } });
@@ -353,20 +373,25 @@ export const addServer = async (ctx: koa.Context, next: Function) => {
         "Ensure ServerHuD backend is running and the input is correct.";
       ctx.status = 422;
     } else {
-      ctx.body = `${error}`;
+      ctx.body = "Unknown server error has occured.";
       ctx.status = 400;
     }
   }
 };
 
 export const getTimeseriesUpData = async (ctx: koa.Context, next: Function) => {
-  let res = await getMonitoredUpInfo(ctx.params.id, ctx.state.user._id, ctx.params.upInc);
+  let res = await getMonitoredUpInfo(
+    ctx.params.id,
+    ctx.state.user._id,
+    ctx.params.upInc
+  );
   ctx.body = res;
   ctx.status = 200;
 };
 
 export const updateServer = async (ctx: koa.Context, next: Function) => {
-  const { url, optionalUrl, name, trackOptions, serverOptions, interval } = ctx.request.body;
+  const { url, optionalUrl, name, trackOptions, serverOptions, interval } =
+    ctx.request.body;
 
   // Check if URL is empty
   if (!url || url === URL_EMPTY_DEFAULT) {
@@ -408,9 +433,9 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
       sslExpiry: sslInfo.daysRemaining,
       serverOptions: {
         emailNotifications: serverOptions?.emailNotifications,
-        checkHttp: serverOptions?.checkHttp
+        checkHttp: serverOptions?.checkHttp,
       },
-      interval: interval
+      interval: interval,
     });
 
     if (!user) throw Error("User not found!");

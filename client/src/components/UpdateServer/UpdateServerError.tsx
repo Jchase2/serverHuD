@@ -10,9 +10,9 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { ErrorShow } from "../Error/ErrorShow";
-import { UseMutationResult } from "@tanstack/react-query/build/lib/types";
 import { AxiosError, AxiosResponse } from "axios";
 import { IUpdateServer } from "../../types";
+import { UseMutationResult } from "@tanstack/react-query";
 
 interface IUpdateServerErrorProps {
     updateServer:  UseMutationResult<AxiosResponse<IUpdateServer>, AxiosError<any>, IUpdateServer, unknown>,
