@@ -42,7 +42,7 @@ const CpuUsageGraph = (props: CpuUsageGraphProps) => {
       <VictoryAxis
         invertAxis={true}
         fixLabelOverlap={true}
-        tickFormat={(x) =>
+        tickFormat={(x: any) =>
           inc === '1h' || inc === '1d' ?
           new Date(x).toLocaleString("en-US", {
             hour: "numeric",
@@ -66,7 +66,7 @@ const CpuUsageGraph = (props: CpuUsageGraphProps) => {
       <VictoryAxis
         dependentAxis
         fixLabelOverlap={true}
-        tickFormat={(tick) => `${tick}%`}
+        tickFormat={(tick: any) => `${tick}%`}
         style={{
           axis: { stroke: "none" },
           ticks: { stroke: "none" },

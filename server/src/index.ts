@@ -10,6 +10,7 @@ import http from "http";
 import { sioJwtVerify, sioUpCheck } from "./Controllers/sockets";
 import { Client } from "pg";
 import { startServerJobs } from "./Utils/cronUtils";
+import { seedDb } from './seed';
 
 const app = new Koa();
 app.use(logger());
@@ -42,17 +43,9 @@ const io = new Server(server, {
   });
 
   try {
-    await client.connect();
-    console.log("Connected.");
-    console.log("Attempting to create_hypertable...");
-    let addExtension = await client.query(
-      `CREATE EXTENSION IF NOT EXISTS timescaledb;`
-    );
-    console.log("ADD EXTENSION RESPONSE: ", addExtension)
-    let hypRes = await client.query(
-      `SELECT create_hypertable('"liveserver"', 'time', if_not_exists => TRUE);`
-    );
-    console.log("Hypertable Creation Response: ", hypRes);
+
+    seedDb()
+
     server.listen(3001, () => console.log(`Server running on port: ${3001}`));
     console.log("Starting all server jobs.");
     await startServerJobs();

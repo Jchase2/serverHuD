@@ -45,7 +45,7 @@ const MemUsageGraph = (props: MemUsageGraphProps) => {
       <VictoryAxis
         invertAxis={true}
         fixLabelOverlap={true}
-        tickFormat={(x) =>
+        tickFormat={(x: any) =>
           inc === '1h' || inc === '1d' ?
           new Date(x).toLocaleString("en-US", {
             hour: "numeric",
@@ -69,7 +69,7 @@ const MemUsageGraph = (props: MemUsageGraphProps) => {
       />
       <VictoryAxis
         dependentAxis
-        tickFormat={(tick) => `${tick}%`}
+        tickFormat={(tick: any) => `${tick}%`}
         fixLabelOverlap={true}
         style={{
           axis: { stroke: "none" },
