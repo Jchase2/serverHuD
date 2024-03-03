@@ -63,20 +63,21 @@ const Login = (props: LoginProps) => {
     });
   };
 
-  if (login.isSuccess) {
-    console.log("Logged in!");
-    localStorage.setItem("userId", login.data.userId);
-    // sets authed to true in root component.
-    setIsAuthed("true");
-    navigate("/dashboard");
-  }
-
   useEffect(() => {
+    if (login.isSuccess) {
+      console.log("Logged in!");
+      localStorage.setItem("userId", login.data.userId);
+      // sets authed to true in root component.
+      setIsAuthed("true");
+      navigate("/dashboard");
+    }
+
     if (login.isError) {
       setClosed(false);
       setStateMessage("Email or Password is incorrect");
       console.log("Error");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [login]);
 
   useEffect(() => {

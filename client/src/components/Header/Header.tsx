@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
+import { SettingsDrawer } from "../SettingsDrawer/SettingsDrawer";
 
 interface IClientHeaderProps {
   globalLogOut: () => void;
@@ -19,7 +20,6 @@ interface IClientHeaderProps {
 
 const ClientHeader = (props: IClientHeaderProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
-
   const { globalLogOut, isAuthed } = props;
 
   const LoginAndRegister = () => {
@@ -84,6 +84,7 @@ const ClientHeader = (props: IClientHeaderProps) => {
             <Button onClick={toggleColorMode}>
               {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
             </Button>
+            {isAuthed === "true" ? <SettingsDrawer /> : null}
             <Menu>
               {isAuthed === "false" ? <LoginAndRegister /> : <Logout />}
             </Menu>

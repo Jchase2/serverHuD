@@ -180,10 +180,11 @@ const urlDbChecker = async (data: ISocketData, socket: Socket) => {
     );
   }
 
+  // TODO: Not sure if I want to update this a bit more.
   if(extensionServerStatus) {
     socket.emit("serverUpdate", {id: data.id, extensionServerStatus: extensionServerStatus},
     (resp: { id: number; status: string }) => {
-      console.log("Extension Server Status Changed.")
+      //console.log("Extension Server Status Changed.")
     })
   }
 };

@@ -80,7 +80,54 @@ export function useGetServerUsage(
   });
 }
 
-export const verifyUser = async () => {
+
+export const useGetUserInfo = () => {
+  const userId = getUserId()
+  return useQuery({
+    queryKey: [`user-info-${userId}`],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: "get",
+        url:
+          process.env.REACT_APP_BACKEND_URL + `/user/me`,
+        withCredentials: true,
+      });
+      return data;
+    },
+  });
+}
+
+// export const useGetUserPerms = () => {
+//   const userId = getUserId()
+//   return useQuery({
+//     queryKey: [`user-perms-${userId}`],
+//     queryFn: async () => {
+//       const { data } = await axios({
+//         method: "get",
+//         url:
+//           process.env.REACT_APP_BACKEND_URL + `/user/permissions`,
+//         withCredentials: true,
+//       });
+//       return data;
+//     },
+//   });
+// }
+
+export const getUserPerms = async () => {
+  try {
+    const { data } = await axios({
+      method: "get",
+      url:
+        process.env.REACT_APP_BACKEND_URL + `/user/permissions`,
+      withCredentials: true,
+    });
+    return data;
+  } catch (err) {
+    return err;
+  }
+}
+
+export const getUserInfo = async () => {
   try {
     const { data } = await axios({
       method: "get",

@@ -6,6 +6,7 @@ import { ExtensionServer } from './extensionServer.model';
 import { Role } from './role.model';
 import { Permission } from './permission.model';
 import { RolePermissions } from './rolePerms.model';
+import { AdminSettings } from './adminSettings.mode';
 
 export const sequelize = new Sequelize({
   database: process.env.DATABASE,
@@ -14,4 +15,4 @@ export const sequelize = new Sequelize({
   password: process.env.DB_PW
 })
 
-sequelize.addModels([User, Server, LiveServer, ExtensionServer, Role, Permission, RolePermissions]);
+sequelize.addModels([User, Server, LiveServer, ExtensionServer, Role, Permission, RolePermissions, AdminSettings]);

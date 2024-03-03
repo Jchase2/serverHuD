@@ -19,13 +19,15 @@ import {
   getMonitoredUpInfo,
   getMonitoredUsageData,
   getOneCombinedState,
+  getUserPermissions,
   timeoutChecker,
 } from "../Utils/apiUtils";
 import { getUserId, verifyToken } from "../Utils/jwt";
 import { IResolvedValues } from "../types";
 import { ExtensionServer } from "../Models/extensionServer.model";
-import axios from "axios";
-import { error } from "console";
+import { Role } from "../Models/role.model";
+import { getRoleIdByName } from "../Utils/roleManagement";
+import { AdminSettings } from "../Models/adminSettings.mode";
 
 const URL_EMPTY_DEFAULT = "http://";
 
@@ -53,7 +55,8 @@ export const registerUser = async (ctx: koa.Context, next: Function) => {
 
     // Check if pw matches, and create user.
     const hash = await bcrypt.hash(ctx.request.body.password, 10);
-    User.create({ email: ctx.request.body.email, password: hash });
+    const defaultRoleId = getRoleIdByName("user");
+    User.create({ email: ctx.request.body.email, password: hash, roleId: defaultRoleId});
     ctx.body = "User Created!";
     ctx.status = 201;
   } catch (e: any) {
@@ -82,7 +85,7 @@ export const loginUser = async (ctx: koa.Context, next: Function) => {
     );
     if (!validatedPass) throw new Error("Incorrect username or password!");
     const accessToken = jwt.sign(
-      { _id: user.id },
+      { _id: user.id, role: user?.roleId },
       process.env.SECRET_KEY || "insecureuY47Qf2xo3M9kKjF67hq",
       { expiresIn: "7d" }
     );
@@ -108,16 +111,39 @@ export const getVerifyUser = async (ctx: koa.Context, next: Function) => {
       where: { id: userId },
     });
 
+    const roleName = await Role.findOne({
+      where: {
+        id: user?.dataValues.roleId
+      }
+    })
+
     if (userId === -1 || userId !== user?.id) {
       ctx.status = 401;
     } else {
-      ctx.body = { userId: userId };
+      ctx.body = { userId: userId, userEmail: user?.dataValues.email, roleId: user?.dataValues.roleId, role: roleName?.dataValues.name };
       ctx.status = 200;
     }
   } else {
     ctx.status = 401;
   }
 };
+
+export const getUserPerms = async (ctx: koa.Context, next: Function) => {
+  let accessToken = ctx.cookies.get("accessToken");
+  if(accessToken) {
+    try {
+      let userId = getUserId(accessToken);
+      const userPerms = await getUserPermissions(userId)
+
+      ctx.body = userPerms;
+      ctx.status = 200;
+    } catch (err) {
+      console.log("Permissions error: ", err)
+      ctx.body = "Permissions error."
+      ctx.status = 401;
+    }
+  }
+}
 
 export const getUserLogout = async (ctx: koa.Context, next: Function) => {
   let accessToken = ctx.cookies.get("accessToken");
@@ -495,3 +521,18 @@ export const updateServer = async (ctx: koa.Context, next: Function) => {
     }
   }
 };
+
+export const updateRegistrationSettings = async (ctx: koa.Context, next: Function) => {
+  const { adminOptions } = ctx.request.body;
+  const { enableRegistration } = adminOptions;
+  try {
+    const resp = await AdminSettings.upsert({'enable_registration': enableRegistration})
+    if(resp){
+      ctx.status = 204;
+    }
+  } catch (err) {
+    console.log("ERROR in update registration settings: ", err)
+    ctx.body = "Issue with updating registration settings."
+    ctx.status = 400;
+  }
+}

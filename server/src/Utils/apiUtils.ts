@@ -6,6 +6,10 @@ import { ExtensionServer } from "../Models/extensionServer.model";
 import { sequelize } from "../Models";
 import { isUp } from "./serverDetails";
 import axios from "axios";
+import { User } from "../Models/user.model";
+import { Role } from "../Models/role.model";
+import Permission from "../Models/permission.model";
+import { RolePermissions } from "../Models/rolePerms.model";
 
 export const getAllCombinedState = async (userid: number) => {
   try {
@@ -298,5 +302,42 @@ export const timeoutChecker = async (url: string) => {
   } catch(err: any) {
     if(err.code === "ECONNABORTED") return true
     else return false
+  }
+}
+
+
+export const getUserPermissions = async (userId: number) => {
+  try {
+    const user = await User.findOne({
+      where: {
+        id: userId
+      },
+    })
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const userPerms = await RolePermissions.findAll({
+      where: {
+        roleId: user?.dataValues.roleId
+      }
+    })
+
+    const userPermsArray = userPerms.map((perm) => perm?.dataValues.permissionId);
+
+    const userPermNamesObjects = await Permission.findAll({
+      where: {
+        id: userPermsArray
+      },
+      attributes: ["name"]
+    });
+
+    const userPermNames = userPermNamesObjects.map((permObj) => permObj?.dataValues.name)
+    return userPermNames;
+
+  } catch (error) {
+    console.error('Error retrieving user permissions:', error);
+    throw error;
   }
 }

@@ -29,7 +29,7 @@ const Dashboard = () => {
   );
   const [stateMessage, setStateMessage] = useState<string>("");
   const [closed, setClosed] = useState(true);
-  const { data, isLoading, isError, error } = useGetServers();
+  const { data, isPending, isError, error } = useGetServers();
   const [searchData, setSearchData] = useState<IData[]>();
   const addNewServer = useAddServer();
   const navigate = useNavigate();
@@ -64,7 +64,7 @@ const Dashboard = () => {
     setClosed(true);
   };
 
-  if (isLoading)
+  if (isPending)
     return (
       <Container centerContent mt={4}>
         <Loading />
